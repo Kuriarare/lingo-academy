@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: #F4F6FB;
+    
+}
+
+.container {
+    width: 100%;
+    padding: 0.6rem 2.5rem;
+}
+
+.custom-bg {
+    background: linear-gradient(87deg, rgb(17, 205, 239), rgb(17, 113, 239));
+}
+.custom-bg-profile {
+    background: linear-gradient(87deg, rgb(23, 43, 77), rgb(26, 23, 77))
+}
+.box-shadow-inputs {
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 1px 3px, rgba(0, 0, 0, 0.02) 0px 1px 0px;
+}
+
+.box-shadow-form {
+    box-shadow: rgba(136, 152, 170, 0.15) 0px 0px 2rem 0px;
+}
