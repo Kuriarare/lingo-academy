@@ -15,7 +15,7 @@ const Login = () => {
     // remember to change the URL to the deployed backend
     // remember to use cookies instead of local storage
     // http://localhost:3001
-    fetch('https://lingo-platform.onrender.com/login', {
+    fetch('http://195.110.58.68:3001/login', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {

@@ -21,12 +21,9 @@ function CallScreen() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [screenSharing, setScreenSharing] = useState(false);
   const localStreamRef = useRef(null);
-  const screenStreamRef = useRef(null)
+  const screenStreamRef = useRef(null);
 
-
-  // http://localhost:3001
-  // http://195.110.58.68:3001
-  const socket = socketio("http://195.110.58.68:3001", {
+  const socket = socketio("https://lingo-platform.onrender.com", {
     autoConnect: false,
   });
 
@@ -150,20 +147,31 @@ function CallScreen() {
       return;
     }
   
-    console.log("Signaling data received:", data);
+    if (!pc) {
+      console.warn("PeerConnection is not initialized.");
+      return;
+    }
   
     try {
       if (data.type === "offer") {
-        console.log("Received offer:", data);
-        createPeerConnection();
+        if (pc.signalingState !== "stable") {
+          console.warn("Ignoring offer in state:", pc.signalingState);
+          return;
+        }
         await pc.setRemoteDescription(new RTCSessionDescription(data));
         await sendAnswer();
       } else if (data.type === "answer") {
-        console.log("Received answer:", data);
+        if (pc.signalingState !== "have-local-offer") {
+          console.warn("Ignoring answer in state:", pc.signalingState);
+          return;
+        }
         await pc.setRemoteDescription(new RTCSessionDescription(data));
       } else if (data.type === "candidate") {
-        console.log("Received candidate:", data);
-        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        if (pc.signalingState === "stable" || pc.signalingState === "have-local-offer" || pc.signalingState === "have-remote-offer") {
+          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } else {
+          console.warn("Ignoring candidate in state:", pc.signalingState);
+        }
       } else {
         console.log("Unknown Data Type:", data.type);
       }
@@ -172,7 +180,6 @@ function CallScreen() {
     }
   };
   
-
   socket.on("ready", () => {
     console.log("Ready to Connect!");
     createPeerConnection();
@@ -186,6 +193,7 @@ function CallScreen() {
 
   useEffect(() => {
     startConnection();
+    createPeerConnection(); // Ensure this is called
     return function cleanup() {
       if (pc) {
         pc.close();
@@ -211,7 +219,6 @@ function CallScreen() {
     }
     setCameraEnabled(enabled);
   };
-
   const shareScreen = () => {
     if (!screenSharing) {
       navigator.mediaDevices

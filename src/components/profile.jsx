@@ -55,7 +55,7 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
-    fetch("https://lingo-platform.onrender.com/userdata", {
+    fetch("http://195.110.58.68:3001/userdata", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -84,7 +84,7 @@ const Profile = () => {
   };
 
   const handleSaveProfile = () => {
-    fetch("https://lingo-platform.onrender.com/updateuser", {
+    fetch("http://195.110.58.68:3001/updateuser", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

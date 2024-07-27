@@ -14,7 +14,7 @@ export const DataProvider = ({ children }) => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("https://lingo-platform.onrender.com/userdata", {
+    fetch("http://195.110.58.68:3001/userdata", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
