@@ -5,11 +5,11 @@ const UserModal = ({ show, handleClose }) => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user"); // Default role
+  const [role, setRole] = useState("user"); 
 
   const createUser = async (e) => {
     e.preventDefault();
-    const response = await fetch("https://lingo-platform.onrender.com/register", {
+    const response = await fetch("http://localhost:8000/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +19,7 @@ const UserModal = ({ show, handleClose }) => {
         lastName,
         email,
         password,
-        role, // Include role in the request body
+        role, 
       }),
     });
     const data = await response.json();
@@ -28,18 +28,19 @@ const UserModal = ({ show, handleClose }) => {
         alert(data.error);
       } else {
         alert("User created successfully");
+        window.location.reload();
       }
     } catch (error) {
       console.log(error);
     }
 
-    // Clear inputs after successful creation
+    
     setName("");
     setLastName("");
     setEmail("");
     setPassword("");
     setRole("user");
-    handleClose(); // Close the modal
+    handleClose();
   };
 
   if (!show) {

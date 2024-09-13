@@ -1,38 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { BiLogoFacebook } from 'react-icons/bi';
 import { AiOutlineTwitter } from 'react-icons/ai';
-import { useAuth } from '../context/AuthContext';
+import { loginUser } from '../redux/userSlice';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth()
+  const dispatch = useDispatch();
+  const userStatus = useSelector((state) => state.user.status);
+  const userError = useSelector((state) => state.user.error);
+
   const handleLogin = () => {
     const data = { email, password };
-
-    // remember to change the URL to the deployed backend
-    // remember to use cookies instead of local storage
-    // http://localhost:3001
-    fetch('http://195.110.58.68:3001/login', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
+    dispatch(loginUser(data)).then((action) => {
+      if (action.payload.token) {
+        navigate('/home');
+      } else {
+        alert('Wrong credentials');
       }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          login(data.user); 
-          navigate('/home');
-        } else {
-          alert('Wrong credentials');
-        }
-      })
-      .catch(error => console.error('Error:', error));
+    });
   };
 
   return (
@@ -105,6 +94,8 @@ const Login = () => {
             Login
           </button>
         </div>
+        {userStatus === 'loading' && <p>Loading...</p>}
+        {userStatus === 'failed' && <p>Error: {userError}</p>}
         <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
           Don&apos;t have an account?{' '}
           <a

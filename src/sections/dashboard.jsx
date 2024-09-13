@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const location = useLocation();
   const [activeLink, setActiveLink] = useState("");
- const [user, setUser] = useState("");
+  const user = useSelector((state) => state.user.userInfo.user);
+
   useEffect(() => {
     setActiveLink(location.pathname);
   }, [location]);
@@ -14,26 +15,8 @@ const Dashboard = () => {
     setActiveLink(name);
   };
 
-  useEffect(() => {
-    fetch("https://lingo-platform.onrender.com/userdata", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data);
-      })
-      .catch((error) => console.error("Error:", error));
-  }, []);
-
-
-  
-
   return (
-    <div className="p-3 bg-white text-sm h-full w-[16rem] relative shadow-lg">
+    <div className="p-3 bg-white text-sm h-full 2xl:w-[16rem] md:w-[14rem] relative box-shadow-form ">
       <div className="flex flex-col flex-shrink-0 sticky top-3">
         <Link to="/home" className="flex justify-center items-center mb-3 text-[#8898AA] no-underline">
           <i className="fa-solid fa-map-location-dot mr-2"></i>

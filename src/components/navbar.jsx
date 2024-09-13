@@ -1,36 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import avatar from "../assets/logos/avatar.jpg";
 import { useLogout } from "../hooks/customHooks";
+import { logout } from "../redux/userSlice";
 
-const Navbar = () => {
-  const logout = useLogout();
-  const [url, setUrl] = useState(null);
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-
+const Navbar = ({header}) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userInfo.user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const logoutAndNavigate = useLogout();
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-  useEffect(() => {
-    fetch("http://195.110.58.68:3001/userdata", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setUrl(data.avatarUrl);
-        setName(data.name);
-        setLastName(data.lastName);
-      })
-      .catch((error) => console.error("Error:", error));
-  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    logoutAndNavigate();
+  };
+
   return (
     <header className="w-full flex justify-between items-center ">
-      <h2 className="text-white font-semibold text-[0.9375rem]">USER PROFILE</h2>
+      <h2 className="text-white font-semibold text-[0.9375rem]">
+        {header}
+      </h2>
 
       <nav className="flex gap-10">
         <div className="relative">
@@ -48,14 +41,17 @@ const Navbar = () => {
             onClick={toggleDropdown}
           >
             <img
-               src={!url ? avatar : url}
+              src={!user?.avatarUrl ? avatar : user.avatarUrl}
               alt="avatar"
-              className="w-[2.3rem] rounded-full"
+              className="w-[2.3rem] h-[2.3rem] object-cover rounded-full"
             />
-            <p className="text-white">{name} {lastName}</p>
+
+            <p className="text-white">
+              {user?.name} {user?.lastName}
+            </p>
           </a>
           {isDropdownOpen && (
-            <div className="absolute top-[2.6REM] right-0 mt-2 w-48 bg-white text-[#8898AA] rounded-md shadow-lg py-2">
+            <div className="absolute top-[2.6REM] right-0 mt-2 w-48 bg-white text-[#8898AA] rounded-md shadow-lg py-2 z-10">
               <a
                 href="/profile"
                 className="flex items-center gap-2 px-4 py-2  hover:bg-gray-100"
@@ -82,7 +78,7 @@ const Navbar = () => {
               </a>
               <div className="border-t my-2"></div>
               <a
-                onClick={logout}
+                onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2  hover:bg-gray-100 cursor-pointer"
               >
                 <i className="fa-solid fa-sign-out-alt"></i> Log Out

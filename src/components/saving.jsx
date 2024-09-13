@@ -25,7 +25,7 @@ function CallScreen() {
 
   // https://lingo-platform.onrender.com
   // http://localhost:3001
-  const socket = socketio("https://lingo-platform.onrender.com", {
+  const socket = socketio("https://localhost:4000", {
     autoConnect: false,
   });
 

@@ -7,7 +7,7 @@ const DeleteUserModal = ({ show, handleClose }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3001/deleteuser", {
+      const response = await fetch("http://localhost:8000/deleteuser", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -21,6 +21,7 @@ const DeleteUserModal = ({ show, handleClose }) => {
         alert(data.error);
       } else {
         alert("User deleted successfully");
+        window.location.reload();
       }
     } catch (error) {
       console.log("Error deleting user:", error);

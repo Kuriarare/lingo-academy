@@ -2,19 +2,16 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./components/login"; 
 import Home from "./sections/home";
-import Profile from "./components/profile";
+import Profile from "./sections/profile";
 import Admin from "./components/admin"; 
-import  {AuthProvider}  from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Learning from "./sections/learning";
-// import VideoCall from "./components/videoCall";
-import Shchedule from "./components/schedule";
+import Shchedule from "./sections/schedule";
 import CallScreen from "./components/callScreen";
-// import { MyUILayout } from "./stream/MyApp";
+
 
 function App() {
   return (
-    <AuthProvider>
+   
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
@@ -23,9 +20,9 @@ function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
+             
                 <Admin />
-              </ProtectedRoute>
+             
             }
           />
           <Route path="/learning" element={<Learning />} />
@@ -35,7 +32,7 @@ function App() {
           
         </Routes>
       </Router>
-    </AuthProvider>
+   
   );
 }
 

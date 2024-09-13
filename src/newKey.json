@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "caramel-granite-427322-e7",
+  "private_key_id": "589aa5d6339fecfbb4cec4c3635c709e3c7214ea",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxoiD9c5HS79Hj\nkND+38eK/4czYhvDH4xIZrXud4XMYsj7OtcrligyLLEmq0mNMu6xqFKBDHF7gHR+\nd9sk5PzmyG/YYKqLXdEL9RzVaBuKH9pqKosoQ7VDIf46GUp8RIdqU2dBwZx7LWPc\nh+DngPUgK8mrOnL/8IVm6vjYJ76/DRAC1cOvg5Bw4CpZJ1Q00V4vfvdULiDGUypl\ne7DVB2za8AQbKqszaqwYLGtijU0Knev53/ENOJwJCsXZR2W5eBqGiUgjMmuFb4c3\n32h+jfDdiS7rkoS8F2ecjdlV8UKbsnC1jvEbeJJ0j+Nv68LiWaa7bzcq2aLmz7/L\nT9CLgrsrAgMBAAECggEAC7K9sXNW+ylIDVCQMvjRz1mcscmYQnVla6839AhzC07G\nJaVuXjR5WTSQRheptF7SUWjgZhdHsfZ3tYx3JirebORuWTWkhaEcD0mJKJS+m44V\neEBtAa3T1iP69iCMQzrQIDR17GKvx3zpwrBAI37epcu8cEZdJHXWkzyOPs3/Rd2e\nIMSbMPqHLZHCfpCDdpArDnnvl6MAXyniB6g+IsTBbY5o5iY7Y+gFS66Vgqal4TUg\nd/MZiG9cabwOB+AKQrvr5SjoCJIx8p1XRDw1G43sKBJH51EdQTDo0kh847SkwvYQ\nVb9P3OI0S9a0e18lcnswIt1EHQBtWwzzbIxZWZh2wQKBgQDsDOyQjxpIuyLW6wyv\nt4ccR9s04Jzhp9WL0rriGaTAVVlXDgNqFR1Q8M2y2FkWVseayZ7s/xtBqDquhyvH\n7nAsQyWxI8NvFBe/pQjHCyIeYBv9i7+wldKfOEpjtU/jODZ67d+/DbMX3163AR3V\nJ5ZK2LWPwLiH0SFwbfJWwQfHMwKBgQDApVGYV1pS2u7opTTblnYNyex5hTUwwVoy\nh7RdJQfK/aZtMjeIpJ/ZoRb/pMRvLZvaQk+jSDCFQbRYkgtbMlhxKjE4e2L5T3UW\nfJFFpYo1TseW006kj7g1GmYl5dGCDTFEFgABKtTUnoEcLRs5ytvg3WwhtFvOPpbp\nfh66NZzcKQKBgQDEMlnOLaNjIGfsyqFYy+p5DyCb6rV6uc080oKSu028rzP6r6MW\n4UXkqMHQDRK/BpIRjdOSmNdG01UzCxbQrtZ9c7I4cclW4hR7LekFx7MsHCYnr6g8\nVcsim9740RL9gROHSX/XhMN+7CIFaeAp8yVwQH9oZH78JE7u6/OpN/gHEQKBgEjP\nsxFDIs5iFR41Is9EBQadJRWg9UOiMLccd10lG9brG7X13ut0XT5iFlE1M1FaCafq\nnDL4m+4hsUowmL41Pxw2eDgC2pukHnsLRdTvBlezmNg2sWidMWBQw/7a596hodc8\nAXBvgdWCuwWtPrcPJx/MUIxEoNZI7bz+gBqdHNZRAoGBAOQQqUG+3TrOgrRsV5u0\ndA8ow0laOGhmzsF4lJ9QgWDBsusbEfcsDe82K4nmcrmAe9y6/Zo8YAO6KojHVUTh\nEjFyUFkeHHJTk4p/SYS2Fm4xA4OYhtdGW2u09Kg0jg7QSab3cLWHX1ChycMpJBKx\nOOk2GTDUuSlUYTUVTuAmQCyp\n-----END PRIVATE KEY-----\n",
+  "client_email": "lingo-account-avatar@caramel-granite-427322-e7.iam.gserviceaccount.com",
+  "client_id": "100891005145812215281",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/lingo-account-avatar%40caramel-granite-427322-e7.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

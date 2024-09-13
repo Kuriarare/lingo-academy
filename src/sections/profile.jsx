@@ -1,47 +1,17 @@
 import { useEffect, useState } from "react";
 import Dashboard from "./dashboard";
-import Navbar from "./navbar";
-// import DataContext from "../context/context";
+import Navbar from "../components/navbar";
+import Modal from "../components/modal";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUser, uploadAvatar } from "../redux/userSlice";
 import avatar from "../assets/logos/avatar.jpg";
-import Modal from "./modal";
 
 const Profile = () => {
-  // const data = useContext(DataContext);
+  const user = useSelector((state) => state.user.userInfo.user);
+  const header = "USER PROFILE";
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleUploadSuccess = (newAvatarUrl) => {
-    setAvatarUrl(newAvatarUrl);
-    window.location.reload();
-  };
-  
-  const handleSaveAvatar = (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-  
-    fetch("http://localhost:3001/uploadavatar", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        handleUploadSuccess(data.avatarUrl);
-      })
-      .catch((error) => console.error("Error:", error));
-  };
-  
 
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -53,77 +23,87 @@ const Profile = () => {
   const [postal, setPostal] = useState("");
   const [biography, setBiography] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [teacherAssigned, setTeacherAssigned] = useState("");
+  console.log('teacherAssigned:', teacherAssigned);
+  // useEffect(() => {
+  //   console.log('User state updated:', user);
+  // }, [user]);
 
   useEffect(() => {
-    fetch("http://195.110.58.68:3001/userdata", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setName(data.name);
-        setLastName(data.lastName);
-        setPhone(data.phone);
-        setEmail(data.email);
-        setAddress(data.address);
-        setCity(data.city);
-        setCountry(data.country);
-        setPostal(data.postal);
-        setBiography(data.biography);
-        setAvatarUrl(data.avatarUrl);
+    if (user) {
+      setName(user.name);
+      setLastName(user.lastName);
+      setPhone(user.phone);
+      setEmail(user.email);
+      setAddress(user.address);
+      setCity(user.city);
+      setCountry(user.country);
+      setPostal(user.postal);
+      setBiography(user.biography);
+      setAvatarUrl(user.avatarUrl);
+      setTeacherAssigned(user.schedule[0].teacherName);
+    }
+  }, [user]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSaveAvatar = (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    dispatch(uploadAvatar(formData))
+      .then((response) => {
+        if (response.meta.requestStatus === "fulfilled") {
+          setIsModalOpen(false);
+        }
       })
       .catch((error) => console.error("Error:", error));
-  }, []);
+  };
 
   const handleEditProfile = () => {
     setIsEditMode(true);
   };
 
+  const dispatch = useDispatch();
+
   const handleSaveProfile = () => {
-    fetch("http://195.110.58.68:3001/updateuser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        name,
-        lastName,
-        phone,
-        email,
-        address,
-        city,
-        country,
-        postal,
-        biography,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setIsEditMode(false);
+    const updatedUser = {
+      name,
+      lastName,
+      phone,
+      email,
+      address,
+      city,
+      country,
+      postal,
+      biography,
+    };
+
+    dispatch(updateUser(updatedUser))
+      .then((response) => {
+        if (response.meta.requestStatus === "fulfilled") {
+          setIsEditMode(false);
+        }
       })
       .catch((error) => console.error("Error:", error));
   };
 
-  // if (!data) {
-  //   return <div></div>;
-  // }
-
   return (
-    <div className="flex w-full h-[153vh] relative ">
+    <div className="flex w-full h-[135vh] ">
       <Dashboard />
       <div className="w-full">
-        <section className="w-full h-[63vh] custom-bg-profile overflow-hidden relative">
+        <section className="w-full h-[36vh] custom-bg-profile overflow-hidden relative">
           <div className="container w-full">
-            <Navbar />
-            <div className="flex flex-col justify-center text-white w-full text- absolute top-[31%]">
-              <h2 className="text-[2.75rem]">Hello {name}</h2>
-              <p className="max-w-[30rem] mt-4 mb-12">
+            <Navbar header={header} />
+            <div className="flex flex-col justify-center text-white w-full mt-2">
+              <h2 className="2xl:text-[2.75rem] text-[2.3rem]">Hello {name}</h2>
+              <p className="max-w-[30rem] mt-4 mb-10">
                 This is your profile page. You can see the progress you&apos;ve
                 made with your work and manage your personal information.
               </p>
@@ -141,11 +121,13 @@ const Profile = () => {
         </section>
 
         <section className="flex h-screen">
-          <div className="container w-full ml-[2.5rem] relative">
-            <div className="absolute bottom-[6rem] left-[0rem] flex">
-              <div className="w-[58.2rem] bg-[#F7FAFC] rounded-lg box-shadow-form overflow-hidden">
+          <div className="container w-full ">
+            <div className="flex">
+              <div className="2xl:w-[58.2rem] max-w-[58.2rem] bg-[#F7FAFC] rounded-lg box-shadow-form overflow-hidden">
                 <div className="flex justify-between items-center bg-white py-[0.8rem] px-3 shadow-sm">
-                  <h2 className="text-[1.0625rem] text-[#32325D]">My Account</h2>
+                  <h2 className="text-[1.0625rem] text-[#32325D]">
+                    My Account
+                  </h2>
                   {isEditMode && (
                     <button
                       type="button"
@@ -156,14 +138,14 @@ const Profile = () => {
                     </button>
                   )}
                 </div>
-                <div className="p-[1.5rem] pb-0">
+                <div className="py-[1.5rem] 2xl:px-[1.5rem] px-[0.7rem] pb-0">
                   <form action="">
                     <h2 className="text-[0.75rem] text-[#8898AA] mb-6">
                       USER INFORMATION
                     </h2>
 
                     <div className="flex mb-12">
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="name"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -176,11 +158,11 @@ const Profile = () => {
                           name="name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="lastName"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -193,13 +175,13 @@ const Profile = () => {
                           name="lastName"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
                     </div>
                     <div className="flex mb-14">
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="phone"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -212,11 +194,11 @@ const Profile = () => {
                           name="phone"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="email"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -229,7 +211,7 @@ const Profile = () => {
                           name="email"
                           value={email}
                           readOnly
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                         />
                       </div>
                     </div>
@@ -238,7 +220,7 @@ const Profile = () => {
                       CONTACT INFORMATION
                     </h2>
                     <div className="flex mb-12">
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="address"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -251,13 +233,13 @@ const Profile = () => {
                           name="address"
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
                     </div>
                     <div className="flex mb-14">
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="city"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -270,11 +252,11 @@ const Profile = () => {
                           name="city"
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="country"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -287,11 +269,11 @@ const Profile = () => {
                           name="country"
                           value={country}
                           onChange={(e) => setCountry(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="postal-code"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -304,7 +286,7 @@ const Profile = () => {
                           name="postal-code"
                           value={postal}
                           onChange={(e) => setPostal(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
                         />
                       </div>
@@ -314,7 +296,7 @@ const Profile = () => {
                       ABOUT ME
                     </h2>
                     <div className="flex mb-12">
-                      <div className="flex flex-col pl-[1.5rem] w-full">
+                      <div className="flex flex-col 2xl:pl-[1.5rem] pl-[0.75rem] w-full">
                         <label
                           htmlFor="biography"
                           className="text-[0.875rem] text-[#525F7F] font-semibold"
@@ -326,7 +308,7 @@ const Profile = () => {
                           name="biography"
                           value={biography}
                           onChange={(e) => setBiography(e.target.value)}
-                          className="w-full rounded-md py-2 px-5 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs resize-none"
+                          className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs resize-none"
                           rows="3"
                           readOnly={!isEditMode}
                         />
@@ -336,17 +318,32 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="ml-[1.5rem] bg-white w-[29.4rem] flex flex-col rounded-lg relative">
-                <div>
+              <div className="xl:ml-[1.5rem] ml-[0.8rem] bg-white w-[29.4rem] h-auto flex flex-col rounded-lg items-center ">
+                <div className="relative">
                   <img
                     src={!avatarUrl ? avatar : avatarUrl}
                     alt="avatar"
-                    className="w-[10rem] rounded-full absolute top-[-3rem] left-[34%]"
+                    className="w-[10rem] h-[10rem] object-cover rounded-full mt-1"
                   />
-                  <div className="bg-[#D8DADF] flex justify-center items-center w-7 h-7 absolute top-[4.7rem] left-[60%] cursor-pointer z-10 rounded-full">
-                    <i className="fa-solid fa-camera camera-icon" onClick={handleOpenModal}></i>
-                    <Modal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSaveAvatar} /> 
+                  <div className="bg-[#D8DADF] flex justify-center items-center w-7 h-7 absolute top-[7rem] left-[80%] cursor-pointer z-10 rounded-full">
+                    <i
+                      className="fa-solid fa-camera camera-icon"
+                      onClick={handleOpenModal}
+                    ></i>
+                    <Modal
+                      isOpen={isModalOpen}
+                      onClose={handleCloseModal}
+                      onSave={handleSaveAvatar}
+                    />
                   </div>
+                </div>
+                  {(user.role === 'user') && (
+                    <div className="flex flex-col items-center mt-5">
+                      <h3>My teacher:  {teacherAssigned}</h3>
+                    </div>
+                  )}
+                <div>
+                  <h2>More features soon...</h2>
                 </div>
               </div>
             </div>
