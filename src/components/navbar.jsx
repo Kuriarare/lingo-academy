@@ -1,29 +1,77 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import avatar from "../assets/logos/avatar.jpg";
 import { useLogout } from "../hooks/customHooks";
-import { logout } from "../redux/userSlice";
+import { logout, updateUserStatus } from "../redux/userSlice";
+import { io } from "socket.io-client";
+import { Bounce, Slide, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const Navbar = ({header}) => {
+const Navbar = ({ header }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userInfo.user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const logoutAndNavigate = useLogout();
 
+  useEffect(() => {
+    const socket = io('http://localhost:8000');
+    console.log(user);
+    socket.on('userStatus', (data) => {
+      const { id, online, name } = data;
+      toast(
+        <div>
+          <b>{name}</b> is now {online}
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Slide,
+        }
+      );
+      
+      dispatch(updateUserStatus({ id, online }));
+      // Update the status of the user in the state
+    
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [ user, dispatch]);
+
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     dispatch(logout());
     logoutAndNavigate();
+    try {
+      await fetch("http://localhost:8000/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
+
   return (
-    <header className="w-full flex justify-between items-center ">
-      <h2 className="text-white font-semibold text-[0.9375rem]">
-        {header}
-      </h2>
+    <header className="w-full flex justify-between items-center  relative">
+      <h2 className="text-white font-semibold text-[0.9375rem]">{header}</h2>
 
       <nav className="flex gap-10">
         <div className="relative">
@@ -87,6 +135,10 @@ const Navbar = ({header}) => {
           )}
         </div>
       </nav>
+
+      <div className="absolute top-4 right-2">
+      <ToastContainer />
+      </div>
     </header>
   );
 };

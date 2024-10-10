@@ -7,6 +7,7 @@ import Admin from "./components/admin";
 import Learning from "./sections/learning";
 import Shchedule from "./sections/schedule";
 import CallScreen from "./components/callScreen";
+import Teachers from "./sections/teachers";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/schedule" element={<Shchedule/>} />
           <Route path="/call/:username/:room" element={<CallScreen />} />
           {/* <Route path="/class" element={<VideoCall/>} /> */}
+          <Route path="/teachers" element={<Teachers />} />
           
         </Routes>
       </Router>

@@ -16,7 +16,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-3 bg-white text-sm h-full 2xl:w-[16rem] md:w-[14rem] relative box-shadow-form ">
+    <div className="p-3 bg-white text-sm h-full 2xl:w-[16rem] md:w-[15rem] relative box-shadow-form ">
       <div className="flex flex-col flex-shrink-0 sticky top-3">
         <Link to="/home" className="flex justify-center items-center mb-3 text-[#8898AA] no-underline">
           <i className="fa-solid fa-map-location-dot mr-2"></i>
@@ -29,7 +29,7 @@ const Dashboard = () => {
             <Link
               to="/home"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/home" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
+                activeLink === "/home" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
               }`}
               onClick={() => handleClick("/home")}
             >
@@ -41,7 +41,7 @@ const Dashboard = () => {
             <Link
               to="/schedule"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/schedule" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
+                activeLink === "/schedule" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
               }`}
               onClick={() => handleClick("/schedule")}
             >
@@ -53,7 +53,7 @@ const Dashboard = () => {
             <Link
               to="/learning"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/learning" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
+                activeLink === "/learning" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
               }`}
               onClick={() => handleClick("/learning")}
             >
@@ -65,7 +65,7 @@ const Dashboard = () => {
             <Link
               to="/teachers"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/teachers" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
+                activeLink === "/teachers" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
               }`}
               onClick={() => handleClick("/teachers")}
             >
@@ -73,7 +73,7 @@ const Dashboard = () => {
               Teachers
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/progress"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
@@ -84,12 +84,12 @@ const Dashboard = () => {
               <i className="fa-solid fa-spinner mr-2"></i>
               Progress
             </Link>
-          </li>
+          </li> */}
         </ul>
         <hr className="my-2" />
 
         <ul className="flex flex-col mb-auto">
-          <li>
+          {/* <li>
             <Link
               to="#"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
@@ -100,12 +100,12 @@ const Dashboard = () => {
               <i className="fa-solid fa-house-user mr-2"></i>
               Home
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link
               to="/profile"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/profile" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
+                activeLink === "/profile" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
               }`}
               onClick={() => handleClick("/profile")}
             >
@@ -113,7 +113,7 @@ const Dashboard = () => {
               Profile
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/option3"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
@@ -124,13 +124,13 @@ const Dashboard = () => {
               <i className="fa-solid fa-spinner mr-2"></i>
               Option 3
             </Link>
-          </li>
+          </li> */}
           {user && user.role === 'admin' && (
             <li>
               <Link
                 to="/admin"
                 className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                  activeLink === "/admin" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
+                  activeLink === "/admin" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
                 }`}
                 onClick={() => handleClick("/admin")}
               >

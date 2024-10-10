@@ -20,15 +20,29 @@
 //   const [username, setUsername] = useState("");
 //   const [teacherChat, setTeacherChat] = useState([]);
 //   const [chatIsOpen, setChatIsOpen] = useState(false);
+//   const [microphoneEnabled, setMicrophoneEnabled] = useState(true);
+//   const [cameraEnabled, setCameraEnabled] = useState(true);
+//   const [screenSharing, setScreenSharing] = useState(false);
+//   const [isRemoteSharing, setIsRemoteSharing] = useState(false);
+//   const [roomShareScreen, setRoomShareScreen] = useState("");
+//   const localStreamRef = useRef(null);
+//   const screenStreamRef = useRef(null);
+//   const localVideoRef = useRef(null);
+//   const remoteVideoRef = useRef(null);
+//   const screenVideoRef = useRef(null);
+//   const pc = useRef(null); // Use ref to persist peer connection
 
 //   useEffect(() => {
 //     if (user.role === "teacher") {
 //       setUsername(user.name);
 //       setRoom(user._id);
 //       setTeacherChat(user.students);
+//       setRoomShareScreen(user._id);
 //     } else {
 //       setUsername(user.name);
 //       setRoom(user._id);
+//       setTeacherChat(user.teacher._id);
+//       setRoomShareScreen(user.teacher._id);
 //     }
 //   }, [user]);
 
@@ -36,22 +50,10 @@
 //   const navigate = useNavigate();
 //   const localUsername = params.username;
 //   const roomName = params.room;
-//   const localVideoRef = useRef(null);
-//   const remoteVideoRef = useRef(null);
 
-//   const [microphoneEnabled, setMicrophoneEnabled] = useState(true);
-//   const [cameraEnabled, setCameraEnabled] = useState(true);
-//   const [screenSharing, setScreenSharing] = useState(false);
-//   const localStreamRef = useRef(null);
-//   const screenStreamRef = useRef(null);
-
-//   // http://localhost:8000
-//   // https://srv570363.hstgr.cloud:8000
 //   const socket = socketio("http://localhost:8000/", {
 //     autoConnect: false,
 //   });
-
-//   let pc = null;
 
 //   const sendData = (data) => {
 //     socket.emit("data", {
@@ -71,12 +73,6 @@
 //         console.log("Local Stream found");
 //         localVideoRef.current.srcObject = stream;
 //         localStreamRef.current = stream;
-
-//         // Log tracks in the local stream
-//         stream.getTracks().forEach((track) => {
-//           console.log("Local track:", track.kind);
-//         });
-
 //         socket.connect();
 //         socket.emit("join", { username: localUsername, room: roomName });
 //       })
@@ -98,19 +94,36 @@
 //   const onTrack = (event) => {
 //     console.log("Adding remote track");
 //     const remoteStream = event.streams[0];
-//     remoteVideoRef.current.srcObject = remoteStream;
-
-//     // Log tracks in the remote stream
-//     remoteStream.getTracks().forEach((track) => {
-//       console.log("Remote track:", track.kind);
-//     });
+//     console.log("Remote stream:", remoteStream);
+    
+//     // Check if the track is a screen sharing track
+//     if (event.track.kind === "video" && event.track.label.includes("screen")) {
+//       if (screenVideoRef.current) {
+//         screenVideoRef.current.srcObject = remoteStream;
+//         console.log("Screen video element updated");
+//       } else {
+//         console.error("Screen video ref is not available");
+//       }
+//     } else {
+//       if (remoteVideoRef.current) {
+//         remoteVideoRef.current.srcObject = remoteStream;
+//         console.log("Remote video element updated");
+//       } else {
+//         console.error("Remote video ref is not available");
+//       }
+//     }
 //   };
+  
 
 //   const createPeerConnection = () => {
+//     if (pc.current) {
+//       console.log("PeerConnection already exists");
+//       return;
+//     }
+
 //     try {
-//       pc = new RTCPeerConnection({
+//       pc.current = new RTCPeerConnection({
 //         iceServers: [
-//           // { urls: "stun:stun.l.google.com:19302" }
 //           {
 //             urls: "turn:195.110.58.68:3478",
 //             username: "sincelejana",
@@ -119,13 +132,13 @@
 //         ],
 //       });
 
-//       pc.onicecandidate = onIceCandidate;
-//       pc.ontrack = onTrack;
+//       pc.current.onicecandidate = onIceCandidate;
+//       pc.current.ontrack = onTrack;
 
 //       const localStream = localStreamRef.current;
 //       if (localStream) {
 //         localStream.getTracks().forEach((track) => {
-//           pc.addTrack(track, localStream);
+//           pc.current.addTrack(track, localStream);
 //         });
 //       } else {
 //         console.error("Local stream is not available");
@@ -139,7 +152,7 @@
 
 //   const setAndSendLocalDescription = async (sessionDescription) => {
 //     try {
-//       await pc.setLocalDescription(sessionDescription);
+//       await pc.current.setLocalDescription(sessionDescription);
 //       console.log("Local description set");
 //       sendData({
 //         type: sessionDescription.type,
@@ -153,7 +166,7 @@
 //   const sendOffer = async () => {
 //     try {
 //       console.log("Sending offer");
-//       const offer = await pc.createOffer();
+//       const offer = await pc.current.createOffer();
 //       await setAndSendLocalDescription(offer);
 //     } catch (error) {
 //       console.error("Send offer failed: ", error);
@@ -163,7 +176,7 @@
 //   const sendAnswer = async () => {
 //     try {
 //       console.log("Sending answer");
-//       const answer = await pc.createAnswer();
+//       const answer = await pc.current.createAnswer();
 //       await setAndSendLocalDescription(answer);
 //     } catch (error) {
 //       console.error("Send answer failed: ", error);
@@ -182,14 +195,14 @@
 //       if (data.type === "offer") {
 //         console.log("Received offer:", data);
 //         createPeerConnection();
-//         await pc.setRemoteDescription(new RTCSessionDescription(data));
+//         await pc.current.setRemoteDescription(new RTCSessionDescription(data));
 //         await sendAnswer();
 //       } else if (data.type === "answer") {
 //         console.log("Received answer:", data);
-//         await pc.setRemoteDescription(new RTCSessionDescription(data));
+//         await pc.current.setRemoteDescription(new RTCSessionDescription(data));
 //       } else if (data.type === "candidate") {
 //         console.log("Received candidate:", data);
-//         await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+//         await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate));
 //       } else {
 //         console.log("Unknown Data Type:", data.type);
 //       }
@@ -209,11 +222,23 @@
 //     signalingDataHandler(data);
 //   });
 
+//   // Assuming you receive `isScreenSharing` and `senderId` from the server
+//   socket.on("screenSharing", (data) => {
+//     const { isScreenSharing, senderId } = data;
+//     console.log("Screen sharing state changed:", isScreenSharing);
+//     console.log("Sender ID:", senderId);
+
+//     // Check if the current peer is not the sender
+//     if (senderId !== user._id) {
+//       setIsRemoteSharing(isScreenSharing); // Update the remote peer's screen sharing state
+//     }
+//   });
+
 //   useEffect(() => {
 //     startConnection();
-//     return function cleanup() {
-//       if (pc) {
-//         pc.close();
+//     return () => {
+//       if (pc.current) {
+//         pc.current.close();
 //       }
 //       socket.disconnect();
 //     };
@@ -236,123 +261,144 @@
 //     }
 //     setCameraEnabled(enabled);
 //   };
-
-//   const shareScreen = () => {
-//     if (!pc) {
-//       console.error("Peer connection is not initialized");
+//   useEffect(() => {
+//     console.log("Component mounted. screenVideoRef:", screenVideoRef.current);
+//   }, []);
+  
+//   const shareScreen = async () => {
+//     if (!pc.current) {
+//       console.error("PeerConnection is not initialized");
 //       return;
 //     }
+  
 //     if (!navigator.mediaDevices.getDisplayMedia) {
 //       console.error("Screen sharing is not supported on this device.");
 //       alert("Screen sharing is not supported on this device.");
 //       return;
 //     }
-//     if (!screenSharing) {
-//       navigator.mediaDevices
-//         .getDisplayMedia({ video: true })
-//         .then((screenStream) => {
-//           const screenTrack = screenStream.getVideoTracks()[0];
-//           if (!screenTrack) {
-//             console.error("No video track found in screen stream");
-//             return;
+  
+//     if (!screenSharing) { // Start screen sharing
+//       try {
+//         console.log("Attempting to get screen media...");
+//         const screenStream = await navigator.mediaDevices.getDisplayMedia({
+//           video: true,
+//         });
+  
+//         const screenTrack = screenStream.getVideoTracks()[0];
+  
+//         if (screenTrack) {
+//           console.log("Screen track obtained, adding to PeerConnection...");
+  
+//           // Add the screen track to the PeerConnection
+//           pc.current.addTrack(screenTrack, screenStream);
+  
+//           // Save the stream for later use
+//           screenStreamRef.current = screenStream;
+  
+//           // Check if screenVideoRef.current is not null
+//           if (screenVideoRef.current) {
+//             screenVideoRef.current.srcObject = screenStream;
+//           } else {
+//             console.error("screenVideoRef.current is null");
 //           }
-
-//           // Ensure pc is initialized
-//           if (pc) {
-//             pc.getSenders().forEach((sender) => {
-//               if (sender.track.kind === "video") {
-//                 sender
-//                   .replaceTrack(screenTrack)
-//                   .then(() => {
-//                     console.log("Screen track replaced successfully");
-//                   })
-//                   .catch((error) => {
-//                     console.error("Failed to replace track:", error);
-//                   });
-//               }
-//             });
-
-//             screenStreamRef.current = screenStream;
-//             setScreenSharing(true);
-
-//             // Handle stopping screen sharing
-//             screenStream.getTracks().forEach((track) => {
-//               track.onended = () => {
-//                 console.log("Screen sharing stopped");
-//                 const localVideoTrack =
-//                   localStreamRef.current.getVideoTracks()[0];
-//                 if (localVideoTrack && pc) {
-//                   pc.getSenders().forEach((sender) => {
-//                     if (sender.track.kind === "video") {
-//                       sender
-//                         .replaceTrack(localVideoTrack)
-//                         .then(() => {
-//                           console.log(
-//                             "Local video track restored successfully"
-//                           );
-//                           setScreenSharing(false);
-//                           // Renegotiate to update the remote peer
-//                           sendOffer();
-//                         })
-//                         .catch((error) => {
-//                           console.error(
-//                             "Failed to restore local video track:",
-//                             error
-//                           );
-//                         });
-//                     }
-//                   });
-//                 } else {
-//                   console.error(
-//                     "No local video track found or pc is not initialized"
-//                   );
-//                 }
-//               };
+  
+//           setScreenSharing(true);
+  
+//           if (!socket.connected) {
+//             console.log("Socket is not connected, connecting...");
+//             socket.connect();
+//             socket.on("connect", () => {
+//               console.log("Socket connected");
+//               socket.emit("screenSharing", {
+//                 isScreenSharing: true,
+//                 room: roomShareScreen,
+//                 senderId: user._id,
+//               });
 //             });
 //           } else {
-//             console.error("Peer connection is not initialized");
+//             console.log("Socket is already connected");
+//             socket.emit("screenSharing", {
+//               isScreenSharing: true,
+//               room: roomShareScreen,
+//               senderId: user._id,
+//             });
 //           }
-//         })
-//         .catch((error) => {
-//           console.error("Failed to get display media:", error);
-//         });
-//     } else {
-//       // Stop sharing screen
+  
+//           // Handle the end of screen sharing
+//           screenTrack.onended = () => {
+//             console.log("Screen sharing stopped");
+  
+//             // Remove the screen track from PeerConnection
+//             const senders = pc.current.getSenders();
+//             senders.forEach((sender) => {
+//               if (sender.track === screenTrack) {
+//                 pc.current.removeTrack(sender);
+//               }
+//             });
+  
+//             // Stop all tracks in the screen stream
+//             if (screenStreamRef.current) {
+//               screenStreamRef.current.getTracks().forEach((track) => track.stop());
+//             }
+  
+//             if (!socket.connected) {
+//               console.error("Socket is not connected");
+//               return;
+//             }
+  
+//             console.log('Socket is connected, notifying peers');
+//             socket.emit("screenSharing", {
+//               isScreenSharing: false,
+//               room: roomShareScreen,
+//               senderId: user._id,
+//             });
+  
+//             setScreenSharing(false);
+//             setIsRemoteSharing(false);
+//           };
+//         } else {
+//           console.error("No screen track found.");
+//         }
+//       } catch (error) {
+//         console.error("Screen sharing failed:", error);
+//       }
+//     } else { // Stop screen sharing
 //       if (screenStreamRef.current) {
 //         screenStreamRef.current.getTracks().forEach((track) => track.stop());
-//         setScreenSharing(false);
-
-//         // Restore local video track
-//         const localVideoTrack = localStreamRef.current.getVideoTracks()[0];
-//         if (localVideoTrack && pc) {
-//           pc.getSenders().forEach((sender) => {
-//             if (sender.track.kind === "video") {
-//               sender
-//                 .replaceTrack(localVideoTrack)
-//                 .then(() => {
-//                   console.log("Local video track restored successfully");
-//                   // Renegotiate to update the remote peer
-//                   sendOffer();
-//                 })
-//                 .catch((error) => {
-//                   console.error("Failed to restore local video track:", error);
-//                 });
-//             }
-//           });
-//         } else {
-//           console.error("No local video track found or pc is not initialized");
-//         }
 //       }
+  
+//       console.log("Notifying peers about stopping screen sharing...");
+//       socket.emit("screenSharing", {
+//         isScreenSharing: false,
+//         room: roomShareScreen,
+//         senderId: user._id,
+//       });
+  
+//       setScreenSharing(false);
+//       setIsRemoteSharing(false);
 //     }
 //   };
+  
+  
 
-//   const endCall = () => {
-//     if (pc) {
-//       pc.close();
+//   const hangUp = () => {
+//     if (pc.current) {
+//       pc.current.close();
+//       pc.current = null;
+//     }
+//     if (localStreamRef.current) {
+//       localStreamRef.current.getTracks().forEach((track) => track.stop());
+//     }
+//     if (screenStreamRef.current) {
+//       screenStreamRef.current.getTracks().forEach((track) => track.stop());
 //     }
 //     socket.disconnect();
 //     navigate("/schedule");
 //     window.location.reload();
+//   };
+
+//   const toggleChat = () => {
+//     setChatIsOpen(!chatIsOpen);
 //   };
 
 //   return (
@@ -368,14 +414,35 @@
 //           muted
 //           playsInline
 //           ref={localVideoRef}
-//           className="w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]"
+//           className={`${
+//             screenSharing && !isRemoteSharing
+//               ? "absolute top-2 left-2 w-[50px] h-[50px] rounded-lg object-contain scale-x-[-1]"
+//               : "w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]"
+//           }`}
 //         />
+
 //         <video
 //           autoPlay
 //           playsInline
 //           ref={remoteVideoRef}
-//           className="w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]"
+//           className={`${
+//             isRemoteSharing
+//               ? "w-[1100px] h-full rounded-lg object-fill scale-x-[1]" // Use object-fill to stretch the video
+//               : "w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]"
+//           }`}
 //         />
+
+  
+//   <video
+//   autoPlay
+//   playsInline
+//   ref={screenVideoRef} // New ref for screen sharing
+//   className={`${
+//     screenSharing
+//       ? "w-[50px] h-[50px] rounded-lg object-contain"
+//       : "hidden" // Hide if not screen sharing
+//   }`}
+// />
 
 //         <div className={`${chatIsOpen ? "" : "hidden"}`}>
 //           {user.role === "teacher" ? (
@@ -399,7 +466,7 @@
 //         </button>
 
 //         <button
-//           onClick={() => setChatIsOpen(!chatIsOpen)}
+//           onClick={toggleChat}
 //           className="bg-white text-black px-3 py-2 rounded flex items-center"
 //         >
 //           <img src={chat} alt="Screen Share" className="w-6 h-6" />
@@ -426,7 +493,7 @@
 //           />
 //         </button>
 //         <button
-//           onClick={endCall}
+//           onClick={hangUp}
 //           className="bg-red-600 text-white px-3 py-2 rounded flex items-center"
 //         >
 //           <img src={hang} alt="Hang Up" className="w-6 h-6" />
@@ -437,3 +504,5 @@
 // }
 
 // export default CallScreen;
+
+

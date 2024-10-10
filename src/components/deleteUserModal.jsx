@@ -7,7 +7,7 @@ const DeleteUserModal = ({ show, handleClose }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/deleteuser", {
+      const response = await fetch("http://localhost:8000/users", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

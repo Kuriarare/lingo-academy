@@ -24,26 +24,43 @@ const Profile = () => {
   const [biography, setBiography] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [teacherAssigned, setTeacherAssigned] = useState("");
-  console.log('teacherAssigned:', teacherAssigned);
   // useEffect(() => {
   //   console.log('User state updated:', user);
   // }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      setName(user.name);
-      setLastName(user.lastName);
-      setPhone(user.phone);
-      setEmail(user.email);
-      setAddress(user.address);
-      setCity(user.city);
-      setCountry(user.country);
-      setPostal(user.postal);
-      setBiography(user.biography);
-      setAvatarUrl(user.avatarUrl);
-      setTeacherAssigned(user.schedule[0].teacherName);
+ useEffect(() => {
+  if (user.role === 'user') {
+    setName(user.name);
+    setLastName(user.lastName);
+    setPhone(user.phone);
+    setEmail(user.email);
+    setAddress(user.address);
+    setCity(user.city);
+    setCountry(user.country);
+    setPostal(user.postal);
+    setBiography(user.biography);
+    setAvatarUrl(user.avatarUrl);
+
+    // Check if studentSchedules exists and has at least one item
+    if (user.studentSchedules && user.studentSchedules.length > 0) {
+      setTeacherAssigned(user.studentSchedules[0].teacherName);
+    } else {
+      setTeacherAssigned(""); // Set to an empty string if no teacher assigned
     }
-  }, [user]);
+  } else {
+    setName(user.name);
+    setLastName(user.lastName);
+    setPhone(user.phone);
+    setEmail(user.email);
+    setAddress(user.address);
+    setCity(user.city);
+    setCountry(user.country);
+    setPostal(user.postal);
+    setBiography(user.biography);
+    setAvatarUrl(user.avatarUrl);
+  }
+}, [user]);
+
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -84,16 +101,21 @@ const Profile = () => {
       postal,
       biography,
     };
-
+  
     dispatch(updateUser(updatedUser))
       .then((response) => {
+        console.log("Update user response:", response);
         if (response.meta.requestStatus === "fulfilled") {
           setIsEditMode(false);
+        } else {
+          console.error("Failed to update user:", response.error.message);
         }
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => console.error("Error in updating user:", error));
   };
 
+  
+  
   return (
     <div className="flex w-full h-[135vh] ">
       <Dashboard />
@@ -156,7 +178,7 @@ const Profile = () => {
                           type="text"
                           id="name"
                           name="name"
-                          value={name}
+                          value={name || ""}
                           onChange={(e) => setName(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -173,7 +195,7 @@ const Profile = () => {
                           type="text"
                           id="lastName"
                           name="lastName"
-                          value={lastName}
+                          value={lastName || ""}
                           onChange={(e) => setLastName(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -192,7 +214,7 @@ const Profile = () => {
                           type="number"
                           id="phone"
                           name="phone"
-                          value={phone}
+                          value={phone || ""}
                           onChange={(e) => setPhone(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -209,7 +231,7 @@ const Profile = () => {
                           type="email"
                           id="email"
                           name="email"
-                          value={email}
+                          value={email || "" }
                           readOnly
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                         />
@@ -231,7 +253,7 @@ const Profile = () => {
                           type="text"
                           id="address"
                           name="address"
-                          value={address}
+                          value={address || ""}
                           onChange={(e) => setAddress(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -250,7 +272,7 @@ const Profile = () => {
                           type="text"
                           id="city"
                           name="city"
-                          value={city}
+                          value={city || ""}
                           onChange={(e) => setCity(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -267,7 +289,7 @@ const Profile = () => {
                           type="text"
                           id="country"
                           name="country"
-                          value={country}
+                          value={country || ""}
                           onChange={(e) => setCountry(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -284,7 +306,7 @@ const Profile = () => {
                           type="number"
                           id="postal-code"
                           name="postal-code"
-                          value={postal}
+                          value={postal || ""}
                           onChange={(e) => setPostal(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs"
                           readOnly={!isEditMode}
@@ -306,7 +328,7 @@ const Profile = () => {
                         <textarea
                           id="biography"
                           name="biography"
-                          value={biography}
+                          value={biography || ""}
                           onChange={(e) => setBiography(e.target.value)}
                           className="w-full rounded-md py-2 2xl:px-5 px-3 text-[#8898AA] text-[0.96rem] focus:outline-none focus:border-blue-500 box-shadow-inputs resize-none"
                           rows="3"

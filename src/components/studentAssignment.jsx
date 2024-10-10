@@ -3,7 +3,9 @@ import { Calendar, dayjsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
 import avatar from "../assets/logos/avatar.jpg";
+const LOCAL_HOST = "http://localhost:8000";
 
+// eslint-disable-next-line react/prop-types
 const StudentAssignment = ({ teachers, students }) => {
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -11,7 +13,7 @@ const StudentAssignment = ({ teachers, students }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [events, setEvents] = useState([]);
-  
+
   const [eventDetails, setEventDetails] = useState({ start: "", end: "" });
   const [teachersEvents, setTeachersEvents] = useState({});
 
@@ -26,29 +28,42 @@ const StudentAssignment = ({ teachers, students }) => {
   };
 
   const handleCalendarOpen = () => {
-    if (selectedTeacher.schedule) {
-      const endDate = dayjs().add(3, 'year'); // Define the end date as 3 years from now
+    if (selectedTeacher.teacherSchedules) {
+      const endDate = dayjs().add(3, "year"); // Define the end date as 3 years from now
 
-      const formattedEvents = selectedTeacher.schedule.flatMap((event) => {
-        const startTime = dayjs(`${event.date} ${event.startTime}`, "YYYY-MM-DD HH:mm");
-        const endTime = dayjs(`${event.date} ${event.endTime}`, "YYYY-MM-DD HH:mm");
+      const formattedEvents = selectedTeacher.teacherSchedules.flatMap(
+        (event) => {
+          const startTime = dayjs(
+            `${event.date} ${event.startTime}`,
+            "YYYY-MM-DD HH:mm"
+          );
+          const endTime = dayjs(
+            `${event.date} ${event.endTime}`,
+            "YYYY-MM-DD HH:mm"
+          );
 
-        // Generate events for the next 3 years
-        return Array.from({ length: 3 * 52 }, (_, i) => { // 3 years * 52 weeks
-          const start = startTime.add(i * 7, 'day');
-          const end = endTime.add(i * 7, 'day');
+          // Generate events for the next 3 years
+          return Array.from({ length: 3 * 52 }, (_, i) => {
+            // 3 years * 52 weeks
+            const start = startTime.add(i * 7, "day");
+            const end = endTime.add(i * 7, "day");
 
-          // Check if the event is within the 3-year range
-          if (start.isBefore(endDate)) {
-            return {
-              title: selectedTeacher.role === "teacher" ? event.studentName : event.teacherName,
-              start: start.toDate(),
-              end: end.toDate(),
-            };
-          }
-          return null;
-        }).filter(Boolean); // Filter out null values
-      });
+            // Check if the event is within the 3-year range
+            if (start.isBefore(endDate)) {
+              return {
+                title:
+                  selectedTeacher.role === "teacher"
+                    ? event.studentName
+                    : event.teacherName,
+                start: start.toDate(),
+                end: end.toDate(),
+                studentId: event.studentId,
+              };
+            }
+            return null;
+          }).filter(Boolean); // Filter out null values
+        }
+      );
       setTeachersEvents(formattedEvents);
     }
     setIsCalendarOpen(!isCalendarOpen);
@@ -76,17 +91,17 @@ const StudentAssignment = ({ teachers, students }) => {
         .second(0)
         .millisecond(0)
         .toDate();
-  
+
       const endDateTime = dayjs(selectedDate)
         .hour(parseInt(eventDetails.end.split(":")[0], 10))
         .minute(parseInt(eventDetails.end.split(":")[1], 10))
         .second(0)
         .millisecond(0)
         .toDate();
-  
+
       const dayOfWeek = dayjs(selectedDate).format("dddd");
       const date = dayjs(selectedDate).format("YYYY-MM-DD"); // Format the date for sending
-  
+
       // Add the new event to the events array, with both teacher and student names
       setEvents((prev) => [
         ...prev,
@@ -97,43 +112,47 @@ const StudentAssignment = ({ teachers, students }) => {
           date,
           start: startDateTime,
           end: endDateTime,
-          teacherName: selectedTeacher.name, // Store the teacher's name
-          studentName: selectedStudent.name, // Store the student's name
+          teacherName: `${selectedTeacher.name} ${selectedTeacher.lastName}`,
+          studentName: `${selectedStudent.name} ${selectedStudent.lastName}`,
         },
       ]);
-  
+
       setEventDetails({ start: "", end: "" });
       setEventModalOpen(false);
     }
   };
-  
-  
-  
+
+  // https://srv570363.hstgr.cloud:8000
 
   const assignTeacherToStudent = (data) => {
-    fetch("http://localhost:8000/assignstudent", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        })
-        .then((res) => res.json())
-        .then((data) => {
-            console.log(data);
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-        });
+    fetch(`${LOCAL_HOST}/users/assignstudent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.text().then((errorText) => {
+            throw new Error(errorText || "An error occurred");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   const handleAssignClick = () => {
-
-
     if (selectedTeacher && selectedStudent && events.length > 0) {
       assignTeacherToStudent({
-        teacherId: selectedTeacher._id,
-        studentId: selectedStudent._id,
+        teacherId: selectedTeacher.id,
+        studentId: selectedStudent.id,
         events,
       });
       setEvents([]); // Clear events after assignment
@@ -141,7 +160,9 @@ const StudentAssignment = ({ teachers, students }) => {
   };
 
   const formatDateTime = (dateTime) => {
-    return dayjs(dateTime).isValid() ? dayjs(dateTime).format("HH:mm") : "Invalid Date";
+    return dayjs(dateTime).isValid()
+      ? dayjs(dateTime).format("HH:mm")
+      : "Invalid Date";
   };
 
   return (
@@ -151,9 +172,9 @@ const StudentAssignment = ({ teachers, students }) => {
         <h2 className="text-xl font-bold mb-4">Students</h2>
         {students.map((student) => (
           <div
-            key={student._id}
+            key={student.id}
             className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-              selectedStudent?._id === student._id ? "bg-blue-100" : ""
+              selectedStudent?.id === student.id ? "bg-blue-100" : ""
             }`}
             onClick={() => handleStudentSelect(student)}
           >
@@ -176,9 +197,9 @@ const StudentAssignment = ({ teachers, students }) => {
         <h2 className="text-xl font-bold mb-4">Teachers</h2>
         {teachers.map((teacher) => (
           <div
-            key={teacher._id}
+            key={teacher.id}
             className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-              selectedTeacher?._id === teacher._id ? "bg-blue-100" : ""
+              selectedTeacher?.id === teacher.id ? "bg-blue-100" : ""
             }`}
             onClick={() => handleTeacherSelect(teacher)}
           >
@@ -304,19 +325,22 @@ const StudentAssignment = ({ teachers, students }) => {
         </div>
       )}
 
-{events.length > 0 && (
-  <div className="flex flex-col gap-4 mt-4">
-    <h2 className="text-xl font-bold">Scheduled Events</h2>
-    <ul className="list-disc ml-6">
-      {events.map((event, index) => (
-        <li key={index}>
-          {`${dayjs(event.date).format("MMM DD, YYYY")} from ${formatDateTime(event.start)} - ${formatDateTime(event.end)}`}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
+      {events.length > 0 && (
+        <div className="flex flex-col gap-4 mt-4">
+          <h2 className="text-xl font-bold">Scheduled Events</h2>
+          <ul className="list-disc ml-6">
+            {events.map((event, index) => (
+              <li key={index}>
+                {`${dayjs(event.date).format(
+                  "MMM DD, YYYY"
+                )} from ${formatDateTime(event.start)} - ${formatDateTime(
+                  event.end
+                )}`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Assign Button */}
       <div className="flex flex-col justify-end">

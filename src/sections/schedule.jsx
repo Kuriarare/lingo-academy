@@ -5,78 +5,95 @@ import { useSelector } from "react-redux";
 import { Calendar, dayjsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
-import JoinClassButton from "../components/buttons/joinClass";
+import { useNavigate } from "react-router-dom"; 
 import ChatWindow from "../components/chatWindow";
 import MainChat from "../components/buttons/chatList";
 
 const Schedule = () => {
   const user = useSelector((state) => state.user.userInfo.user);
   const header = "MY SCHEDULE";
-  const [room, setRoom] = useState("");
-  const [username, setUsername] = useState("");
-  const [chatRoom, setChatRoom] = useState("");
-
-  const [isButtonVisible, setIsButtonVisible] = useState(true);
   const [events, setEvents] = useState([]);
   const [teacherChat, setTeacherChat] = useState([]);
-  const [teacherInfo , setTeacherInfo] = useState({});
-
+  const [teacherInfo, setTeacherInfo] = useState({});
+  const [chatRoom, setChatRoom] = useState("");
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     if (user.role === "teacher") {
-      setUsername(user.name);
-      setRoom(user._id);
       setTeacherChat(user.students);
-      if (!user.students || user.students.length === 0) {
-        setIsButtonVisible(false);
-      }
-    } else {
-      setUsername(user.name);
-      setRoom(user.teacher._id);
-      setChatRoom(user._id);
       setTeacherInfo(user.teacher);
-      if (!user.teacher) {
-        setIsButtonVisible(false);
+      setChatRoom(user.id);
+
+      if (user.teacherSchedules) {
+        const endDate = dayjs().add(3, "year");
+  
+        const formattedEvents = user.teacherSchedules.flatMap((event) => {
+          const startTime = dayjs(`${event.date} ${event.startTime}`, "YYYY-MM-DD HH:mm");
+          const endTime = dayjs(`${event.date} ${event.endTime}`, "YYYY-MM-DD HH:mm");
+  
+          return Array.from({ length: 3 * 52 }, (_, i) => {
+            const start = startTime.add(i * 7, "day");
+            const end = endTime.add(i * 7, "day");
+  
+            if (start.isBefore(endDate)) {
+              return {
+                title: event.studentName, 
+                start: start.toDate(),
+                end: end.toDate(),
+                studentId: event.studentId, 
+              };
+            }
+            return null;
+          }).filter(Boolean);
+        });
+        setEvents(formattedEvents);
       }
-    }
+    } else if (user.role === "user") {
+      setChatRoom(user.id);
+  
 
-    // Map user.schedule to the events array for Calendar
-    if (user.schedule) {
-      const endDate = dayjs().add(3, "year"); // Define the end date as 3 years from now
-
-      const formattedEvents = user.schedule.flatMap((event) => {
-        const startTime = dayjs(
-          `${event.date} ${event.startTime}`,
-          "YYYY-MM-DD HH:mm"
-        );
-        const endTime = dayjs(
-          `${event.date} ${event.endTime}`,
-          "YYYY-MM-DD HH:mm"
-        );
-
-        // Generate events for the next 3 years
-        return Array.from({ length: 3 * 52 }, (_, i) => {
-          // 3 years * 52 weeks
-          const start = startTime.add(i * 7, "day");
-          const end = endTime.add(i * 7, "day");
-
-          // Check if the event is within the 3-year range
-          if (start.isBefore(endDate)) {
-            return {
-              title:
-                user.role === "teacher" ? event.studentName : event.teacherName,
-              start: start.toDate(),
-              end: end.toDate(),
-            };
-          }
-          return null;
-        }).filter(Boolean); // Filter out null values
-      });
-      setEvents(formattedEvents);
+      if (user.studentSchedules) {
+        const endDate = dayjs().add(3, "year");
+  
+        const formattedEvents = user.studentSchedules.flatMap((event) => {
+          const startTime = dayjs(`${event.date} ${event.startTime}`, "YYYY-MM-DD HH:mm");
+          const endTime = dayjs(`${event.date} ${event.endTime}`, "YYYY-MM-DD HH:mm");
+  
+          return Array.from({ length: 3 * 52 }, (_, i) => {
+            const start = startTime.add(i * 7, "day");
+            const end = endTime.add(i * 7, "day");
+  
+            if (start.isBefore(endDate)) {
+              return {
+                title: event.teacherName, 
+                start: start.toDate(),
+                end: end.toDate(),
+                studentId: event.studentId, 
+              };
+            }
+            return null;
+          }).filter(Boolean);
+        });
+        setEvents(formattedEvents);
+      }
     }
   }, [user]);
 
   const localizer = dayjsLocalizer(dayjs);
+  
+  const CustomEvent = ({ event }) => {
+    return (
+      <div className="flex items-center justify-center h-full text-[15px]">
+        <span>{event.title}</span>
+      </div>
+    );
+  };
+
+  const handleEventClick = (event) => {
+    const roomId = event.studentId; 
+    const username = user.name;
+    navigate(`/call/${username}/${roomId}`);
+  };
 
   return (
     <div className="flex w-full relative h-screen">
@@ -88,50 +105,48 @@ const Schedule = () => {
           </div>
         </section>
 
-       
-        <section className="mt-4 flex">
+        <section className="mt-4 flex pr-2">
           <div className="w-3/4 mx-4 h-[600px]">
             <Calendar
               localizer={localizer}
-              events={events} // Pass the mapped events here
+              events={events}
               startAccessor="start"
               endAccessor="end"
               defaultView="week"
-              min={new Date(2024, 0, 1, 6, 0)} 
-              max={new Date(2024, 0, 1, 18, 0)} 
-              step={60} 
-              timeslots={1} 
-              formats={{
-                timeGutterFormat: "HH:mm", 
-                eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
-                  `${localizer.format(
-                    start,
-                    "HH:mm",
-                    culture
-                  )} - ${localizer.format(end, "HH:mm", culture)}`,
+              min={new Date(2024, 0, 1, 6, 0)}
+              max={new Date(2024, 0, 1, 18, 0)}
+              step={60}
+              timeslots={1}
+              components={{
+                event: CustomEvent, 
               }}
+              eventPropGetter={() => ({
+                style: {
+                  backgroundColor: '#273296', 
+                  color: 'white',
+                  borderRadius: '5px',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                },
+              })}
+              formats={{
+                eventTimeRangeFormat: () => '',
+              }}
+              onSelectEvent={handleEventClick} 
             />
-               <div className="my-1 flex justify-end">
-              <JoinClassButton
-                username={username}
-                room={room}
-                isButtonVisible={isButtonVisible}
-                setUsername={setUsername}
-                setRoom={setRoom}
-              />
-            </div>
+            <h2>
+              *Click on an event to join the class directly*
+            </h2>
           </div>
-          <div className="">
-         
-            <div className="w-full">
-             
-              {user.role === "teacher" ? (
-                <MainChat username={username} teacherChat ={teacherChat}  />
-              ) : (
-                <ChatWindow username={username} room={chatRoom} peerInfo={teacherInfo} />
-              )}
 
-            </div>
+          <div className="">
+            {user.role === "teacher" ? (
+              <MainChat username={user.name} teacherChat={teacherChat} />
+            ) : (
+              <ChatWindow username={user.name} room={chatRoom} peerInfo={teacherInfo} />
+            )}
           </div>
         </section>
       </div>

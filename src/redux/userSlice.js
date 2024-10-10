@@ -1,15 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+// Get the environment variable
+const LOCAL_HOST = 'http://localhost:8000'
+
 // Async action to log in a user
 export const loginUser = createAsyncThunk('user/loginUser', async (data) => {
-  const response = await fetch('http://localhost:8000/login', {
+
+  const response = await fetch(`${LOCAL_HOST}/auth/login`, { // Use template literal to insert LOCAL_HOST
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
     },
   });
-  
+
   const result = await response.json();
   if (result.token) {
     localStorage.setItem('token', result.token);
@@ -17,12 +21,11 @@ export const loginUser = createAsyncThunk('user/loginUser', async (data) => {
 
   return result;
 });
-// http://localhost:8000
-// https://srv570363.hstgr.cloud:8000
+
 // Async action to update user information
 export const updateUser = createAsyncThunk('user/updateUser', async (userData, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:8000/updateuser', {
+    const response = await fetch(`${LOCAL_HOST}/users/updateuser`, { // Use template literal here as well
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,19 +39,22 @@ export const updateUser = createAsyncThunk('user/updateUser', async (userData, {
     }
 
     const updatedUser = await response.json();
+    if (response.status === 204) {
+  return {}; // Return an empty object for successful update
+}
     return updatedUser;
   } catch (error) {
     return rejectWithValue(error.message);
   }
 });
 
-
+// Async action to upload avatar
 export const uploadAvatar = createAsyncThunk('user/uploadAvatar', async (formData, { rejectWithValue }) => {
   console.log('Starting avatar upload');
   console.log('Form data:', formData);
 
   try {
-    const response = await fetch('http://localhost:8000/uploadavatar', {
+    const response = await fetch(`${LOCAL_HOST}/uploadavatar`, { // Use template literal here as well
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -59,7 +65,7 @@ export const uploadAvatar = createAsyncThunk('user/uploadAvatar', async (formDat
     console.log('Upload response status:', response.status);
 
     if (!response.ok) {
-      console.error('Upload response error:', await response.text());
+
       throw new Error('Failed to upload avatar');
     }
 
@@ -81,10 +87,30 @@ const userSlice = createSlice({
     error: null,
   },
   reducers: {
+    updateUserStatus: (state, action) => {
+      const { id, online } = action.payload; 
+      const user = state.userInfo.user;
+       if (user.teacher) {
+        console.log('Updating teacher status');
+        if (user.teacher.id === id) {
+          user.teacher.online = online;
+        }
+      }
+     else if (user && user.students) {
+        // Find the user in the students array and update their online status
+        const studentIndex = user.students.findIndex(student => student.id === id);
+        if (studentIndex !== -1) {
+          user.students[studentIndex].online = online; 
+        }
+      }
+      
+  
+    },
     logout: (state) => {
       state.userInfo = null;
       localStorage.removeItem('token');
     },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -107,7 +133,10 @@ const userSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.userInfo.user = action.payload;
+        state.userInfo.user= {
+          ...state.userInfo.user,
+          ...action.meta.arg, // Merge the updated fields
+        };
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.status = 'failed';
@@ -131,6 +160,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { logout } = userSlice.actions;
+export const { logout, updateUserStatus } = userSlice.actions;
 
 export default userSlice.reducer;

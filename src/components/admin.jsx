@@ -5,7 +5,9 @@ import UserModal from "./userModal";
 import DeleteUserModal from "./deleteUserModal";
 import { useSelector } from "react-redux";
 import StudentAssignment from "./studentAssignment"; // Import the new component
-
+const LOCAL_HOST = 'http://localhost:8000'
+// https://lingo.srv570363.hstgr.cloud/
+// http://localhost:8000
 const Admin = () => {
   const user = useSelector((state) => state.user.userInfo.user);
 
@@ -17,7 +19,8 @@ const Admin = () => {
   const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal);
 
   useEffect(() => {
-    fetch("http://localhost:8000/allusers")
+    // fetch(`${LOCAL_HOST}/allusers`)
+    fetch(`${LOCAL_HOST}/users`)
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((error) => console.error("Error fetching users:", error));
@@ -25,7 +28,8 @@ const Admin = () => {
 
   const teachers = users.filter((user) => user.role === "teacher");
   const students = users.filter(
-    (user) => user.role === "user" && user.teacher === undefined
+    (user) => user.role === "user" && (user.studentSchedules.length === 0)
+    // (user) => user.role === "user" && user.teacher === undefined
   );
 
   return (
@@ -59,7 +63,6 @@ const Admin = () => {
           </div>
         </section>
 
-        {/* Render StudentAssignment component */}
         <StudentAssignment teachers={teachers} students={students} />
 
       </div>

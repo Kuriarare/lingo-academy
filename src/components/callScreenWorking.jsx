@@ -11,41 +11,46 @@ import screenStop from "../assets/logos/stop-screen.png";
 import chat from "../assets/logos/chat.png";
 import ChatWindow from "./chatWindow";
 import { useSelector } from "react-redux";
-import MainChat from "./buttons/chatList";
+const LOCAL_HOST = "https://lingo.srv570363.hstgr.cloud";
 
 function CallScreen() {
   const user = useSelector((state) => state.user.userInfo.user);
 
   const [room, setRoom] = useState("");
   const [username, setUsername] = useState("");
-  const [teacherChat, setTeacherChat] = useState([]);
+  // const [teacherChat, setTeacherChat] = useState([]);
   const [chatIsOpen, setChatIsOpen] = useState(false);
   const [microphoneEnabled, setMicrophoneEnabled] = useState(true);
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [screenSharing, setScreenSharing] = useState(false);
+  const [isRemoteSharing, setIsRemoteSharing] = useState(false);
+  const [roomShareScreen, setRoomShareScreen] = useState("");
   const localStreamRef = useRef(null);
   const screenStreamRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-  const pc = useRef(null); // Use ref to persist peer connection
+  const pc = useRef(null); 
 
   useEffect(() => {
     if (user.role === "teacher") {
       setUsername(user.name);
-      setRoom(user._id);
-      setTeacherChat(user.students);
+      // setRoom(user._id);
+
+      setRoomShareScreen(user.id);
     } else {
       setUsername(user.name);
-      setRoom(user._id);
+      // setRoom(user.id);
+
+      setRoomShareScreen(user.id);
     }
   }, [user]);
-  
+
   const params = useParams();
   const navigate = useNavigate();
   const localUsername = params.username;
   const roomName = params.room;
 
-  const socket = socketio("http://localhost:8000/", {
+  const socket = socketio(`${LOCAL_HOST}`, {
     autoConnect: false,
   });
 
@@ -198,6 +203,18 @@ function CallScreen() {
     signalingDataHandler(data);
   });
 
+  // Assuming you receive `isScreenSharing` and `senderId` from the server
+  socket.on("screenSharing", (data) => {
+    const { isScreenSharing, senderId } = data;
+    console.log("Screen sharing state changed:", isScreenSharing);
+    console.log("Sender ID:", senderId);
+
+    // Check if the current peer is not the sender
+    if (senderId !== user.id) {
+      setIsRemoteSharing(isScreenSharing); // Update the remote peer's screen sharing state
+    }
+  });
+
   useEffect(() => {
     startConnection();
     return () => {
@@ -231,63 +248,84 @@ function CallScreen() {
       console.error("PeerConnection is not initialized");
       return;
     }
-
+  
     if (!navigator.mediaDevices.getDisplayMedia) {
       console.error("Screen sharing is not supported on this device.");
       alert("Screen sharing is not supported on this device.");
       return;
     }
-
-    if (!screenSharing) {
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+  
+    try {
+      if (!screenSharing) {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
         const screenTrack = screenStream.getVideoTracks()[0];
-
+  
         if (screenTrack) {
-          pc.current.getSenders().forEach((sender) => {
-            if (sender.track.kind === "video") {
-              sender.replaceTrack(screenTrack)
-                .then(() => console.log("Screen track replaced successfully"))
-                .catch((error) => console.error("Failed to replace track:", error));
-            }
-          });
-
+          replaceVideoTrack(screenTrack);
           screenStreamRef.current = screenStream;
           setScreenSharing(true);
-
+          emitScreenSharing(true);
           screenStream.getTracks().forEach((track) => {
-            track.onended = () => {
-              console.log("Screen sharing stopped");
-              const localVideoTrack = localStreamRef.current.getVideoTracks()[0];
-              if (localVideoTrack) {
-                pc.current.getSenders().forEach((sender) => {
-                  if (sender.track.kind === "video") {
-                    sender.replaceTrack(localVideoTrack);
-                  }
-                });
-              }
-              setScreenSharing(false);
-            };
+            track.onended = stopScreenSharing;
           });
         } else {
           console.error("No screen track found.");
         }
-      } catch (error) {
-        console.error("Screen sharing failed:", error);
+      } else {
+        stopScreenSharing();
       }
-    } else {
-      const localVideoTrack = localStreamRef.current.getVideoTracks()[0];
-      if (localVideoTrack) {
-        pc.current.getSenders().forEach((sender) => {
-          if (sender.track.kind === "video") {
-            sender.replaceTrack(localVideoTrack);
-          }
-        });
-      }
-      setScreenSharing(false);
+    } catch (error) {
+      console.error("Screen sharing failed:", error);
     }
   };
+  
+  const replaceVideoTrack = (newTrack) => {
+    pc.current.getSenders().forEach((sender) => {
+      if (sender.track.kind === "video") {
+        sender.replaceTrack(newTrack).then(() => {
+          console.log("Track replaced successfully");
+        }).catch((error) => {
+          console.error("Failed to replace track:", error);
+        });
+      }
+    });
+  };
+  
+  const emitScreenSharing = (isScreenSharing) => {
+    const data = {
+      isScreenSharing,
+      room: roomName,
+      senderId: user.id,
+    };
+  
+    if (!socket.connected) {
+      socket.connect();
+      socket.on("connect", () => {
+        socket.emit("screenSharing", data);
+      });
+    } else {
+      socket.emit("screenSharing", data);
+    }
+  };
+  
+  const stopScreenSharing = () => {
 
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((track) => track.stop());
+      screenStreamRef.current = null;
+    }
+    const localVideoTrack = localStreamRef.current.getVideoTracks()[0];
+    if (localVideoTrack) {
+      replaceVideoTrack(localVideoTrack);
+      emitScreenSharing(false);
+    }
+  
+    setScreenSharing(false);
+    setIsRemoteSharing(false);
+  };
+  
   const hangUp = () => {
     if (pc.current) {
       pc.current.close();
@@ -308,42 +346,81 @@ function CallScreen() {
     setChatIsOpen(!chatIsOpen);
   };
 
-
   return (
-    <div className="w-full h-[100vh] relative flex flex-col justify-center bg-[#202124] px-2">
+    <div className="w-full h-[100vh] relative flex flex-col justify-center bg-[#282A2F] px-2">
       <div className="flex justify-center gap-2 mb-2 text-white">
         {/* <label className="">{"Name: " + localUsername}</label>
 
         <label className="hidden">{"Room: " + roomName}</label> */}
       </div>
-      <div className="w-full rounded-lg flex flex-col lg:flex-row items-center justify-center overflow-hidden gap-2">
+      <div className="flex justify-center relative">
         <video
           autoPlay
           muted
           playsInline
           ref={localVideoRef}
-          className="w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]"
+          className="w-[200px] absolute top-2 left-2 rounded-lg object-contain scale-x-[-1]"
         />
+
         <video
           autoPlay
           playsInline
           ref={remoteVideoRef}
-          className="w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]"
+          className={`w-[1000px] rounded-lg object-fill scale-x-${
+            isRemoteSharing ? "[1]" : "[-1]"
+          }`}
+        />
+
+        <div className={`${chatIsOpen ? "" : "hidden"}`}>
+          
+            <ChatWindow username={username} room={roomName} />
+         
+        </div>
+      </div>
+
+      {/* <div
+        className={`w-full rounded-lg ${
+          isRemoteSharing ? "flex-col" : "lg:flex-row"
+        } flex items-center justify-center overflow-hidden gap-2`}
+      >
+        <video
+          autoPlay
+          muted
+          playsInline
+          ref={localVideoRef}
+          className={`${
+            isRemoteSharing
+              ? "w-[50px] h-[50px] rounded-lg object-contain scale-x-[-1]" // Small local video when sharing
+              : screenSharing
+              ? "absolute top-2 left-2 w-[50px] h-[50px] rounded-lg object-contain scale-x-[-1]"
+              : "w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]" // Normal size otherwise
+          }`}
+        />
+
+        <video
+          autoPlay
+          playsInline
+          ref={remoteVideoRef}
+          className={`${
+            isRemoteSharing
+              ? "w-full h-full rounded-lg object-fill scale-x-[1]" // Full screen for remote video when sharing
+              : "w-full lg:w-1/2 md:h-auto rounded-lg object-contain scale-x-[-1]" // Normal size otherwise
+          }`}
         />
 
         <div className={`${chatIsOpen ? "" : "hidden"}`}>
           {user.role === "teacher" ? (
-            <MainChat username={username} teacherChat={teacherChat} />
+            <ChatWindow username={username} room={roomName} />
           ) : (
             <ChatWindow username={username} room={room} />
           )}
         </div>
-      </div>
+      </div> */}
 
-      <div className=" flex space-x-4 justify-center mt-4">
+      <div className=" flex space-x-3 justify-center mt-4">
         <button
           onClick={toggleMicrophone}
-          className="bg-white text-black px-3 py-2 rounded flex items-center"
+          className="bg-[#1C1E22] text-black px-3 py-2 rounded-lg flex items-center"
         >
           <img
             src={microphoneEnabled ? microOn : microOff}
@@ -354,14 +431,14 @@ function CallScreen() {
 
         <button
           onClick={toggleChat}
-          className="bg-white text-black px-3 py-2 rounded flex items-center"
+          className="bg-[#1C1E22] text-black px-3 py-2 rounded-lg flex items-center"
         >
           <img src={chat} alt="Screen Share" className="w-6 h-6" />
         </button>
 
         <button
           onClick={toggleCamera}
-          className="bg-white text-black px-3 py-2 rounded flex items-center"
+          className="bg-[#1C1E22] text-black px-3 py-2 rounded-lg flex items-center"
         >
           <img
             src={cameraEnabled ? videoOn : videoOff}
@@ -371,7 +448,7 @@ function CallScreen() {
         </button>
         <button
           onClick={shareScreen}
-          className="bg-white text-black px-3 py-2 rounded flex items-center"
+          className="bg-[#1C1E22] text-black px-3 py-2 rounded-lg flex items-center"
         >
           <img
             src={screenSharing ? screenStop : screenShare}
@@ -381,7 +458,7 @@ function CallScreen() {
         </button>
         <button
           onClick={hangUp}
-          className="bg-red-600 text-white px-3 py-2 rounded flex items-center"
+          className="bg-red-600 text-white px-3 py-2 rounded-lg flex items-center"
         >
           <img src={hang} alt="Hang Up" className="w-6 h-6" />
         </button>

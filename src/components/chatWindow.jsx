@@ -1,45 +1,52 @@
-import { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
-import send from '../assets/logos/send.png';
-import axios from 'axios';
+import { useState, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
+import send from "../assets/logos/send.png";
+import { BsEmojiSmile } from "react-icons/bs"; // For emoji icon
+import axios from "axios";
+import { useSelector } from "react-redux";
+import PerfectScrollbar from "react-perfect-scrollbar";
+import "react-perfect-scrollbar/dist/css/styles.css";
+import EmojiPicker from "emoji-picker-react"; // Emoji picker library
 
-const ChatWindow = ({ username, room, peerInfo}) => {
+const LOCAL_HOST = "http://localhost:8000";
+
+const ChatWindow = ({ username, room, studentName, height}) => {
+  const user = useSelector((state) => state.user.userInfo.user);
+  const teacher = useSelector((state) => state.user.userInfo.user.teacher);
 
   const [socket, setSocket] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  // Ref to the messages container
-  const messagesEndRef = useRef(null);
+  // Ref to the PerfectScrollbar container
+  const scrollContainerRef = useRef(null);
 
-  // Function to format time to HH:mm
   const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
-  // Fetch previous messages from the server
   const fetchMessages = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/messages/${room}`);
-      setChatMessages(response.data.reverse()); // Reverse to display oldest first
+      const response = await axios.get(`${LOCAL_HOST}/chat/messages/${room}`);
+      setChatMessages(response.data.reverse());
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
     }
   };
 
   useEffect(() => {
     if (username && room) {
-      const socketInstance = io('http://localhost:8000');
+      const socketInstance = io(`${LOCAL_HOST}`);
       setSocket(socketInstance);
 
-      // Fetch existing messages when component mounts
       fetchMessages();
+      socketInstance.emit("join", { username, room });
 
-      // Join the room
-      socketInstance.emit('join', { username, room });
-
-      // Handle incoming chat messages
-      socketInstance.on('chat', (data) => {
+      socketInstance.on("chat", (data) => {
         setChatMessages((prevMessages) => [...prevMessages, data]);
       });
 
@@ -49,88 +56,131 @@ const ChatWindow = ({ username, room, peerInfo}) => {
     }
   }, [username, room]);
 
-  // Scroll to the bottom of the messages container whenever chatMessages changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll to the bottom when the component mounts or when chatMessages change
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   }, [chatMessages]);
 
   const sendMessage = () => {
-    if (message && room) {
-      const timestamp = new Date(); // Register the send time
-      socket.emit('chat', { username, room, message, timestamp });
-      setMessage('');
+    if (message && room && socket) {
+      const timestamp = new Date();
+      socket.emit("chat", { username, room, message, timestamp });
+      setMessage("");
     }
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault(); // Prevent default behavior of Enter key
+    if (event.key === "Enter") {
+      event.preventDefault();
       sendMessage();
     }
   };
 
-  return (
-    <div className="h-[600px] w-[340px] flex flex-col border p-3  bg-white">
-      <h2 className="mb-4 text-center">Chatting </h2>
+  const handleEmojiClick = (emojiObject) => {
+    setMessage((prevMessage) => prevMessage + emojiObject.emoji); // Add the emoji to the message
+    setShowEmojiPicker(false); // Close emoji picker after selecting
+  };
 
-      <div className="flex-1 overflow-y-auto mb-4 pr-1">
-        <h3>Chat Messages:</h3>
+  return (
+    <div className="2xl:w-[340px] xl:w-[330px] md:w-[300px] w-full flex flex-col border ml-1 bg-white" style={{ height: height || '600px' }}>
+      <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
+        {user.role === "user" ? (
+          <>
+            {teacher.name},{" "}
+            {teacher.online === "online" ? (
+              <>
+                <span className="ml-[4px]">online</span>
+                <span className="w-[0.62rem] h-[0.62rem] bg-green-500 inline-block rounded-full ml-1"></span>
+              </>
+            ) : (
+              <>
+                <span className="ml-[4px]">offline</span>
+                <span className="w-[0.62rem] h-[0.62rem] bg-red-600 inline-block rounded-full ml-1"></span>
+              </>
+            )}
+          </>
+        ) : (
+          studentName
+        )}
+      </h2>
+
+      <PerfectScrollbar containerRef={(ref) => (scrollContainerRef.current = ref)} className="flex-1 overflow-hidden mb-4 p-3 relative">
         <ul>
           {chatMessages.map((msg, index) => {
-            const showTimestamp = index === 0 || new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) > 3 * 60 * 1000;
+            const showTimestamp =
+              index === 0 ||
+              new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) >
+                3 * 60 * 1000;
 
             return (
               <div key={index} className="mb-2">
-              {/* Show the time only if more than 3 minutes have passed since the last message */}
-              {showTimestamp && (
-                <div className="text-center text-gray-500 text-[12px] my-1">
-                  {formatTime(msg.timestamp)}
-                </div>
-              )}
-              <li 
-                className={`flex ${msg.username === username ? 'justify-end' : 'justify-start'} mb-2 text-[15px]`}
-              >
-                <div className={`flex flex-col ${msg.username === username ? 'items-end' : 'items-start'}`}>
-                  {msg.username !== username && (
-                    <span className={`text-[13px] ${msg.username === username ? 'text-white' : 'text-slate-500'} `}>
-                      {msg.username}
-                    </span>
-                  )}
-                  <div 
-                    className={`p-2 rounded-lg max-w-xs ${msg.username === username ? 'bg-blue-500 text-white text-right' : 'bg-gray-300 text-black text-left text-[15px]'}`}
-                  >
-                    <span>{msg.message}</span>
+                {showTimestamp && (
+                  <div className="text-center text-gray-500 text-[12px] my-2">
+                    {formatTime(msg.timestamp)}
                   </div>
-                </div>
-              </li>
-            </div>
-            
+                )}
+                <li
+                  className={`flex ${
+                    msg.username === username ? "justify-end" : "justify-start"
+                  } mb-2 text-[15px]`}
+                >
+                  <div
+                    className={`flex flex-col ${
+                      msg.username === username ? "items-end" : "items-start"
+                    }`}
+                  >
+                    <div
+                      className={`p-2 rounded-xl max-w-xs ${
+                        msg.username === username
+                          ? "bg-[#273296] text-white text-right 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+                          : "bg-[#E8EBEE] text-blue-950 text-left 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+                      }`}
+                    >
+                      <span>{msg.message}</span>
+                    </div>
+                  </div>
+                </li>
+              </div>
             );
           })}
-          {/* Scroll to bottom indicator */}
-          <div ref={messagesEndRef} />
+          <div />
         </ul>
-      </div>
+      </PerfectScrollbar>
 
-      <div className="flex-shrink-0 flex">
-        <input 
-          type="text" 
-          placeholder="Message" 
-          value={message} 
-          onChange={(e) => setMessage(e.target.value)} 
-          onKeyDown={handleKeyDown}
-          className="flex-1 p-2 border rounded-l"
-        />
-        <button 
-          onClick={sendMessage} 
-          className="p-2 bg-blue-500 text-white rounded-r"
+      <div className="flex-shrink-0 flex items-center ml-1">
+        <div className="relative flex-1 flex items-center">
+          <button
+            onClick={() => setShowEmojiPicker((prevState) => !prevState)}
+            className="absolute left-2 bg-transparent"
+          >
+            <BsEmojiSmile className="text-[21px] text-slate-400" />
+          </button>
+          <input
+            type="text"
+            placeholder="Type a message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+          />
+        </div>
+        <button
+          onClick={sendMessage}
+          className="p-2 bg-[#273296] text-white rounded-full m-1"
         >
-         <img src={send} alt="send" className='w-[24px]' />
+          <img src={send} alt="send" className="2xl:w-[24px] xl:w-[23px] md:w-[22px]" />
         </button>
+
+        {showEmojiPicker && (
+          <div className="absolute bottom-16 left-2 z-10">
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default ChatWindow;
- 
