@@ -7,6 +7,8 @@ const Dashboard = () => {
   const [activeLink, setActiveLink] = useState("");
   const user = useSelector((state) => state.user.userInfo.user);
 
+  const isSidebarOpen = useSelector((state) => state.sidebar.isSidebarOpen); // Get sidebar visibility state from Redux
+
   useEffect(() => {
     setActiveLink(location.pathname);
   }, [location]);
@@ -16,11 +18,19 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-3 bg-white text-sm h-full 2xl:w-[16rem] md:w-[15rem] relative box-shadow-form ">
-      <div className="flex flex-col flex-shrink-0 sticky top-3">
-        <Link to="/home" className="flex justify-center items-center mb-3 text-[#8898AA] no-underline">
-          <i className="fa-solid fa-map-location-dot mr-2"></i>
-          <span className="text-xl">Lingolandias</span>
+    <div
+      className={`p-3 bg-white text-sm h-screen relative box-shadow-form transition-all duration-300 ${
+        isSidebarOpen ? 'w-[16rem]' : 'w-[4rem]'
+      }`}
+    >
+      {/* Sidebar content here */}
+      <div className={`flex flex-col flex-shrink-0 sticky top-3`}>
+        <Link
+          to="/home"
+          className="flex justify-center items-center my-1 text-[#8898AA] no-underline"
+        >
+          <i className="fa-solid fa-map-location-dot py-2"></i>
+          {isSidebarOpen && <span className="text-xl ml-2 ">Lingolandias</span>} {/* Added ml-2 */}
         </Link>
         <hr className="my-2" />
 
@@ -29,113 +39,89 @@ const Dashboard = () => {
             <Link
               to="/home"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/home" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
+                activeLink === "/home"
+                  ? "bg-[#273296] text-white"
+                  : "text-[#8898AA] hover:bg-slate-100"
+              } ${isSidebarOpen ? '' : 'justify-center'}`} // Center icons when sidebar is closed
               onClick={() => handleClick("/home")}
             >
-              <i className="fa-solid fa-gauge-high mr-2"></i>
-              Dashboard
+              <i className="fa-solid fa-gauge-high py-1"></i>
+              {isSidebarOpen && <span className="ml-2 ">Dashboard</span>} {/* Added ml-2 */}
             </Link>
           </li>
           <li>
             <Link
               to="/schedule"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/schedule" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
+                activeLink === "/schedule"
+                  ? "bg-[#273296] text-white"
+                  : "text-[#8898AA] hover:bg-slate-100"
+              } ${isSidebarOpen ? '' : 'justify-center'}`} // Center icons when sidebar is closed
               onClick={() => handleClick("/schedule")}
             >
-              <i className="fa-solid fa-calendar-days mr-2"></i>
-              My Schedule
+              <i className="fa-solid fa-calendar-days py-1"></i>
+              {isSidebarOpen && <span className="ml-2">My Schedule</span>} {/* Added ml-2 */}
             </Link>
           </li>
           <li>
             <Link
               to="/learning"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/learning" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
+                activeLink === "/learning"
+                  ? "bg-[#273296] text-white"
+                  : "text-[#8898AA] hover:bg-slate-100"
+              } ${isSidebarOpen ? '' : 'justify-center'}`} // Center icons when sidebar is closed
               onClick={() => handleClick("/learning")}
             >
-              <i className="fa-solid fa-graduation-cap mr-2"></i>
-              Learning
+              <i className="fa-solid fa-graduation-cap py-1"></i>
+              {isSidebarOpen && <span className="ml-2">Learning</span>} {/* Added ml-2 */}
             </Link>
           </li>
           <li>
             <Link
-              to="/teachers"
+              to="/messages"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/teachers" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
-              onClick={() => handleClick("/teachers")}
+                activeLink === "/messages"
+                  ? "bg-[#273296] text-white"
+                  : "text-[#8898AA] hover:bg-slate-100"
+              } ${isSidebarOpen ? '' : 'justify-center'}`} // Center icons when sidebar is closed
+              onClick={() => handleClick("/messages")}
             >
-              <i className="fa-solid fa-chalkboard-user mr-2"></i>
-              Teachers
+              <i className="fa-solid fa-comments py-1"></i>
+              {isSidebarOpen && <span className="ml-2">Messages</span>} {/* Added ml-2 */}
             </Link>
           </li>
-          {/* <li>
-            <Link
-              to="/progress"
-              className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/progress" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
-              onClick={() => handleClick("/progress")}
-            >
-              <i className="fa-solid fa-spinner mr-2"></i>
-              Progress
-            </Link>
-          </li> */}
         </ul>
         <hr className="my-2" />
 
         <ul className="flex flex-col mb-auto">
-          {/* <li>
-            <Link
-              to="#"
-              className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "#" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
-              onClick={() => handleClick("#")}
-            >
-              <i className="fa-solid fa-house-user mr-2"></i>
-              Home
-            </Link>
-          </li> */}
           <li>
             <Link
               to="/profile"
               className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/profile" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
+                activeLink === "/profile"
+                  ? "bg-[#273296] text-white"
+                  : "text-[#8898AA] hover:bg-slate-100"
+              } ${isSidebarOpen ? '' : 'justify-center'}`} // Center icons when sidebar is closed
               onClick={() => handleClick("/profile")}
             >
-              <i className="fa-solid fa-user mr-2"></i>
-              Profile
+              <i className="fa-solid fa-user py-1"></i>
+              {isSidebarOpen && <span className="ml-2">Profile</span>} {/* Added ml-2 */}
             </Link>
           </li>
-          {/* <li>
-            <Link
-              to="/option3"
-              className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                activeLink === "/option3" ? "bg-purple-500 text-white" : "text-[#8898AA] hover:bg-slate-100"
-              }`}
-              onClick={() => handleClick("/option3")}
-            >
-              <i className="fa-solid fa-spinner mr-2"></i>
-              Option 3
-            </Link>
-          </li> */}
           {user && user.role === 'admin' && (
             <li>
               <Link
                 to="/admin"
                 className={`flex items-center py-2 px-4 rounded-md transition-colors duration-200 ${
-                  activeLink === "/admin" ? "bg-[#273296] text-white" : "text-[#8898AA] hover:bg-slate-100"
-                }`}
+                  activeLink === "/admin"
+                    ? "bg-[#273296] text-white"
+                    : "text-[#8898AA] hover:bg-slate-100"
+                } ${isSidebarOpen ? '' : 'justify-center'}`} // Center icons when sidebar is closed
                 onClick={() => handleClick("/admin")}
               >
-                <i className="fa-solid fa-unlock mr-2"></i>
-                Admin
+                <i className="fa-solid fa-unlock py-1"></i>
+                {isSidebarOpen && <span className="ml-2">Admin</span>} {/* Added ml-2 */}
               </Link>
             </li>
           )}

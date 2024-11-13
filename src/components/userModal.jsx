@@ -5,7 +5,8 @@ const UserModal = ({ show, handleClose }) => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user"); 
+  const [role, setRole] = useState("user");
+  const [language, setLanguage] = useState("");  // New state for language
 
   const createUser = async (e) => {
     e.preventDefault();
@@ -19,7 +20,8 @@ const UserModal = ({ show, handleClose }) => {
         lastName,
         email,
         password,
-        role, 
+        role,
+        language,  // Include the language in the body
       }),
     });
     const data = await response.json();
@@ -34,12 +36,12 @@ const UserModal = ({ show, handleClose }) => {
       console.log(error);
     }
 
-    
     setName("");
     setLastName("");
     setEmail("");
     setPassword("");
     setRole("user");
+    setLanguage("");  
     handleClose();
   };
 
@@ -94,6 +96,20 @@ const UserModal = ({ show, handleClose }) => {
             <option value="teacher">Teacher</option>
             <option value="admin">Admin</option>
           </select>
+
+          {/* New Language Select */}
+          <select
+            id="language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full mb-2 p-2 border rounded"
+          >
+            <option value="">Select Language</option>
+            <option value="english">English</option>
+            <option value="spanish">Spanish</option>
+            <option value="polish">Polish</option>
+          </select>
+
           <div className="flex justify-end">
             <button
               type="button"

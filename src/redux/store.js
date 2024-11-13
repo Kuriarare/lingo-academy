@@ -1,5 +1,7 @@
+// store.js
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from '../redux/userSlice';
+import sidebarReducer from '../redux/sidebarSlice'; // Import sidebarReducer
 
 // Utility functions to save and load state from localStorage
 const saveState = (state) => {
@@ -27,9 +29,11 @@ const loadState = () => {
 // Load the state from localStorage
 const persistedState = loadState();
 
+// Configure the store
 const store = configureStore({
   reducer: {
     user: userReducer,
+    sidebar: sidebarReducer, // Add sidebarReducer to the store
   },
   preloadedState: persistedState, 
 });
@@ -37,7 +41,8 @@ const store = configureStore({
 // Subscribe to store changes and save to localStorage
 store.subscribe(() => {
   saveState({
-    user: store.getState().user, // Save only the user slice
+    user: store.getState().user,      // Save only the user slice
+    sidebar: store.getState().sidebar, // Save the sidebar state as well
   });
 });
 

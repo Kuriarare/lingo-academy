@@ -1,13 +1,12 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import avatar from '../../assets/logos/avatar.jpg';
 import ChatWindow from '../chatWindow';
 import back from '../../assets/logos/back.png';
 
-
 const ChatList = ({ chats, onChatSelect }) => {
-
   return (
-    <div className="h-[600px]  flex flex-col border p-3 bg-white">
+    <div className="h-[600px] flex flex-col border p-3 bg-white">
       <h2 className="text-center mb-4">Messages</h2>
       <ul>
         {chats.map((chat) => (
@@ -33,7 +32,20 @@ const ChatList = ({ chats, onChatSelect }) => {
   );
 };
 
-const MainChat = ({ username, teacherChat }) => {
+ChatList.propTypes = {
+  chats: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      avatarUrl: PropTypes.string,
+      name: PropTypes.string.isRequired,
+      lastName: PropTypes.string.isRequired,
+      online: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  onChatSelect: PropTypes.func.isRequired,
+};
+
+const MainChat = ({ username, teacherChat, email }) => {
   const [selectedChat, setSelectedChat] = useState(null);
 
   const handleChatSelect = (chat) => {
@@ -52,12 +64,13 @@ const MainChat = ({ username, teacherChat }) => {
         <div className="relative h-full">
           <button
             onClick={handleBackToChats}
-            className="absolute top-[4.7px] left-2 p-2  rounded-full"
+            className="absolute top-[4.7px] left-2 p-2 rounded-full"
           >
             <img src={back} alt="" className="w-6 h-6" />
           </button>
           <ChatWindow
             username={username}
+            email={email}
             room={selectedChat.id}
             studentName={selectedChat.name}
           />
@@ -65,6 +78,20 @@ const MainChat = ({ username, teacherChat }) => {
       )}
     </div>
   );
+};
+
+MainChat.propTypes = {
+  username: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  teacherChat: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      avatarUrl: PropTypes.string,
+      name: PropTypes.string.isRequired,
+      lastName: PropTypes.string.isRequired,
+      online: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };
 
 export default MainChat;

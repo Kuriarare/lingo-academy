@@ -5,6 +5,7 @@ import Modal from "../components/modal";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser, uploadAvatar } from "../redux/userSlice";
 import avatar from "../assets/logos/avatar.jpg";
+import { v4 as uuidv4 } from "uuid";
 
 const Profile = () => {
   const user = useSelector((state) => state.user.userInfo.user);
@@ -61,6 +62,7 @@ const Profile = () => {
   }
 }, [user]);
 
+const dispatch = useDispatch();
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -71,9 +73,12 @@ const Profile = () => {
   };
 
   const handleSaveAvatar = (file) => {
+    const uniqueFileName = `${uuidv4()}-${file.name}`; 
     const formData = new FormData();
-    formData.append("file", file);
-
+    formData.append("file", file, uniqueFileName);
+  
+    formData.append("userId", user.id);
+  
     dispatch(uploadAvatar(formData))
       .then((response) => {
         if (response.meta.requestStatus === "fulfilled") {
@@ -87,7 +92,6 @@ const Profile = () => {
     setIsEditMode(true);
   };
 
-  const dispatch = useDispatch();
 
   const handleSaveProfile = () => {
     const updatedUser = {
@@ -117,10 +121,10 @@ const Profile = () => {
   
   
   return (
-    <div className="flex w-full h-[135vh] ">
+    <div className="flex w-full h-[97vh] ">
       <Dashboard />
-      <div className="w-full">
-        <section className="w-full h-[36vh] custom-bg-profile overflow-hidden relative">
+      <div className="w-full h-[100vh] overflow-y-auto ">
+        <section className="w-full h-[36vh] custom-bg-profile  relative">
           <div className="container w-full">
             <Navbar header={header} />
             <div className="flex flex-col justify-center text-white w-full mt-2">
@@ -142,7 +146,7 @@ const Profile = () => {
           </div>
         </section>
 
-        <section className="flex h-screen">
+        <section className="flex ">
           <div className="container w-full ">
             <div className="flex">
               <div className="2xl:w-[58.2rem] max-w-[58.2rem] bg-[#F7FAFC] rounded-lg box-shadow-form overflow-hidden">

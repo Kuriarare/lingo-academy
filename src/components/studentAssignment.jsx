@@ -29,7 +29,7 @@ const StudentAssignment = ({ teachers, students }) => {
 
   const handleCalendarOpen = () => {
     if (selectedTeacher.teacherSchedules) {
-      const endDate = dayjs().add(3, "year"); // Define the end date as 3 years from now
+      const endDate = dayjs().add(1, "month");
 
       const formattedEvents = selectedTeacher.teacherSchedules.flatMap(
         (event) => {
@@ -42,13 +42,9 @@ const StudentAssignment = ({ teachers, students }) => {
             "YYYY-MM-DD HH:mm"
           );
 
-          // Generate events for the next 3 years
-          return Array.from({ length: 3 * 52 }, (_, i) => {
-            // 3 years * 52 weeks
+          return Array.from({ length: 4 }, (_, i) => {
             const start = startTime.add(i * 7, "day");
             const end = endTime.add(i * 7, "day");
-
-            // Check if the event is within the 3-year range
             if (start.isBefore(endDate)) {
               return {
                 title:
@@ -61,7 +57,7 @@ const StudentAssignment = ({ teachers, students }) => {
               };
             }
             return null;
-          }).filter(Boolean); // Filter out null values
+          }).filter(Boolean);
         }
       );
       setTeachersEvents(formattedEvents);
@@ -71,7 +67,7 @@ const StudentAssignment = ({ teachers, students }) => {
 
   const handleSelectSlot = ({ start }) => {
     setSelectedDate(start);
-    setEventModalOpen(true); // Open the event modal
+    setEventModalOpen(true);
   };
 
   const handleEventModalClose = () => {
