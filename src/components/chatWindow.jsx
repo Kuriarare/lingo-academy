@@ -8,7 +8,8 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
 
-const LOCAL_HOST = "http://localhost:8000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+
 
 const ChatWindow = ({ username, email, room, studentName, height }) => {
   const user = useSelector((state) => state.user.userInfo.user);
@@ -19,8 +20,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [fileUrl, setFileUrl] = useState("");  // Estado para almacenar la URL del archivo
-
+  const [fileUrl, setFileUrl] = useState(""); // Estado para almacenar la URL del archivo
 
   const scrollContainerRef = useRef(null);
 
@@ -64,8 +64,8 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get(`${LOCAL_HOST}/chat/messages/${room}`, {
-        params: { email }  
+      const response = await axios.get(`${BACKEND_URL}/chat/messages/${room}`, {
+        params: { email },
       });
       setChatMessages(response.data.reverse());
     } catch (error) {
@@ -75,7 +75,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
 
   useEffect(() => {
     if (username && room) {
-      const socketInstance = io(`${LOCAL_HOST}`);
+      const socketInstance = io(`${BACKEND_URL}`);
       setSocket(socketInstance);
 
       fetchMessages();
@@ -107,56 +107,69 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
     } else {
       // Si no hay mensaje de texto, ejecutar la función para cargar el archivo
       await handleFileChange(); // Esperamos a que se cargue el archivo
-  
+
       // Después de la carga, obtener la URL y enviarla como mensaje
       if (fileUrl) {
         const timestamp = new Date();
-        socket.emit("chat", { username, email, room, message: fileUrl, timestamp });
+        socket.emit("chat", {
+          username,
+          email,
+          room,
+          message: fileUrl,
+          timestamp,
+        });
       }
     }
   };
-  
+
   const sendFileMessage = (fileUrl) => {
     if (fileUrl && room && socket) {
       const timestamp = new Date();
-      socket.emit("chat", { username, email, room, message: fileUrl, timestamp });
+      socket.emit("chat", {
+        username,
+        email,
+        room,
+        message: fileUrl,
+        timestamp,
+      });
       setFileUrl(null); // Limpiar la URL del archivo
     }
   };
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     setUploading(true);
-    
+
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('userId', 'user-id');  // Pasa el ID del usuario, si es necesario
-  
+    formData.append("file", file);
+    formData.append("userId", "user-id"); // Pasa el ID del usuario, si es necesario
+
     try {
       // Enviar el archivo al backend (localhost:8000/upload/chat-upload)
-      const response = await fetch('http://localhost:8000/upload/chat-upload', {
-        method: 'POST',
-        body: formData,
-      });
-  
+      const response = await fetch(
+        `${BACKEND_URL}/upload/chat-upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Error uploading file');
+        throw new Error("Error uploading file");
       }
-  
+
       // Obtener la URL del archivo cargado
       const data = await response.json();
       const fileUrl = data.fileUrl; // La URL que el backend devuelve
-      console.log('File uploaded:', fileUrl);
+      console.log("File uploaded:", fileUrl);
       sendFileMessage(fileUrl);
-
     } catch (error) {
       console.error("Error uploading file:", error);
     } finally {
       setUploading(false);
     }
   };
-  
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -171,7 +184,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
   };
 
   const renderFileMessage = (fileUrl, isSender) => {
-    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    const fileExtension = fileUrl.split(".").pop().toLowerCase();
 
     if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
       // Renderiza una imagen
@@ -221,7 +234,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
 
   return (
     <div
-      className="2xl:w-[340px] xl:w-[330px] md:w-[300px] w-full flex flex-col border ml-1 bg-white"
+      className="chat-pattern 2xl:w-[340px] xl:w-[330px]  w-full flex flex-col border ml-1 bg-white"
       style={{ height: height || "600px" }}
     >
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
@@ -249,48 +262,52 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 relative"
       >
- <ul>
-  {chatMessages.map((msg, index) => {
-    const showTimestamp =
-      index === 0 ||
-      new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) >
-        3 * 60 * 1000;
-    const isSender = msg.email === email;  // Identifying the sender using the email
-    const isFileMessage = msg.message.startsWith("http");
+        <ul>
+          {chatMessages.map((msg, index) => {
+            const showTimestamp =
+              index === 0 ||
+              new Date(msg.timestamp) -
+                new Date(chatMessages[index - 1].timestamp) >
+                3 * 60 * 1000;
+            const isSender = msg.email === email; // Identifying the sender using the email
+            const isFileMessage = msg.message.startsWith("http");
 
-    return (
-      <div key={index} className="mb-2">
-        {showTimestamp && (
-          <div className="text-center text-gray-500 text-[12px] my-2">
-            {formatTimestamp(msg.timestamp)}
-          </div>
-        )}
-        <li
-          className={`flex ${isSender ? "justify-end" : "justify-start"} mb-2 text-[15px]`}
-        >
-          <div
-            className={`flex flex-col ${isSender ? "items-end" : "items-start"}`}
-          >
-            <div
-              className={`p-2 rounded-xl max-w-xs ${
-                isSender
-                  ? "bg-[#273296] text-white text-right"
-                  : "bg-[#E8EBEE] text-blue-950 text-left"
-              }`}
-            >
-              <span>
-                {isFileMessage
-                  ? renderFileMessage(msg.message, isSender)
-                  : formatMessageWithLinks(msg.message, isSender)}
-              </span>
-            </div>
-          </div>
-        </li>
-      </div>
-    );
-  })}
-</ul>
-
+            return (
+              <div key={index} className="mb-2">
+                {showTimestamp && (
+                  <div className="text-center text-gray-500 text-[12px] my-2">
+                    {formatTimestamp(msg.timestamp)}
+                  </div>
+                )}
+                <li
+                  className={`flex ${
+                    isSender ? "justify-end" : "justify-start"
+                  } mb-2 text-[15px]`}
+                >
+                  <div
+                    className={`flex flex-col ${
+                      isSender ? "items-end" : "items-start"
+                    }`}
+                  >
+                    <div
+                      className={`p-2 rounded-xl max-w-xs ${
+                        isSender
+                          ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
+                          : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
+                      }`}
+                    >
+                      <span>
+                        {isFileMessage
+                          ? renderFileMessage(msg.message, isSender)
+                          : formatMessageWithLinks(msg.message, isSender)}
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              </div>
+            );
+          })}
+        </ul>
       </PerfectScrollbar>
 
       <div className="flex-shrink-0 flex items-center ml-1">
@@ -331,7 +348,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
           <img
             src={send}
             alt="send"
-            className="2xl:w-[24px] xl:w-[23px] md:w-[22px]"
+            className="2xl:w-[24px] xl:w-[23px] w-[22px]"
           />
         </button>
 

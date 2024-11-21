@@ -5,11 +5,11 @@ import { DashboardCard } from "../components/home/DashboardCard";
 import { FiBook, FiClock, FiAward, FiCalendar } from "react-icons/fi";
 import { InfoCard } from "../components/home/InfoCard";
 import { UpcomingClass } from "../components/home/UpcomingClass";
-import useFormattedEvents from "../hooks/useFormattedEvents";
 
 const Home = () => {
   const user = useSelector((state) => state.user.userInfo.user);
-  useFormattedEvents(user);
+
+  console.log("User:", user);
   const home = "HOME PAGE";
 
   return (
@@ -27,7 +27,7 @@ const Home = () => {
 
         {/* Content of the Home component */}
         <div className="min-h-[92vh] ">
-          <div className="px-8 pt-8 pb-4">
+          <div className="lg:px-8 md:px-5 md:pt-8 px-3 pt-4 pb-4">
             {/* Welcome Section */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-600 mb-2">

@@ -11,7 +11,7 @@ import avatar from "../../assets/logos/avatar.jpg";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 
-const ChatWindowComponent = ({
+const CallChatWindow = ({
   username,
   room,
   studentName,
@@ -116,11 +116,11 @@ const ChatWindowComponent = ({
   };
 
   return (
-    <div className=" chat-pattern w-[100%] h-[92vh] flex flex-col border bg-white relative">
+    <div className=" chat-pattern 2xl:w-[340px] xl:w-[330px] md:w-[300px] h-[100vh] flex flex-col border bg-white relative">
       {" "}
       {/* Set height to 92vh */}
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
-        {studentName}
+        {studentName ? `Chat with ${studentName}` : "Teachers Chat - English"}
       </h2>
       <PerfectScrollbar
         containerRef={(ref) => (scrollContainerRef.current = ref)}
@@ -233,7 +233,7 @@ const ChatWindowComponent = ({
           <img
             src={send}
             alt="send"
-            className="2xl:w-[24px] xl:w-[23px] w-[22px]"
+            className="2xl:w-[24px] xl:w-[23px] md:w-[22px]"
           />
         </button>
 
@@ -247,4 +247,4 @@ const ChatWindowComponent = ({
   );
 };
 
-export default ChatWindowComponent;
+export default CallChatWindow;

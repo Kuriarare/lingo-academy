@@ -3,10 +3,11 @@ import { JitsiMeeting } from "@jitsi/react-sdk";
 import { useLocation, useNavigate } from "react-router-dom";
 import ChatWindow from "./chatWindow";
 import { FiMessageSquare } from "react-icons/fi";
+import CallChatWindow from "./messages/CallChatWindow";
 
 const JitsiClassRoom = () => {
   const location = useLocation();
-  const { userName, roomId, email } = location.state || {};
+  const { userName, roomId, email, fromMeeting } = location.state || {};
   const domain = "jitsi.srv570363.hstgr.cloud";
   const apiRef = useRef(null);
   const navigate = useNavigate();
@@ -15,8 +16,6 @@ const JitsiClassRoom = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
-
     if (apiRef.current) {
       apiRef.current.executeCommand("displayName", userName);
     }
@@ -24,18 +23,16 @@ const JitsiClassRoom = () => {
 
   const options = {
     configOverwrite: {
-      startWithAudioMuted: true,
+      startWithAudioMuted: false,
       disableModeratorIndicator: true,
-      apiLogLevels: ['error'], // Only log errors globally
-        logging: {
-          defaultLogLevel: 'error', // Default log level is 'error'
-          loggers: {
-            'modules/RTC/TraceablePeerConnection.js': 'error',  
-            'modules/statistics/CallStats.js': 'error',        
-            'modules/xmpp/strophe.util.js': 'error',          
-            'modules/statistics/LocalStatsCollector.js': 'error' 
-          }
-        }
+      apiLogLevels: ["error"], // Log only errors
+      logging: {
+        defaultLogLevel: "error",
+        loggers: {
+          "modules/RTC/TraceablePeerConnection.js": "error",
+          "modules/statistics/CallStats.js": "error",
+        },
+      },
     },
     interfaceConfigOverwrite: {
       DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
@@ -82,7 +79,10 @@ const JitsiClassRoom = () => {
           <div className="dot"></div>
         </section>
       )}
-      <div className="relative" style={{ flex: 1, display: loading ? "none" : "block" }}>
+      <div
+        className="relative"
+        style={{ flex: 1, display: loading ? "none" : "block" }}
+      >
         <JitsiMeeting
           domain={domain}
           roomName={roomId}
@@ -105,26 +105,42 @@ const JitsiClassRoom = () => {
         />
         <button
           onClick={toggleChat}
-          className="absolute bottom-[17px] py-[17px] right-[30%] bg-[#191318] text-white rounded-lg p-2 cursor-pointer"
+          className="absolute lg:bottom-[17px] bottom-[8rem] py-[17px] left-[5%] bg-[#191318] text-white rounded-lg p-2 cursor-pointer"
         >
           <FiMessageSquare size={24} />
         </button>
       </div>
+      {/* Chat Window for small devices with transition */}
       <div
+        className={`lg:block fixed top-0 right-0 w-[350px] h-full bg-white z-50 transition-transform transform ${
+          showChat ? "lg:block translate-x-0" : "lg:block translate-x-full"
+        }`}
         style={{
-          width: "full",
-          height: "100%",
-          display: showChat ? "block" : "none",
+          transition: "transform 0.3s ease-in-out", // Smooth transition for sliding in and out
         }}
       >
-        <ChatWindow
-          username={userName}
-          email = {email}
-          room={roomId}
-          height="100vh"
-          externalMessages={chatMessages}
-          onSendMessage={sendMessageToJitsi}
-        />
+        {/* Chat content stays static, unaffected by the translate effect */}
+        <div className="w-full h-full">
+          {fromMeeting ? (
+            <CallChatWindow
+              username={userName}
+              email={email}
+              room={roomId}
+              height="100vh"
+              externalMessages={chatMessages}
+              onSendMessage={sendMessageToJitsi}
+            />
+          ) : (
+            <ChatWindow
+              username={userName}
+              email={email}
+              room={roomId}
+              height="100vh"
+              externalMessages={chatMessages}
+              onSendMessage={sendMessageToJitsi}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

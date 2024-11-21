@@ -23,6 +23,7 @@ const Login = () => {
     dispatch(loginUser(data)).then((action) => {
       if (action.payload.token) {
         navigate('/home');
+        window.location.reload();
       } else {
         alert('Wrong credentials');
       }
@@ -104,7 +105,7 @@ const Login = () => {
         </form>
         {userStatus === 'loading' && <p>Loading...</p>}
         {userStatus === 'failed' && <p>Error: {userError}</p>}
-        <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
+        {/* <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
           Don&apos;t have an account?{' '}
           <a
             className="text-red-600 hover:underline hover:underline-offset-4"
@@ -112,7 +113,7 @@ const Login = () => {
           >
             Register
           </a>
-        </div>
+        </div> */}
       </div>
     </section>
   );

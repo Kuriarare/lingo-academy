@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // Get the environment variable
-const LOCAL_HOST = "http://localhost:8000";
+// const LOCAL_HOST = "https://www.testing.srv570363.hstgr.cloud";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 // Async action to log in a user
 export const loginUser = createAsyncThunk("user/loginUser", async (data) => {
-  const response = await fetch(`${LOCAL_HOST}/auth/login`, {
+  const response = await fetch(`${BACKEND_URL}/auth/login`, {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
@@ -26,7 +27,7 @@ export const updateUser = createAsyncThunk(
   "user/updateUser",
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${LOCAL_HOST}/users/updateuser`, {
+      const response = await fetch(`${BACKEND_URL}/users/updateuser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export const uploadAvatar = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
  
     try {
-      const response = await fetch(`${LOCAL_HOST}/upload/file`, {
+      const response = await fetch(`${BACKEND_URL}/upload/file`, {
         // Use template literal here as well
         method: "POST",
         headers: {

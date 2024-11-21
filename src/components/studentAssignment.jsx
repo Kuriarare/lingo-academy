@@ -3,7 +3,13 @@ import { Calendar, dayjsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
 import avatar from "../assets/logos/avatar.jpg";
-const LOCAL_HOST = "http://localhost:8000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // eslint-disable-next-line react/prop-types
 const StudentAssignment = ({ teachers, students }) => {
@@ -18,6 +24,7 @@ const StudentAssignment = ({ teachers, students }) => {
   const [teachersEvents, setTeachersEvents] = useState({});
 
   const localizer = dayjsLocalizer(dayjs);
+  const userTimeZone = dayjs.tz.guess();
 
   const handleTeacherSelect = (teacher) => {
     setSelectedTeacher(teacher);
@@ -27,8 +34,12 @@ const StudentAssignment = ({ teachers, students }) => {
     setSelectedStudent(student);
   };
 
+  const studentsWithoutTeacher = students.filter(
+    (student) => student.teacher === null
+  );
+
   const handleCalendarOpen = () => {
-    if (selectedTeacher.teacherSchedules) {
+    if (selectedTeacher?.teacherSchedules) {
       const endDate = dayjs().add(1, "month");
 
       const formattedEvents = selectedTeacher.teacherSchedules.flatMap(
@@ -66,7 +77,9 @@ const StudentAssignment = ({ teachers, students }) => {
   };
 
   const handleSelectSlot = ({ start }) => {
-    setSelectedDate(start);
+    // Convert the selected date to UTC before setting it
+    // const utcSelectedDate = dayjs(start).utc().toDate();
+    setSelectedDate(start); // Store in UTC
     setEventModalOpen(true);
   };
 
@@ -81,24 +94,41 @@ const StudentAssignment = ({ teachers, students }) => {
 
   const handleAddEvent = () => {
     if (selectedDate && eventDetails.start && eventDetails.end) {
+      const timePattern = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/; // HH:MM format, 24-hour validation
+
+      if (
+        !timePattern.test(eventDetails.start) ||
+        !timePattern.test(eventDetails.end)
+      ) {
+        alert("Please enter time in HH:MM format (24-hour)");
+        return;
+      }
+
+      const [startHours, startMinutes] = eventDetails.start
+        .split(":")
+        .map(Number);
+      const [endHours, endMinutes] = eventDetails.end.split(":").map(Number);
+
       const startDateTime = dayjs(selectedDate)
-        .hour(parseInt(eventDetails.start.split(":")[0], 10))
-        .minute(parseInt(eventDetails.start.split(":")[1], 10))
+        .hour(startHours)
+        .minute(startMinutes)
         .second(0)
         .millisecond(0)
+        .utc() // Then convert to UTC
         .toDate();
 
       const endDateTime = dayjs(selectedDate)
-        .hour(parseInt(eventDetails.end.split(":")[0], 10))
-        .minute(parseInt(eventDetails.end.split(":")[1], 10))
+        .hour(endHours)
+        .minute(endMinutes)
         .second(0)
         .millisecond(0)
+        .utc() // Then convert to UTC
         .toDate();
 
       const dayOfWeek = dayjs(selectedDate).format("dddd");
-      const date = dayjs(selectedDate).format("YYYY-MM-DD"); // Format the date for sending
+      const date = dayjs(selectedDate).format("YYYY-MM-DD");
 
-      // Add the new event to the events array, with both teacher and student names
+      // Add the new event to the events array
       setEvents((prev) => [
         ...prev,
         {
@@ -113,15 +143,14 @@ const StudentAssignment = ({ teachers, students }) => {
         },
       ]);
 
+      // Clear input fields
       setEventDetails({ start: "", end: "" });
       setEventModalOpen(false);
     }
   };
 
-  // https://srv570363.hstgr.cloud:8000
-
   const assignTeacherToStudent = (data) => {
-    fetch(`${LOCAL_HOST}/users/assignstudent`, {
+    fetch(`${BACKEND_URL}/users/assignstudent`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,10 +175,17 @@ const StudentAssignment = ({ teachers, students }) => {
 
   const handleAssignClick = () => {
     if (selectedTeacher && selectedStudent && events.length > 0) {
+      // Prepare data to be sent to the backend
+      const eventsWithTeacherAndStudent = events.map((event) => ({
+        ...event,
+        teacherId: selectedTeacher.id,
+        studentId: selectedStudent.id,
+      }));
+
       assignTeacherToStudent({
         teacherId: selectedTeacher.id,
         studentId: selectedStudent.id,
-        events,
+        events: eventsWithTeacherAndStudent,
       });
       setEvents([]); // Clear events after assignment
     }
@@ -164,30 +200,36 @@ const StudentAssignment = ({ teachers, students }) => {
   return (
     <section className="flex flex-col md:flex-row gap-4 m-6 p-4 box-shadow-form">
       {/* Students List */}
+      {/* Students List */}
       <div className="w-1/4 max-h-[12rem] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Students</h2>
-        {students.map((student) => (
-          <div
-            key={student.id}
-            className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-              selectedStudent?.id === student.id ? "bg-blue-100" : ""
-            }`}
-            onClick={() => handleStudentSelect(student)}
-          >
-            <img
-              src={!student.avatarUrl ? avatar : student.avatarUrl}
-              alt={`${student.name} ${student.lastName}`}
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <span className="font-medium">{`${student.name} ${student.lastName}`}</span>
-              <span className="text-sm text-gray-500 block">
-                {student.email}
-              </span>
+        {studentsWithoutTeacher.length === 0 ? (
+          <p>No students available without a teacher.</p>
+        ) : (
+          studentsWithoutTeacher.map((student) => (
+            <div
+              key={student.id}
+              className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
+                selectedStudent?.id === student.id ? "bg-blue-100" : ""
+              }`}
+              onClick={() => handleStudentSelect(student)}
+            >
+              <img
+                src={!student.avatarUrl ? avatar : student.avatarUrl}
+                alt={`${student.name} ${student.lastName}`}
+                className="w-8 h-8 rounded-full"
+              />
+              <div>
+                <span className="font-medium">{`${student.name} ${student.lastName}`}</span>
+                <span className="text-sm text-gray-500 block">
+                  {student.email}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
+
       {/* Teachers List */}
       <div className="w-1/4 max-h-[12rem] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Teachers</h2>
@@ -235,7 +277,7 @@ const StudentAssignment = ({ teachers, students }) => {
 
           {/* Modal Content */}
           <div className="fixed inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-6xl relative">
+            <div className="bg-white w-[700px] rounded-lg shadow-lg p-4 max-w-6xl relative">
               {/* Close Button */}
               <button
                 className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -245,13 +287,13 @@ const StudentAssignment = ({ teachers, students }) => {
               </button>
 
               {/* Calendar */}
-              <div className="w-full h-auto">
+              <div className="w-[] h-auto">
                 <Calendar
                   localizer={localizer}
                   events={teachersEvents}
                   startAccessor="start"
                   endAccessor="end"
-                  style={{ height: 750, width: "100%" }}
+                  style={{ height: 400, width: "100%" }}
                   views={["month", "week"]}
                   selectable
                   onSelectSlot={handleSelectSlot}
@@ -284,10 +326,11 @@ const StudentAssignment = ({ teachers, students }) => {
               <form>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Start Time
+                    Start Time (HH:MM format, 24-hour)
                   </label>
                   <input
-                    type="time"
+                    type="text"
+                    placeholder="HH:MM"
                     name="start"
                     value={eventDetails.start}
                     onChange={handleEventDetailsChange}
@@ -297,10 +340,11 @@ const StudentAssignment = ({ teachers, students }) => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    End Time
+                    End Time (HH:MM format, 24-hour)
                   </label>
                   <input
-                    type="time"
+                    type="text"
+                    placeholder="HH:MM"
                     name="end"
                     value={eventDetails.end}
                     onChange={handleEventDetailsChange}

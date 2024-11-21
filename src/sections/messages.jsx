@@ -4,12 +4,14 @@ import ChatListComponent from "../components/messages/ChatListComponent";
 import ChatWindowComponent from "../components/messages/ChatWindowComponent";
 import Dashboard from "./dashboard";
 import Navbar from "../components/navbar";
+import back from '../assets/logos/back.png'; // Back arrow image
 
 const Messages = () => {
   const user = useSelector((state) => state.user.userInfo.user); // Get the user info
   console.log('Full info:', user);  // Debugging
 
   const [selectedChat, setSelectedChat] = useState(null);
+  const [showChatList, setShowChatList] = useState(true); // State to control chat list visibility on smaller devices
 
   // Define the general chat rooms (these are always available)
   const generalChats = {
@@ -30,51 +32,39 @@ const Messages = () => {
 
   // Handle case for admin
   if (user.role === "admin") {
-    // If user is admin, show all general chats
     chats.push(generalChats.english, generalChats.spanish, generalChats.polish);
-    // Show all teacher chats for admin
     chats.push(teacherChats.english, teacherChats.spanish, teacherChats.polish);
   }
 
   // If the user is a teacher
   if (user.role === "teacher") {
-    // Show teacher's own general chat (based on language)
     const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
     if (generalChats[normalizedLanguage]) {
       chats.push(generalChats[normalizedLanguage]);
     }
-
-    // Add teacher's specific chat (Teacher Chat based on language)
     if (teacherChats[normalizedLanguage]) {
-      chats.push(teacherChats[normalizedLanguage]); // Adding the teacher's chat
+      chats.push(teacherChats[normalizedLanguage]);
     }
-
-    // Now, add group chats with each of their students
     if (user.students && user.students.length > 0) {
-      
-        chats.push({
-          id: user.id,
-          name: `Group Chat - ${user.name}`, 
-          online: "online", 
-          type: "group"
-        });
-
+      chats.push({
+        id: user.id,
+        name: `Group Chat - ${user.name}`, 
+        online: "online", 
+        type: "group"
+      });
     }
   }
 
   // If the user is a student
   if (user.role === "user") {
-    // Show the student a group chat based on their teacher's ID
     if (user.teacher) {
       chats.push({
-        id: user.teacher.id, // The teacher's ID is the chat room ID
+        id: user.teacher.id,
         name: `Group Chat - ${user.teacher.name}`,
         online: "online",
         type: "group",
       });
     }
-
-    // Optionally: Show the student a general chat based on their language
     const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
     if (generalChats[normalizedLanguage]) {
       chats.push(generalChats[normalizedLanguage]);
@@ -85,6 +75,12 @@ const Messages = () => {
 
   const handleChatSelect = (chat) => {
     setSelectedChat(chat); // Update the selected chat when the user clicks a chat
+    setShowChatList(false); // Hide the chat list when a chat is selected on smaller screens
+  };
+
+  const handleBackClick = () => {
+    setSelectedChat(null); // Reset the selected chat to null (go back to the chat list)
+    setShowChatList(true); // Show the chat list again on smaller screens
   };
 
   return (
@@ -99,25 +95,43 @@ const Messages = () => {
 
         <section>
           <div className="flex w-full">
-            <section className="w-[300px] bg-gray-100">
+            {/* Chat List for larger devices */}
+            <section className="w-[300px] bg-gray-100 hidden lg:block">
               <ChatListComponent chats={chats} onChatSelect={handleChatSelect} />
             </section>
+
+            {/* Chat window */}
             <section className="flex-1">
               {selectedChat ? (
-                <ChatWindowComponent
-                  username={user.name}
-                  email={user.email}
-                  userUrl={user.avatarUrl}
-                  room={selectedChat.id}
-                  studentName={selectedChat.name}
-                />
+                <>
+                  {/* Back button for md and smaller screens */}
+                  <div className="lg:hidden absolute top-16 left-5 z-10">
+                    <button onClick={handleBackClick}>
+                      <img src={back} alt="Back" className="w-8 h-8" />
+                    </button>
+                  </div>
+                  <ChatWindowComponent
+                    username={user.name}
+                    email={user.email}
+                    userUrl={user.avatarUrl}
+                    room={selectedChat.id}
+                    studentName={selectedChat.name}
+                  />
+                </>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="lg:flex items-center justify-center h-full hidden">
                   <p>Select a chat to start chatting</p>
                 </div>
               )}
             </section>
           </div>
+
+          {/* Chat list for medium and small devices */}
+          {showChatList && (
+            <section className="lg:hidden">
+              <ChatListComponent chats={chats} onChatSelect={handleChatSelect} />
+            </section>
+          )}
         </section>
       </div>
     </div>

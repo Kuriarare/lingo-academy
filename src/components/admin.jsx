@@ -5,9 +5,10 @@ import UserModal from "./userModal";
 import DeleteUserModal from "./deleteUserModal";
 import { useSelector } from "react-redux";
 import StudentAssignment from "./studentAssignment"; // Import the new component
-const LOCAL_HOST = 'http://localhost:8000'
-// https://lingo.srv570363.hstgr.cloud/
-// http://localhost:8000
+import RemoveStudent from "./admin/RemoveStudent";
+import DisplayAllStudents from "./admin/DisplayAllStudents";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+
 const Admin = () => {
   const user = useSelector((state) => state.user.userInfo.user);
 
@@ -19,8 +20,8 @@ const Admin = () => {
   const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal);
 
   useEffect(() => {
-    // fetch(`${LOCAL_HOST}/allusers`)
-    fetch(`${LOCAL_HOST}/users`)
+    // fetch(`${BACKEND_URL}/allusers`)
+    fetch(`${BACKEND_URL}/users`)
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((error) => console.error("Error fetching users:", error));
@@ -28,9 +29,10 @@ const Admin = () => {
 
   const teachers = users.filter((user) => user.role === "teacher");
   const students = users.filter(
-    (user) => user.role === "user" && (user.studentSchedules.length === 0)
+    (user) => user.role === "user" && (user.teacher === null)
     // (user) => user.role === "user" && user.teacher === undefined
   );
+  const allStudents = users.filter((user) => user.role === "user");
 
   return (
     <div className="flex w-full relative h-screen">
@@ -64,6 +66,8 @@ const Admin = () => {
         </section>
 
         <StudentAssignment teachers={teachers} students={students} />
+        <RemoveStudent teachers={teachers} students={students} />
+        <DisplayAllStudents students={allStudents} />
 
       </div>
 

@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import avatar from '../../assets/logos/avatar.jpg';
 import ChatWindow from '../chatWindow';
 import back from '../../assets/logos/back.png';
+import 'react-perfect-scrollbar/dist/css/styles.css';
+
 
 const ChatList = ({ chats, onChatSelect }) => {
   return (
-    <div className="h-[600px] flex flex-col border p-3 bg-white">
+    <div className="h-[600px] flex flex-col border p-3 bg-white overflow-hidden">
       <h2 className="text-center mb-4">Messages</h2>
-      <ul>
+      <ul className="max-h-[540px] overflow-y-auto">
         {chats.map((chat) => (
           <li
             key={chat.id}
@@ -21,8 +23,7 @@ const ChatList = ({ chats, onChatSelect }) => {
               className="w-10 h-10 rounded-full mr-3"
             />
             <span>{chat.name} {chat.lastName}</span>
-
-            {chat.online === 'online' && ( // Check if this user is online
+            {chat.online === 'online' && (
               <span className="absolute right-2 w-[0.62rem] h-[0.62rem] bg-green-500 rounded-full"></span>
             )}
           </li>
@@ -31,6 +32,7 @@ const ChatList = ({ chats, onChatSelect }) => {
     </div>
   );
 };
+
 
 ChatList.propTypes = {
   chats: PropTypes.arrayOf(
@@ -57,7 +59,7 @@ const MainChat = ({ username, teacherChat, email }) => {
   };
 
   return (
-    <div className="h-[600px] xl:w-[340px] md:w-[300px] bg-gray-100">
+    <div className="h-[600px] xl:w-[340px] lg:w-[300px] bg-gray-100">
       {!selectedChat ? (
         <ChatList chats={teacherChat} onChatSelect={handleChatSelect} />
       ) : (

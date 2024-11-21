@@ -1,4 +1,5 @@
 import { useState } from "react";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 const DeleteUserModal = ({ show, handleClose }) => {
   const [email, setEmail] = useState('');
@@ -7,7 +8,7 @@ const DeleteUserModal = ({ show, handleClose }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/users", {
+      const response = await fetch(`${BACKEND_URL}/users`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

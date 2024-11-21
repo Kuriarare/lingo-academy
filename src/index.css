@@ -33,6 +33,11 @@ body {
   }
 }
 
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 0.6rem 1rem;
+  }
+}
 .custom-select {
   width: 100%;
   padding: 0.5rem;
@@ -98,7 +103,8 @@ body {
   -webkit-user-select: none;
   touch-action: manipulation;
   vertical-align: bottom;
-  width: 190px;
+  width: auto;
+  padding: 0px 8px;
 }
 
 .button-69:hover {

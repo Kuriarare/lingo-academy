@@ -3,44 +3,45 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
-dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const useFormattedEvents = (user) => {
-  const userTimeZone = dayjs.tz.guess();
-  const endDate = dayjs().add(2, "month");  // Only load events for two months
+  const userTimeZone = dayjs.tz.guess();  // Get user's local time zone
+  const endDate = dayjs().add(2, "month");  // Only load events for the next 2 months
 
-  // Memoize formatEvents to avoid unnecessary recalculations
+  // Format events based on schedules
   const formatEvents = useCallback((schedules, nameKey) => {
     return schedules.flatMap((event) => {
-      const startTime = dayjs.tz(
-        `${event.date} ${event.startTime}`,
-        "YYYY-MM-DD HH:mm",
-        "Europe/London"
-      ).tz(userTimeZone, true);
-
-      const endTime = dayjs.tz(
-        `${event.date} ${event.endTime}`,
-        "YYYY-MM-DD HH:mm",
-        "Europe/London"
-      ).tz(userTimeZone, true);
-
+  
+      // Log the event initialDateTime as it is (without UTC conversion)
+      console.log("Event Initial Date and Time (Raw):", event.initialDateTime);
+  
+      // Convert and log the event time in the local time zone (system's local timezone)
+      const eventLocalTime = dayjs(event.initialDateTime).local().format();  // .local() converts to local time zone
+      console.log("Event in Local Time Zone:", eventLocalTime);
+  
+      // Optionally, if you want to show the event in a specific format
+      const formattedEvent = dayjs(event.initialDateTime).local().format('YYYY-MM-DD HH:mm:ss');
+      console.log("Formatted Event in Local Time Zone:", formattedEvent);
+      
+      // Generate recurring events for up to two months
       return Array.from({ length: 8 }, (_, i) => {
-        const start = startTime.add(i * 7, "day");
-        const end = endTime.add(i * 7, "day");
-
+        const start = dayjs(event.initialDateTime).local().add(i * 7, "day");
+        const end = dayjs(event.endTime).local().add(i * 7, "day");
+  
         if (start.isBefore(endDate)) {
           return {
-            title: event[nameKey],
+            title: event[nameKey],   // Event title: studentName or teacherName based on role
             start: start.toDate(),
             end: end.toDate(),
-            studentId: event.studentId,
+            studentId: event.studentId,  // For teacher role
           };
         }
         return null;
-      }).filter(Boolean);
+      }).filter(Boolean);  // Remove any nulls (invalid events)
     });
-  }, [userTimeZone]);
+  }, [userTimeZone, endDate]);
+  
 
   // Memoize formatted events based on user role and schedule data
   const formattedEvents = useMemo(() => {
@@ -49,10 +50,10 @@ const useFormattedEvents = (user) => {
     } else if (user.role === "user" && user.studentSchedules) {
       return formatEvents(user.studentSchedules, "teacherName");
     }
-    return [];
+    return [];  // Return an empty array if no events
   }, [user.role, user.teacherSchedules, user.studentSchedules, formatEvents]);
 
-  return formattedEvents;  // Return directly as it's already memoized
+  return formattedEvents;
 };
 
 export default useFormattedEvents;

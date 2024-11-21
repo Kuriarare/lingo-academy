@@ -8,6 +8,7 @@ import { io } from "socket.io-client";
 import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 const Navbar = ({ header }) => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const Navbar = ({ header }) => {
   const logoutAndNavigate = useLogout();
 
   useEffect(() => {
-    const socket = io('http://localhost:8000');
+    const socket = io(`${BACKEND_URL}`);
     socket.on('userStatus', (data) => {
       const { id, online, name } = data;
       toast(
@@ -70,7 +71,7 @@ const Navbar = ({ header }) => {
     dispatch(logout());
     logoutAndNavigate();
     try {
-      await fetch("http://localhost:8000/auth/logout", {
+      await fetch(`${BACKEND_URL}/auth/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,7 +100,7 @@ const Navbar = ({ header }) => {
       </div>
 
       <nav className="flex gap-10">
-        <div className="relative">
+        <div className="relative lg:block hidden">
           <input
             type="search"
             className="border-2 border-[#FFFFFF99] text-white bg-transparent rounded-full h-11 w-[20rem] pl-10 pr-6 focus:outline-none"

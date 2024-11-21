@@ -148,7 +148,7 @@ const dispatch = useDispatch();
 
         <section className="flex ">
           <div className="container w-full ">
-            <div className="flex">
+            <div className="lg:flex">
               <div className="2xl:w-[58.2rem] max-w-[58.2rem] bg-[#F7FAFC] rounded-lg box-shadow-form overflow-hidden">
                 <div className="flex justify-between items-center bg-white py-[0.8rem] px-3 shadow-sm">
                   <h2 className="text-[1.0625rem] text-[#32325D]">
@@ -344,7 +344,7 @@ const dispatch = useDispatch();
                 </div>
               </div>
 
-              <div className="xl:ml-[1.5rem] ml-[0.8rem] bg-white w-[29.4rem] h-auto flex flex-col rounded-lg items-center ">
+              <div className="xl:ml-[1.5rem] lg:ml-[0.8rem] bg-white lg:w-[29.4rem] lg:mt-0 mt-4 h-auto flex flex-col rounded-lg items-center just ">
                 <div className="relative">
                   <img
                     src={!avatarUrl ? avatar : avatarUrl}
