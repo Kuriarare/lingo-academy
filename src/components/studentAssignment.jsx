@@ -114,7 +114,7 @@ const StudentAssignment = ({ teachers, students }) => {
         .minute(startMinutes)
         .second(0)
         .millisecond(0)
-        .utc() // Then convert to UTC
+        .utc() 
         .toDate();
 
       const endDateTime = dayjs(selectedDate)
@@ -122,7 +122,7 @@ const StudentAssignment = ({ teachers, students }) => {
         .minute(endMinutes)
         .second(0)
         .millisecond(0)
-        .utc() // Then convert to UTC
+        .utc() 
         .toDate();
 
       const dayOfWeek = dayjs(selectedDate).format("dddd");
