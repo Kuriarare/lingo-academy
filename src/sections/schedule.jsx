@@ -6,20 +6,32 @@ import Navbar from "../components/navbar";
 import ChatWindow from "../components/chatWindow";
 import MainChat from "../components/buttons/chatList";
 import useFormattedEvents from "../hooks/useFormattedEvents";
+import useEventEdit from "../hooks/useEventEdit";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
-const engRoom = 'English Teachers Meeting';
-const spaRoom = 'Spanish Teachers Meeting';
-const polRoom = 'Polish Teachers Meeting';
+const engRoom = "English Teachers Meeting";
+const spaRoom = "Spanish Teachers Meeting";
+const polRoom = "Polish Teachers Meeting";
 
 const teacherChats = {
-  english: { id: "uuid-teacher-english", name: "Teachers Chat - English", type: "teacher" },
-  spanish: { id: "uuid-teacher-spanish", name: "Teachers Chat - Spanish", type: "teacher" },
-  polish: { id: "uuid-teacher-polish", name: "Teachers Chat - Polish", type: "teacher" },
+  english: {
+    id: "uuid-teacher-english",
+    name: "Teachers Chat - English",
+    type: "teacher",
+  },
+  spanish: {
+    id: "uuid-teacher-spanish",
+    name: "Teachers Chat - Spanish",
+    type: "teacher",
+  },
+  polish: {
+    id: "uuid-teacher-polish",
+    name: "Teachers Chat - Polish",
+    type: "teacher",
+  },
 };
-
 
 const Schedule = () => {
   const user = useSelector((state) => state.user.userInfo.user);
@@ -29,12 +41,22 @@ const Schedule = () => {
   const [teacherInfo, setTeacherInfo] = useState({});
   const [chatRoom, setChatRoom] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(false);
+
   const navigate = useNavigate();
 
-
-
-
   const events = useFormattedEvents(user);
+
+  const {
+    eventDetails,
+    handleEventEdit,
+    handleEventDetailsChange,
+    handleSubmitEvent,
+    openModalFrom,
+    setOpenModalFrom,
+    handleSelectSlot, 
+  } = useEventEdit();
 
   useEffect(() => {
     if (user.role === "teacher") {
@@ -49,7 +71,6 @@ const Schedule = () => {
     if (events !== undefined) {
       setLoading(false); // Only set loading to false if events are fetched (whether empty or full)
     }
-
   }, [user, events]); // Dependencies for `user` and `events` updates
 
   const localizer = dayjsLocalizer(dayjs);
@@ -61,25 +82,35 @@ const Schedule = () => {
   );
 
   const handleEventClick = (event) => {
-    const roomId = event.studentId;
-    const userName = user.name;
-    const email = user.email;
-    navigate("/classroom", { state: { roomId, userName, email, fromMeeting: false } });
+    if (editingEvent) {
+      handleEventEdit(event); 
+      setIsModalOpen(true); 
+    } else {
+      // If not editing, navigate to the class
+      const roomId = event.studentId; // Assuming studentId is passed in the event
+      const userName = user.name;
+      const email = user.email;
+      navigate("/classroom", {
+        state: { roomId, userName, email, fromMeeting: false },
+      });
+    }
   };
+
 
   const handleJoinMeeting = (roomName) => {
     const userName = user.name;
     const email = user.email;
-    
+
     // Map the roomName to the teacherChats IDs
     let roomId = "";
     if (roomName === engRoom) roomId = teacherChats.english.id;
     if (roomName === spaRoom) roomId = teacherChats.spanish.id;
     if (roomName === polRoom) roomId = teacherChats.polish.id;
-  
-    navigate("/classroom", { state: { roomId, userName, email, fromMeeting: true } });
+
+    navigate("/classroom", {
+      state: { roomId, userName, email, fromMeeting: true },
+    });
   };
-  
 
   return (
     <div className="flex w-full relative h-[97vh]">
@@ -90,7 +121,7 @@ const Schedule = () => {
             <Navbar header={header} />
           </div>
         </section>
-  
+
         {/* Show loading if events are being fetched */}
         {loading && events === undefined ? (
           <section className="dots-container">
@@ -110,8 +141,8 @@ const Schedule = () => {
                   startAccessor="start"
                   endAccessor="end"
                   defaultView="week"
-                  step={60}  // Step size of 60 minutes
-                  timeslots={1}  // Show each minute slot
+                  step={60} // Step size of 60 minutes
+                  timeslots={1} // Show each minute slot
                   components={{
                     event: CustomEvent,
                   }}
@@ -124,7 +155,6 @@ const Schedule = () => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-               
                     },
                   })}
                   formats={{
@@ -135,10 +165,31 @@ const Schedule = () => {
               ) : (
                 <div>No events found.</div>
               )}
-              <h2>*Click on an event to join the class directly*</h2>
+              <div className="flex justify-between">
+                <h2>*Click on an event to join the class directly*</h2>
+                {/* Teachers Meeting button appears after loading */}
+                {!loading &&
+                  (user.role === "teacher" || user.role === "admin") && (
+                    <section className="flex justify-end m-3 gap-8">
+                      {user.role === "teacher" && (
+                        <button
+                          className="button-69 mt-2"
+                          onClick={() => {
+                            setEditingEvent((prev) => !prev)
+                            alert("Select the name/event you want to edit from your calendar and then select the date and time you want to edit it to.");
+                          }} 
+                        >
+                          {editingEvent
+                            ? "Select an event to edit"
+                            : "Edit Event"}
+                        </button>
+                      )}
+                    </section>
+                  )}
+              </div>
             </div>
-  
-            <div >
+
+            <div>
               {user.role === "teacher" ? (
                 <MainChat
                   username={user.name}
@@ -156,7 +207,7 @@ const Schedule = () => {
             </div>
           </section>
         )}
-  
+
         {/* Teachers Meeting button appears after loading */}
         {!loading && (user.role === "teacher" || user.role === "admin") && (
           <section className="flex justify-end m-3 gap-8">
@@ -186,7 +237,7 @@ const Schedule = () => {
                 </button>
               </>
             )}
-            
+
             {/* For teacher, show the appropriate button based on language */}
             {user.role === "teacher" && (
               <>
@@ -221,10 +272,115 @@ const Schedule = () => {
             )}
           </section>
         )}
+
+        {/* Modal - Form to edit the event */}
+        {isModalOpen && (
+          <div className="modal-overlay relative">
+            <div className="modal-content">
+              <h3>Edit Event</h3>
+              <div className="calendar-container">
+                {/* Mini Calendar for selecting a date */}
+                <Calendar
+                  localizer={localizer}
+                  startAccessor="start"
+                  endAccessor="end"
+                  defaultView="week"
+                  step={60} // Step size of 60 minutes
+                  timeslots={1} // Show each minute slot
+                  eventPropGetter={() => ({
+                    style: {
+                      backgroundColor: "#273296",
+                      color: "white",
+                      borderRadius: "5px",
+                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
+                  })}
+                  formats={{
+                    eventTimeRangeFormat: () => "",
+                  }}
+                  onSelectEvent={handleEventClick}
+                  selectable
+                  onSelectSlot={handleSelectSlot}
+                />
+                {/* <Calendar
+                  localizer={localizer}
+                  events={events}
+                  defaultView="month"
+                  views={["month"]}
+                  onSelectSlot={({ start }) => setSelectedDate(start)}
+                /> */}
+              </div>
+
+              {/* Form to edit the event */}
+              { openModalFrom && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                  <form onSubmit={handleSubmitEvent}>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Start Time (HH:MM format, 24-hour)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="HH:MM"
+                        name="start"
+                        value={eventDetails.start || ""}
+                        onChange={handleEventDetailsChange}
+                        className="border rounded w-full py-2 px-3 text-gray-700"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        End Time (HH:MM format, 24-hour)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="HH:MM"
+                        name="end"
+                        value={eventDetails.end || ""}
+                        onChange={handleEventDetailsChange}
+                        className="border rounded w-full py-2 px-3 text-gray-700"
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-blue-600 text-white py-2 px-4 rounded-md w-full"
+                    >
+                      Update Event
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-red-600 text-white mt-2 py-2 px-4 rounded-md w-full"
+                      onClick={() => setOpenModalFrom(false)}
+                    >
+                      Close
+                    </button>
+                  </form>
+                </div>
+              </div>
+              
+              )}
+
+              <button
+                className="button-69 mt-2"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingEvent(false);
+                }}
+              >
+                Close Modal
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-  
 };
 
 export default Schedule;

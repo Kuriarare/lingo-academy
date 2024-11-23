@@ -193,3 +193,33 @@ body {
   background-size: 40px 40px; /* Adjust as needed */
 
 }
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Modal content */
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 700px;
+  height: 610px;
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+}
+.calendar-container {
+  height: 500px; /* Set a fixed height for the calendar container */
+  overflow-y: auto; /* Enable vertical scrolling if the calendar exceeds the height */
+}
