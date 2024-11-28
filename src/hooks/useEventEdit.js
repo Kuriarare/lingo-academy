@@ -88,7 +88,7 @@ const useEventEdit = () => {
       });
   
       if (response.ok) {
-        alert("Event updated successfully");
+        alert("Event updated successfully. Please logout and login again to see changes");
         setIsEditing(false); 
         setEventDetails({ start: "", end: "", eventId: "" }); 
       } else {

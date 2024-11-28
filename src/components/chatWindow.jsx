@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import send from "../assets/logos/send.png";
-import { BsEmojiSmile, BsPaperclip } from "react-icons/bs";
+import { BsEmojiSmile, BsPaperclip, BsThreeDots } from "react-icons/bs";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
+import useDeleteMessage from "../hooks/useDeleteMessage";
+import MessageOptionsCard from "./messages/MessageOptionsCard";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
@@ -23,6 +25,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
   const [fileUrl, setFileUrl] = useState(""); // Estado para almacenar la URL del archivo
 
   const scrollContainerRef = useRef(null);
+  const { handleDeleteNormalMessage, handleEditMessage, toggleOptionsMenu, openMessageId } = useDeleteMessage(setChatMessages, socket, room);
 
   // Función para detectar links y envolverlos en etiquetas <a>
   const formatMessageWithLinks = (text, isSender) => {
@@ -72,6 +75,23 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
       console.error("Error fetching messages:", error);
     }
   };
+
+  useEffect(() => {
+    if (socket && room) {
+      socket.on('normalChatDeleted', (data) => {
+        console.log(`Message with ID ${data.messageId} was deleted`);
+  
+        // Remove the deleted message from the local state
+        setChatMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg.id !== data.messageId)
+        );
+      });
+  
+      return () => {
+        socket.off('normalChatDeleted');  // Clean up the event listener on component unmount
+      };
+    }
+  }, [socket, room]);  // Only re-run if 
 
   useEffect(() => {
     if (username && room) {
@@ -183,9 +203,30 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
     setShowEmojiPicker(false);
   };
 
+  const removeAccents = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+  
+  const cleanFileName = (fileUrl) => {
+    // Extract the file name (without extension)
+    let fileName = fileUrl.split("/").pop().split(".")[0];
+  
+    // Remove the numbers and dashes at the start of the filename
+    fileName = fileName.replace(/^\d+-|^\d+$/g, "");
+  
+    // Remove accents from the file name
+    fileName = removeAccents(fileName);
+  
+    // Remove extra spaces and dashes
+    fileName = fileName.replace(/[-\s]+/g, " ").trim();
+  
+    return fileName;
+  };
+  
   const renderFileMessage = (fileUrl, isSender) => {
     const fileExtension = fileUrl.split(".").pop().toLowerCase();
-
+    const fileName = cleanFileName(fileUrl);
+  
     if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
       // Renderiza una imagen
       return (
@@ -197,7 +238,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
         />
       );
     } else if (fileExtension === "pdf") {
-      // Renderiza un enlace para visualizar PDF
+      // Renderiza el nombre del archivo en lugar de "Download PDF"
       return (
         <a
           href={fileUrl}
@@ -205,7 +246,7 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
           rel="noopener noreferrer"
           className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
         >
-          Download PDF
+          {fileName}.pdf
         </a>
       );
     } else if (["mp3", "wav"].includes(fileExtension)) {
@@ -226,15 +267,16 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
           rel="noopener noreferrer"
           className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
         >
-          Descargar archivo
+          {fileUrl}
         </a>
       );
     }
   };
+  
 
   return (
     <div
-      className="chat-pattern 2xl:w-[340px] xl:w-[330px]  w-full flex flex-col border ml-1 bg-white"
+      className="chat-pattern 2xl:w-[340px] xl:w-[330px]  w-full flex flex-col border ml-1 "
       style={{ height: height || "600px" }}
     >
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
@@ -262,52 +304,82 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 relative"
       >
-        <ul>
-          {chatMessages.map((msg, index) => {
-            const showTimestamp =
-              index === 0 ||
-              new Date(msg.timestamp) -
-                new Date(chatMessages[index - 1].timestamp) >
-                3 * 60 * 1000;
-            const isSender = msg.email === email; // Identifying the sender using the email
-            const isFileMessage = msg.message.startsWith("http");
+<ul>
+  {chatMessages.map((msg, index) => {
+    const showTimestamp =
+      index === 0 ||
+      new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) >
+        3 * 60 * 1000;
+    const isSender = msg.email === email; // Identifying the sender using the email
+    const isFileMessage = msg.message.startsWith("http");
 
-            return (
-              <div key={index} className="mb-2">
-                {showTimestamp && (
-                  <div className="text-center text-gray-500 text-[12px] my-2">
-                    {formatTimestamp(msg.timestamp)}
-                  </div>
-                )}
-                <li
-                  className={`flex ${
-                    isSender ? "justify-end" : "justify-start"
-                  } mb-2 text-[15px]`}
-                >
-                  <div
-                    className={`flex flex-col ${
-                      isSender ? "items-end" : "items-start"
-                    }`}
-                  >
-                    <div
-                      className={`p-2 rounded-xl max-w-xs ${
-                        isSender
-                          ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
-                          : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-                      }`}
-                    >
-                      <span>
-                        {isFileMessage
-                          ? renderFileMessage(msg.message, isSender)
-                          : formatMessageWithLinks(msg.message, isSender)}
-                      </span>
-                    </div>
-                  </div>
-                </li>
+    return (
+      <div key={index} className="mb-2">
+        {showTimestamp && (
+          <div className="text-center text-gray-500 text-[12px] my-2">
+            {formatTimestamp(msg.timestamp)}
+          </div>
+        )}
+        <li
+          className={`flex ${
+            isSender ? "justify-end" : "justify-start"
+          } mb-2 text-[15px]`}
+        >
+          <div
+            className={`flex flex-col ${
+              isSender ? "items-end" : "items-start"
+            } relative`}
+          >
+            {/* Dots Menu (only for Sender) */}
+            {isSender && (
+              <div
+                className="absolute left-0 top-[-15px] flex items-center z-20"
+                onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
+              >
+                {/* Dots button */}
+                <button className="p-1 hover:bg-gray-200 rounded-full">
+                  <BsThreeDots className="text-gray-500" />
+                </button>
               </div>
-            );
-          })}
-        </ul>
+            )}
+
+            {/* Message content */}
+            <div
+              className={`p-2 rounded-xl max-w-xs ${
+                isSender
+                  ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
+                  : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
+              }`}
+            >
+              <span>
+                {isFileMessage ? (
+                  renderFileMessage(msg.message, isSender)
+                ) : (
+                  <>
+                    {/* Render links in messages */}
+                    {formatMessageWithLinks(msg.message, isSender)}
+                  </>
+                )}
+              </span>
+            </div>
+
+            {/* Options card that appears on click */}
+            {openMessageId === msg.id && (
+              <div className="absolute top-2 left-0 z-30">
+                <MessageOptionsCard
+                  onEdit={() => handleEditMessage(msg)}
+                  onDelete={() => handleDeleteNormalMessage(msg.id)}
+                />
+              </div>
+            )}
+          </div>
+        </li>
+      </div>
+    );
+  })}
+</ul>
+
+
       </PerfectScrollbar>
 
       <div className="flex-shrink-0 flex items-center ml-1">

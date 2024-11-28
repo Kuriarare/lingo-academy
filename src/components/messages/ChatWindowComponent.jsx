@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import send from "../../assets/logos/send.png";
-import { BsEmojiSmile } from "react-icons/bs";
+import { BsEmojiSmile, BsThreeDots } from "react-icons/bs";
 import axios from "axios";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
 import avatar from "../../assets/logos/avatar.jpg";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
-
+import MessageOptionsCard from "./MessageOptionsCard";
+import useDeleteMessage from "../../hooks/useDeleteMessage";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ChatWindowComponent = ({
   username,
@@ -24,13 +24,17 @@ const ChatWindowComponent = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const scrollContainerRef = useRef(null);
+  const { handleDeleteMessage, handleEditMessage, toggleOptionsMenu, openMessageId } = useDeleteMessage(setChatMessages, socket, room);
 
   const fetchMessages = async () => {
     try {
       // Fetch messages based on the room and email to ensure proper user identification
-      const response = await axios.get(`${BACKEND_URL}/chat/global-chats/${room}`, {
-        params: { email }, // Passing email to the backend to fetch the right data
-      });
+      const response = await axios.get(
+        `${BACKEND_URL}/chat/global-chats/${room}`,
+        {
+          params: { email }, // Passing email to the backend to fetch the right data
+        }
+      );
 
       // Reverse the messages to show the latest on top
       setChatMessages(response.data.reverse());
@@ -38,7 +42,23 @@ const ChatWindowComponent = ({
       console.error("Error fetching messages:", error);
     }
   };
-
+  useEffect(() => {
+    if (socket && room) {
+      socket.on('globalChatDeleted', (data) => {
+        console.log(`Message with ID ${data.messageId} was deleted`);
+  
+        // Remove the deleted message from the local state
+        setChatMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg.id !== data.messageId)
+        );
+      });
+  
+      return () => {
+        socket.off('globalChatDeleted');  // Clean up the event listener on component unmount
+      };
+    }
+  }, [socket, room]);  // Only re-run if socket or room changes
+  
   useEffect(() => {
     if (username && room) {
       const socketInstance = io(`${BACKEND_URL}`);
@@ -187,7 +207,7 @@ const ChatWindowComponent = ({
                           )}
                         </div>
                         <div
-                          className={`p-3 max-w-lg ${
+                          className={`relative p-3 max-w-lg ${
                             isSender
                               ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
                               : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
@@ -198,6 +218,30 @@ const ChatWindowComponent = ({
                               {msg.username}
                             </div>
                           )}
+
+                          {/* Dots Menu (only for Sender) */}
+                          {isSender && (
+                            <div className="absolute top-1/2 left-[-30px] transform -translate-y-1/2 z-20">
+                              <button
+                                onClick={() => toggleOptionsMenu(msg.id)}
+                                className="p-1 hover:bg-gray-200 rounded-full"
+                              >
+                                <BsThreeDots className="text-gray-500" />
+                              </button>
+
+                              {/* Render Options Card if visible */}
+                              {openMessageId === msg.id && (
+                                <div className="absolute top-0 left-8 z-10">
+                                  <MessageOptionsCard
+                                    onEdit={() => handleEditMessage(msg)}
+                                    onDelete={() => handleDeleteMessage(msg.id)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Message Content */}
                           <span>{msg.message}</span>
                         </div>
                       </div>

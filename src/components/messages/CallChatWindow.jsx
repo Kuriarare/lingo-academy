@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import send from "../../assets/logos/send.png";
-import { BsEmojiSmile } from "react-icons/bs";
+import { BsEmojiSmile, BsThreeDots } from "react-icons/bs";
 import axios from "axios";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
 import avatar from "../../assets/logos/avatar.jpg";
+import MessageOptionsCard from "./MessageOptionsCard";
+import useDeleteMessage from "../../hooks/useDeleteMessage";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
@@ -24,6 +26,8 @@ const CallChatWindow = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const scrollContainerRef = useRef(null);
+  const { handleDeleteMessage, handleEditMessage, toggleOptionsMenu, openMessageId } = useDeleteMessage(setChatMessages, socket, room);
+
 
   const fetchMessages = async () => {
     try {
@@ -38,6 +42,23 @@ const CallChatWindow = ({
       console.error("Error fetching messages:", error);
     }
   };
+
+  useEffect(() => {
+    if (socket && room) {
+      socket.on('globalChatDeleted', (data) => {
+        console.log(`Message with ID ${data.messageId} was deleted`);
+  
+        // Remove the deleted message from the local state
+        setChatMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg.id !== data.messageId)
+        );
+      });
+  
+      return () => {
+        socket.off('globalChatDeleted');  // Clean up the event listener on component unmount
+      };
+    }
+  }, [socket, room]);  // Only re-run if 
 
   useEffect(() => {
     if (username && room) {
@@ -198,6 +219,28 @@ const CallChatWindow = ({
                               {msg.username}
                             </div>
                           )}
+                          {/* Dots Menu (only for Sender) */}
+                          {isSender && (
+                            <div className="absolute top-1/2 left-[-30px] transform -translate-y-1/2 z-20">
+                              <button
+                                onClick={() => toggleOptionsMenu(msg.id)}
+                                className="p-1 hover:bg-gray-200 rounded-full"
+                              >
+                                <BsThreeDots className="text-gray-500" />
+                              </button>
+
+                              {/* Render Options Card if visible */}
+                              {openMessageId === msg.id && (
+                                <div className="absolute top-0 left-8 z-10">
+                                  <MessageOptionsCard
+                                    onEdit={() => handleEditMessage(msg)}
+                                    onDelete={() => handleDeleteMessage(msg.id)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           <span>{msg.message}</span>
                         </div>
                       </div>
