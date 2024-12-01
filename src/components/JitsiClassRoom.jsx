@@ -14,12 +14,15 @@ const JitsiClassRoom = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [showChat, setShowChat] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     if (apiRef.current) {
       apiRef.current.executeCommand("displayName", userName);
     }
   }, [userName]);
+
+  
 
   const options = {
     configOverwrite: {
@@ -59,6 +62,7 @@ const JitsiClassRoom = () => {
 
   const toggleChat = () => {
     setShowChat(!showChat);
+    setIsChatOpen(!isChatOpen);
   };
 
   return (
@@ -105,19 +109,17 @@ const JitsiClassRoom = () => {
         />
         <button
           onClick={toggleChat}
-          className="absolute lg:bottom-[17px] bottom-[8rem] py-[17px] left-[5%] bg-[#191318] text-white rounded-lg p-2 cursor-pointer"
+          className="absolute lg:bottom-[23px] 2xl:bottom-[17px] bottom-[8rem] py-[17px] 2xl:right-[30%] lg:right-[20%] right-[5%] bg-[#191318] text-white rounded-lg p-2 cursor-pointer"
         >
           <FiMessageSquare size={24} />
         </button>
       </div>
       {/* Chat Window for small devices with transition */}
       <div
-        className={`lg:block fixed top-0 right-0 w-[350px] h-full bg-white z-50 transition-transform transform ${
-          showChat ? "lg:block translate-x-0" : "lg:block translate-x-full"
+        className={` bg-white  transition-all duration-300 ${
+          showChat ? "lg:relative absolute top-0 right-0 z-10 2xl:w-[350px] xl:w-[330px] w-full h-full translate-x-0" : "hidden translate-x-full"
         }`}
-        style={{
-          transition: "transform 0.3s ease-in-out", // Smooth transition for sliding in and out
-        }}
+       
       >
         {/* Chat content stays static, unaffected by the translate effect */}
         <div className="w-full h-full">
@@ -136,8 +138,9 @@ const JitsiClassRoom = () => {
               email={email}
               room={roomId}
               height="100vh"
-              externalMessages={chatMessages}
-              onSendMessage={sendMessageToJitsi}
+              isChatOpen={isChatOpen}
+              setIsChatOpen={setIsChatOpen}
+              setShowChat={setShowChat}
             />
           )}
         </div>

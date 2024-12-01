@@ -9,11 +9,20 @@ import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
 import useDeleteMessage from "../hooks/useDeleteMessage";
 import MessageOptionsCard from "./messages/MessageOptionsCard";
+import { FiX } from "react-icons/fi";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-
-const ChatWindow = ({ username, email, room, studentName, height }) => {
+const ChatWindow = ({
+  username,
+  email,
+  room,
+  studentName,
+  height,
+  isChatOpen,
+  setIsChatOpen,
+  setShowChat,
+}) => {
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
 
@@ -25,7 +34,12 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
   const [fileUrl, setFileUrl] = useState(""); // Estado para almacenar la URL del archivo
 
   const scrollContainerRef = useRef(null);
-  const { handleDeleteNormalMessage, handleEditMessage, toggleOptionsMenu, openMessageId } = useDeleteMessage(setChatMessages, socket, room);
+  const {
+    handleDeleteNormalMessage,
+    handleEditMessage,
+    toggleOptionsMenu,
+    openMessageId,
+  } = useDeleteMessage(setChatMessages, socket, room);
 
   // Función para detectar links y envolverlos en etiquetas <a>
   const formatMessageWithLinks = (text, isSender) => {
@@ -78,20 +92,20 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
 
   useEffect(() => {
     if (socket && room) {
-      socket.on('normalChatDeleted', (data) => {
+      socket.on("normalChatDeleted", (data) => {
         console.log(`Message with ID ${data.messageId} was deleted`);
-  
+
         // Remove the deleted message from the local state
         setChatMessages((prevMessages) =>
           prevMessages.filter((msg) => msg.id !== data.messageId)
         );
       });
-  
+
       return () => {
-        socket.off('normalChatDeleted');  // Clean up the event listener on component unmount
+        socket.off("normalChatDeleted"); // Clean up the event listener on component unmount
       };
     }
-  }, [socket, room]);  // Only re-run if 
+  }, [socket, room]); // Only re-run if
 
   useEffect(() => {
     if (username && room) {
@@ -123,7 +137,8 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
       // Si hay un mensaje de texto, enviar el mensaje como de costumbre
       const timestamp = new Date();
       socket.emit("chat", { username, email, room, message, timestamp });
-      setMessage(""); // Limpiar el mensaje
+      setMessage(""); 
+      resetTextarea();
     } else {
       // Si no hay mensaje de texto, ejecutar la función para cargar el archivo
       await handleFileChange(); // Esperamos a que se cargue el archivo
@@ -165,23 +180,23 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
     formData.append("file", file);
     formData.append("userId", "user-id"); // Pasa el ID del usuario, si es necesario
 
+    // Log FormData to check its contents
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
     try {
-      // Enviar el archivo al backend (localhost:8000/upload/chat-upload)
-      const response = await fetch(
-        `${BACKEND_URL}/upload/chat-upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/upload/chat-upload`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error("Error uploading file");
       }
 
-      // Obtener la URL del archivo cargado
       const data = await response.json();
-      const fileUrl = data.fileUrl; // La URL que el backend devuelve
+      const fileUrl = data.fileUrl;
       console.log("File uploaded:", fileUrl);
       sendFileMessage(fileUrl);
     } catch (error) {
@@ -192,9 +207,17 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
+      resetTextarea();
+    }
+  };
+
+  const resetTextarea = () => {
+    const textarea = document.querySelector("textarea");
+    if (textarea) {
+      textarea.style.height = "auto"; // Reset to initial height
     }
   };
 
@@ -206,27 +229,27 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
   const removeAccents = (str) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
-  
+
   const cleanFileName = (fileUrl) => {
     // Extract the file name (without extension)
     let fileName = fileUrl.split("/").pop().split(".")[0];
-  
+
     // Remove the numbers and dashes at the start of the filename
     fileName = fileName.replace(/^\d+-|^\d+$/g, "");
-  
+
     // Remove accents from the file name
     fileName = removeAccents(fileName);
-  
+
     // Remove extra spaces and dashes
     fileName = fileName.replace(/[-\s]+/g, " ").trim();
-  
+
     return fileName;
   };
-  
+
   const renderFileMessage = (fileUrl, isSender) => {
     const fileExtension = fileUrl.split(".").pop().toLowerCase();
     const fileName = cleanFileName(fileUrl);
-  
+
     if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
       // Renderiza una imagen
       return (
@@ -257,6 +280,18 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
           Tu navegador no soporta el elemento de audio.
         </audio>
       );
+    } else if (["docx", "pptx", "xlsx", "txt", "odt"].includes(fileExtension)) {
+      // Handle document and PowerPoint files (Word, Excel, PowerPoint, etc.)
+      return (
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
+        >
+          {fileName}.{fileExtension}
+        </a>
+      );
     } else {
       // Enlace de descarga para otros tipos de archivos
       return (
@@ -272,11 +307,19 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
       );
     }
   };
-  
+
+  const handleInput = (e) => {
+    setMessage(e.target.value);
+
+    // Adjust the height of the textarea dynamically
+    const textarea = e.target;
+    textarea.style.height = "auto"; // Reset height to auto to calculate scrollHeight
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
 
   return (
     <div
-      className="chat-pattern 2xl:w-[340px] xl:w-[330px]  w-full flex flex-col border ml-1 "
+      className="chat-pattern 2xl:w-[350px] xl:w-[330px]  w-full flex flex-col border  "
       style={{ height: height || "600px" }}
     >
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
@@ -298,88 +341,103 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
         ) : (
           studentName
         )}
+
+        {isChatOpen && (
+          <button
+            onClick={() => {
+              setIsChatOpen((prevState) => !prevState);
+              setShowChat((prevState) => !prevState);
+            }}
+            className="absolute right-4"
+          >
+            <FiX className="text-white text-[22px]" />
+          </button>
+        )}
       </h2>
 
       <PerfectScrollbar
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 relative"
       >
-<ul>
-  {chatMessages.map((msg, index) => {
-    const showTimestamp =
-      index === 0 ||
-      new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) >
-        3 * 60 * 1000;
-    const isSender = msg.email === email; // Identifying the sender using the email
-    const isFileMessage = msg.message.startsWith("http");
+        <ul>
+          {chatMessages.map((msg, index) => {
+            const showTimestamp =
+              index === 0 ||
+              new Date(msg.timestamp) -
+                new Date(chatMessages[index - 1].timestamp) >
+                3 * 60 * 1000;
+            const isSender = msg.email === email; // Identifying the sender using the email
+            const isFileMessage = msg.message.startsWith("http");
 
-    return (
-      <div key={index} className="mb-2">
-        {showTimestamp && (
-          <div className="text-center text-gray-500 text-[12px] my-2">
-            {formatTimestamp(msg.timestamp)}
-          </div>
-        )}
-        <li
-          className={`flex ${
-            isSender ? "justify-end" : "justify-start"
-          } mb-2 text-[15px]`}
-        >
-          <div
-            className={`flex flex-col ${
-              isSender ? "items-end" : "items-start"
-            } relative`}
-          >
-            {/* Dots Menu (only for Sender) */}
-            {isSender && (
-              <div
-                className="absolute left-0 top-[-15px] flex items-center z-20"
-                onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
-              >
-                {/* Dots button */}
-                <button className="p-1 hover:bg-gray-200 rounded-full">
-                  <BsThreeDots className="text-gray-500" />
-                </button>
-              </div>
-            )}
-
-            {/* Message content */}
-            <div
-              className={`p-2 rounded-xl max-w-xs ${
-                isSender
-                  ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
-                  : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-              }`}
-            >
-              <span>
-                {isFileMessage ? (
-                  renderFileMessage(msg.message, isSender)
-                ) : (
-                  <>
-                    {/* Render links in messages */}
-                    {formatMessageWithLinks(msg.message, isSender)}
-                  </>
+            return (
+              <div key={index} className="mb-2">
+                {showTimestamp && (
+                  <div className="text-center text-gray-500 text-[12px] my-2">
+                    {formatTimestamp(msg.timestamp)}
+                  </div>
                 )}
-              </span>
-            </div>
+                <li
+                  className={`flex ${
+                    isSender ? "justify-end" : "justify-start"
+                  } mb-2 text-[15px]`}
+                >
+                  <div
+                    className={`flex flex-col ${
+                      isSender ? "items-end" : "items-start"
+                    } relative`}
+                  >
+                    {/* Dots Menu (only for Sender) */}
+                    {isSender && (
+                      <div
+                        className="absolute left-0 top-[-15px] flex items-center z-20"
+                        onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
+                      >
+                        {/* Dots button */}
+                        <button className="p-1 hover:bg-gray-200 rounded-full">
+                          <BsThreeDots className="text-gray-500" />
+                        </button>
+                      </div>
+                    )}
 
-            {/* Options card that appears on click */}
-            {openMessageId === msg.id && (
-              <div className="absolute top-2 left-0 z-30">
-                <MessageOptionsCard
-                  onEdit={() => handleEditMessage(msg)}
-                  onDelete={() => handleDeleteNormalMessage(msg.id)}
-                />
+                    {/* Message content */}
+                    <div
+                      className={`p-2 rounded-xl  ${
+                        isSender
+                          ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
+                          : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
+                      }`}
+                      style={{
+                        whiteSpace: "pre-wrap", // Keeps spaces and line breaks intact
+                        wordWrap: "break-word", // Ensures long words wrap
+                      }}
+                    >
+                      <span>
+                        {isFileMessage ? (
+                          renderFileMessage(msg.message, isSender)
+                        ) : (
+                          <>
+                            {/* Render links in messages */}
+                            {formatMessageWithLinks(msg.message, isSender)}
+                          </>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Options card that appears on click */}
+                    {openMessageId === msg.id && (
+                      <div className="absolute top-2 left-0 z-30">
+                        <MessageOptionsCard
+                          onEdit={() => handleEditMessage(msg)}
+                          onDelete={() => handleDeleteNormalMessage(msg.id)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </li>
               </div>
-            )}
-          </div>
-        </li>
-      </div>
-    );
-  })}
-</ul>
-
-
+            );
+          })}
+        </ul>
       </PerfectScrollbar>
 
       <div className="flex-shrink-0 flex items-center ml-1">
@@ -390,13 +448,13 @@ const ChatWindow = ({ username, email, room, studentName, height }) => {
           >
             <BsEmojiSmile className="text-[21px] text-slate-400" />
           </button>
-          <input
-            type="text"
+          <textarea
             placeholder="Type a message..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleInput}
             onKeyDown={handleKeyDown}
-            className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+            className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+            rows={1} // Start with 1 row
           />
           <input
             type="file"
