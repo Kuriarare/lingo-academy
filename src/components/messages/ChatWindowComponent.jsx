@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { io } from "socket.io-client";
 import send from "../../assets/logos/send.png";
 import { BsEmojiSmile, BsThreeDots } from "react-icons/bs";
 import axios from "axios";
@@ -9,6 +8,7 @@ import EmojiPicker from "emoji-picker-react";
 import avatar from "../../assets/logos/avatar.jpg";
 import MessageOptionsCard from "./MessageOptionsCard";
 import useDeleteMessage from "../../hooks/useDeleteMessage";
+import useChatWindow from "../../hooks/useChatWindow";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ChatWindowComponent = ({
@@ -17,14 +17,23 @@ const ChatWindowComponent = ({
   studentName,
   email,
   userUrl,
+  userId,
+  setNewMessage,
+  socket,
 }) => {
-  const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
   const scrollContainerRef = useRef(null);
-  const { handleDeleteMessage, handleEditMessage, toggleOptionsMenu, openMessageId } = useDeleteMessage(setChatMessages, socket, room);
+  const {
+    handleDeleteMessage,
+    handleEditMessage,
+    toggleOptionsMenu,
+    openMessageId,
+
+  } = useDeleteMessage(setChatMessages, socket, room);
+
+  const { readMessages } = useChatWindow();
 
   const fetchMessages = async () => {
     try {
@@ -44,38 +53,47 @@ const ChatWindowComponent = ({
   };
   useEffect(() => {
     if (socket && room) {
-      socket.on('globalChatDeleted', (data) => {
+      socket.on("globalChatDeleted", (data) => {
         console.log(`Message with ID ${data.messageId} was deleted`);
-  
+
         // Remove the deleted message from the local state
         setChatMessages((prevMessages) =>
           prevMessages.filter((msg) => msg.id !== data.messageId)
         );
       });
-  
+
       return () => {
-        socket.off('globalChatDeleted');  // Clean up the event listener on component unmount
+        socket.off("globalChatDeleted"); // Clean up the event listener on component unmount
       };
     }
-  }, [socket, room]);  // Only re-run if socket or room changes
-  
+  }, [socket, room]); // Only re-run if socket or room changes
+
   useEffect(() => {
-    if (username && room) {
-      const socketInstance = io(`${BACKEND_URL}`);
-      setSocket(socketInstance);
+    if (socket && room) {
+      socket.emit("join", { username, room });
 
-      fetchMessages();
-      socketInstance.emit("join", { username, room });
-
-      socketInstance.on("globalChat", (data) => {
+      socket.on("globalChat", (data) => {
         setChatMessages((prevMessages) => [...prevMessages, data]);
       });
 
+      socket.on('newUnreadGlobalMessage', (data) => {
+        const { room } = data;
+  
+        console.log('Mensaje no leído en la sala:', room);
+  
+        setNewMessage((prevMessages) => ({
+          ...prevMessages,
+          [room]: (prevMessages[room] || 0) + 1, // Incrementa el contador solo para esta sala
+        }));
+      });
+      fetchMessages();
+      readMessages(userId, room)
       return () => {
-        socketInstance.disconnect();
+        socket.off("globalChat");
+        socket.off("newUnreadGlobalMessage");
       };
     }
-  }, [username, room]);
+  }, [username, room, socket]);
 
   useEffect(() => {
     if (scrollContainerRef.current) {

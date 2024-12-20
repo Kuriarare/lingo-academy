@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
 import { FaComments, FaUsers, FaUserFriends } from "react-icons/fa"; // Added FaUserFriends for Group Chat
 
-const ChatListComponent = ({ chats, onChatSelect }) => {
+const ChatListComponent = ({ chats, onChatSelect, newMessage }) => {
   return (
     <div className="h-[92vh] flex flex-col border p-3 bg-white">
-      <h2 className="text-center mb-4 text-lg font-semibold text-gray-600">Chats</h2>
+      <h2 className="text-center mb-4 text-lg font-semibold text-gray-600">
+        Chats
+      </h2>
       <ul className="overflow-y-auto">
         {chats.map((chat) => (
           <li
@@ -20,8 +22,14 @@ const ChatListComponent = ({ chats, onChatSelect }) => {
             ) : (
               <FaComments className="text-gray-600 w-6 h-6 mr-3" /> // Regular chat icon
             )}
-
-            <span className="text-sm text-gray-700">{chat.name}</span>
+            <div>
+              <span className="text-sm text-gray-700">{chat.name}</span>
+              {newMessage[chat.id] > 0 && (
+                <span className="text-xs text-red-500 ml-2">
+                  {newMessage[chat.id]} new
+                </span>
+              )}
+            </div>
           </li>
         ))}
       </ul>

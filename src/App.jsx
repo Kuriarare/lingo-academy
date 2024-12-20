@@ -11,6 +11,8 @@ import JitsiClassRoom from './components/JitsiClassRoom';
 import Messages from './sections/messages';
 
 function App() {
+
+
   return (
     <Router>
       <Routes>
@@ -76,7 +78,7 @@ function App() {
           path="/messages"
           element={
             <RequireAuth>
-              <Messages />
+               <Messages  />
             </RequireAuth>
           }
         />

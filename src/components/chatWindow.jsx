@@ -137,7 +137,7 @@ const ChatWindow = ({
       // Si hay un mensaje de texto, enviar el mensaje como de costumbre
       const timestamp = new Date();
       socket.emit("chat", { username, email, room, message, timestamp });
-      setMessage(""); 
+      setMessage("");
       resetTextarea();
     } else {
       // Si no hay mensaje de texto, ejecutar la función para cargar el archivo
@@ -359,85 +359,87 @@ const ChatWindow = ({
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 relative"
       >
-        <ul>
-          {chatMessages.map((msg, index) => {
-            const showTimestamp =
-              index === 0 ||
-              new Date(msg.timestamp) -
-                new Date(chatMessages[index - 1].timestamp) >
-                3 * 60 * 1000;
-            const isSender = msg.email === email; // Identifying the sender using the email
-            const isFileMessage = msg.message.startsWith("http");
+     <ul>
+  {chatMessages.map((msg, index) => {
+    const showTimestamp =
+      index === 0 ||
+      new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) >
+        3 * 60 * 1000;
+    const isSender = msg.email === email; // Identifying the sender using the email
+    const isFileMessage = msg.message.startsWith("http");
 
-            return (
-              <div key={index} className="mb-2">
-                {showTimestamp && (
-                  <div className="text-center text-gray-500 text-[12px] my-2">
-                    {formatTimestamp(msg.timestamp)}
-                  </div>
-                )}
-                <li
-                  className={`flex ${
-                    isSender ? "justify-end" : "justify-start"
-                  } mb-2 text-[15px]`}
-                >
-                  <div
-                    className={`flex flex-col ${
-                      isSender ? "items-end" : "items-start"
-                    } relative`}
-                  >
-                    {/* Dots Menu (only for Sender) */}
-                    {isSender && (
-                      <div
-                        className="absolute left-0 top-[-15px] flex items-center z-20"
-                        onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
-                      >
-                        {/* Dots button */}
-                        <button className="p-1 hover:bg-gray-200 rounded-full">
-                          <BsThreeDots className="text-gray-500" />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Message content */}
-                    <div
-                      className={`p-2 rounded-xl  ${
-                        isSender
-                          ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
-                          : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-                      }`}
-                      style={{
-                        whiteSpace: "pre-wrap", // Keeps spaces and line breaks intact
-                        wordWrap: "break-word", // Ensures long words wrap
-                      }}
-                    >
-                      <span>
-                        {isFileMessage ? (
-                          renderFileMessage(msg.message, isSender)
-                        ) : (
-                          <>
-                            {/* Render links in messages */}
-                            {formatMessageWithLinks(msg.message, isSender)}
-                          </>
-                        )}
-                      </span>
-                    </div>
-
-                    {/* Options card that appears on click */}
-                    {openMessageId === msg.id && (
-                      <div className="absolute top-2 left-0 z-30">
-                        <MessageOptionsCard
-                          onEdit={() => handleEditMessage(msg)}
-                          onDelete={() => handleDeleteNormalMessage(msg.id)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </li>
+    return (
+      <div key={index} className="mb-2">
+        {showTimestamp && (
+          <div className="text-center text-gray-500 text-[12px] my-2">
+            {formatTimestamp(msg.timestamp)}
+          </div>
+        )}
+        <li
+          className={`flex ${
+            isSender ? "justify-end" : "justify-start"
+          } mb-2 text-[15px]`}
+        >
+          <div
+            className={`flex flex-col ${
+              isSender ? "items-end" : "items-start"
+            } relative`}
+          >
+            {/* Dots Menu (only for Sender) */}
+            {isSender && (
+              <div
+                className="absolute left-0 top-[-15px] flex items-center z-20"
+                onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
+              >
+                {/* Dots button */}
+                <button className="p-1 hover:bg-gray-200 rounded-full">
+                  <BsThreeDots className="text-gray-500" />
+                </button>
               </div>
-            );
-          })}
-        </ul>
+            )}
+
+            {/* Message content */}
+            <div
+              className={`p-2 rounded-xl ${
+                isSender
+                  ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
+                  : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
+              }`}
+              style={{
+                whiteSpace: "pre-wrap", // Keeps spaces and line breaks intact
+                wordWrap: "break-word", // Ensures long words wrap
+                overflowWrap: "break-word", // Breaks long words or URLs
+                wordBreak: "break-word", // Breaks long words or URLs (for extra security)
+              }}
+            >
+              <span>
+                {isFileMessage ? (
+                  renderFileMessage(msg.message, isSender)
+                ) : (
+                  <>
+                    {/* Render links in messages */}
+                    {formatMessageWithLinks(msg.message, isSender)}
+                  </>
+                )}
+              </span>
+            </div>
+
+            {/* Options card that appears on click */}
+            {openMessageId === msg.id && (
+              <div className="absolute top-2 left-0 z-30">
+                <MessageOptionsCard
+                  onEdit={() => handleEditMessage(msg)}
+                  onDelete={() => handleDeleteNormalMessage(msg.id)}
+                />
+              </div>
+            )}
+          </div>
+        </li>
+      </div>
+    );
+  })}
+</ul>
+
       </PerfectScrollbar>
 
       <div className="flex-shrink-0 flex items-center ml-1">

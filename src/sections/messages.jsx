@@ -2,30 +2,54 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import ChatListComponent from "../components/messages/ChatListComponent";
 import ChatWindowComponent from "../components/messages/ChatWindowComponent";
+import { io } from "socket.io-client";
 import Dashboard from "./dashboard";
 import Navbar from "../components/navbar";
-import back from '../assets/logos/back.png'; // Back arrow image
+import back from "../assets/logos/back.png";
+import {teacherChats, generalChats} from '../data/roomData'
+import useMessagesSection from "../hooks/useMessagesSection";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Messages = () => {
-  const user = useSelector((state) => state.user.userInfo.user); // Get the user info
-  console.log('Full info:', user);  // Debugging
 
+ 
+  const user = useSelector((state) => state.user.userInfo.user);
+  console.log('User Id:', user.id);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [showChatList, setShowChatList] = useState(true); // State to control chat list visibility on smaller devices
+  const [showChatList, setShowChatList] = useState(true);
+  const [newMessage, setNewMessage] = useState({})
+  const [socket, setSocket] = useState(null);
+  const { handleChatSelect, handleBackClick } = useMessagesSection(setNewMessage, setSelectedChat, setShowChatList);
 
-  // Define the general chat rooms (these are always available)
-  const generalChats = {
-    english: { id: "uuid-english", name: "General Chat - English", online: "online", type: "general" },
-    spanish: { id: "uuid-spanish", name: "General Chat - Spanish", online: "online", type: "general" },
-    polish: { id: "uuid-polish", name: "General Chat - Polish", online: "online", type: "general" },
-  };
 
-  // Define teacher chats (these are available for admins and teachers)
-  const teacherChats = {
-    english: { id: "uuid-teacher-english", name: "Teachers Chat - English", online: "offline", type: "teacher" },
-    spanish: { id: "uuid-teacher-spanish", name: "Teachers Chat - Spanish", online: "offline", type: "teacher" },
-    polish: { id: "uuid-teacher-polish", name: "Teachers Chat - Polish", online: "offline", type: "teacher" },
-  };
+  useEffect(() => {
+    const socketInstance = io(`${BACKEND_URL}`);
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('newUnreadGlobalMessage', (data) => {
+        const { room } = data;
+  
+        console.log('Mensaje no leído en la sala:', room);
+  
+        setNewMessage((prevMessages) => ({
+          ...prevMessages,
+          [room]: (prevMessages[room] || 0) + 1, // Incrementa el contador solo para esta sala
+        }));
+      });
+  
+      return () => {
+        socket.off('newUnreadGlobalMessage'); // Limpieza del listener
+      };
+    }
+  }, [socket]);
+
 
   // The chat list that will be populated based on the user role and language
   const chats = [];
@@ -38,7 +62,9 @@ const Messages = () => {
 
   // If the user is a teacher
   if (user.role === "teacher") {
-    const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
+    const normalizedLanguage = user.language
+      ? user.language.toLowerCase()
+      : "english";
     if (generalChats[normalizedLanguage]) {
       chats.push(generalChats[normalizedLanguage]);
     }
@@ -48,9 +74,9 @@ const Messages = () => {
     if (user.students && user.students.length > 0) {
       chats.push({
         id: user.id,
-        name: `Group Chat - ${user.name}`, 
-        online: "online", 
-        type: "group"
+        name: `Group Chat - ${user.name}`,
+        online: "online",
+        type: "group",
       });
     }
   }
@@ -65,23 +91,16 @@ const Messages = () => {
         type: "group",
       });
     }
-    const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
+    const normalizedLanguage = user.language
+      ? user.language.toLowerCase()
+      : "english";
     if (generalChats[normalizedLanguage]) {
       chats.push(generalChats[normalizedLanguage]);
     }
   }
 
-  console.log("Available chats for user:", chats);  // Debugging
-
-  const handleChatSelect = (chat) => {
-    setSelectedChat(chat); // Update the selected chat when the user clicks a chat
-    setShowChatList(false); // Hide the chat list when a chat is selected on smaller screens
-  };
-
-  const handleBackClick = () => {
-    setSelectedChat(null); // Reset the selected chat to null (go back to the chat list)
-    setShowChatList(true); // Show the chat list again on smaller screens
-  };
+ 
+  
 
   return (
     <div className="flex w-full relative h-[97vh]">
@@ -97,7 +116,13 @@ const Messages = () => {
           <div className="flex w-full">
             {/* Chat List for larger devices */}
             <section className="w-[300px] bg-gray-100 hidden lg:block">
-              <ChatListComponent chats={chats} onChatSelect={handleChatSelect} />
+              <ChatListComponent
+                chats={chats}
+                onChatSelect={handleChatSelect}
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                socket={socket}
+              />
             </section>
 
             {/* Chat window */}
@@ -116,6 +141,10 @@ const Messages = () => {
                     userUrl={user.avatarUrl}
                     room={selectedChat.id}
                     studentName={selectedChat.name}
+                    newMessage={newMessage}
+                    userId={user.id}
+                    setNewMessage={setNewMessage}
+                    socket={socket}
                   />
                 </>
               ) : (
@@ -129,7 +158,13 @@ const Messages = () => {
           {/* Chat list for medium and small devices */}
           {showChatList && (
             <section className="lg:hidden">
-              <ChatListComponent chats={chats} onChatSelect={handleChatSelect} />
+              <ChatListComponent
+                chats={chats}
+                onChatSelect={handleChatSelect}
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                socket={socket}
+              />
             </section>
           )}
         </section>

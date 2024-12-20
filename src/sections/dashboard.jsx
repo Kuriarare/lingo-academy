@@ -3,10 +3,12 @@ import { useLocation, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../redux/sidebarSlice";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Dashboard = () => {
   const location = useLocation();
   const [activeLink, setActiveLink] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const user = useSelector((state) => state.user.userInfo.user);
   const dispatch = useDispatch();
 
@@ -23,6 +25,29 @@ const Dashboard = () => {
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar()); // Dispatch to toggle sidebar state
   };
+
+  useEffect(() => {
+    if (!user || !user.id) return;
+    // Fetch unread messages count when app initializes or after user logs in
+    const fetchUnreadCount = async () => {
+      const userId = user.id; // Replace with actual logic to get the logged-in user's ID
+      try {
+        const response = await fetch(
+          `${BACKEND_URL}/chat/unread-global-messages/${userId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setUnreadCount(data.length); // Assume the API response has a `count` property
+        } else {
+          console.error("Failed to fetch unread messages count");
+        }
+      } catch (error) {
+        console.error("Error fetching unread messages:", error);
+      }
+    };
+
+    fetchUnreadCount();
+  });
 
   return (
     <div
@@ -109,7 +134,20 @@ const Dashboard = () => {
               onClick={() => handleClick("/messages")}
             >
               <i className="fa-solid fa-comments py-1"></i>
-              {isSidebarOpen && <span className="ml-2">Messages</span>}{" "}
+              {isSidebarOpen && (
+                <span className="ml-2">
+                  Messages{" "}
+                  {unreadCount > 0 && (
+                    <span
+                      className={`${
+                        !activeLink ? "text-white" : "text-red-500 font-bold"
+                      }`}
+                    >
+                      {unreadCount} new
+                    </span>
+                  )}
+                </span>
+              )}
               {/* Added ml-2 */}
             </Link>
           </li>
