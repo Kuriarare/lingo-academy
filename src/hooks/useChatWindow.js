@@ -1,7 +1,6 @@
-import { useMemo } from "react";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
-const useChatWindow = (timestamp) => {
+const useChatWindow = () => {
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const today = new Date();
@@ -21,9 +20,9 @@ const useChatWindow = (timestamp) => {
   };
   
   const readMessages = async (userId, room) => {
-    try {
+    try { 
       const response = await fetch(`${BACKEND_URL}/chat/delete-unread-global-messages/`, {
-        method: 'DELETE',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
