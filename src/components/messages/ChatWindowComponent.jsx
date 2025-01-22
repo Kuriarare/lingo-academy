@@ -9,6 +9,8 @@ import avatar from "../../assets/logos/avatar.jpg";
 import MessageOptionsCard from "./MessageOptionsCard";
 import useDeleteMessage from "../../hooks/useDeleteMessage";
 import useChatWindow from "../../hooks/useChatWindow";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUnreadMessages } from "../../redux/messageSlice";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ChatWindowComponent = ({
@@ -18,13 +20,16 @@ const ChatWindowComponent = ({
   email,
   userUrl,
   userId,
-  setNewMessage,
   socket,
 }) => {
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const scrollContainerRef = useRef(null);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userInfo.user);
+
+
   const {
     handleDeleteMessage,
     handleEditMessage,
@@ -51,49 +56,43 @@ const ChatWindowComponent = ({
       console.error("Error fetching messages:", error);
     }
   };
+ 
+  
   useEffect(() => {
-    if (socket && room) {
-      socket.on("globalChatDeleted", (data) => {
-        console.log(`Message with ID ${data.messageId} was deleted`);
-
-        // Remove the deleted message from the local state
-        setChatMessages((prevMessages) =>
-          prevMessages.filter((msg) => msg.id !== data.messageId)
-        );
-      });
-
-      return () => {
-        socket.off("globalChatDeleted"); // Clean up the event listener on component unmount
-      };
-    }
-  }, [socket, room]); // Only re-run if socket or room changes
-
-  useEffect(() => {
-    if (socket && room) {
+    if (socket && room && user?.id) {
+      // Emit join event to the socket
       socket.emit("join", { username, room });
-
-      socket.on("globalChat", (data) => {
-        setChatMessages((prevMessages) => [...prevMessages, data]);
-      });
-
-      socket.on('newUnreadGlobalMessage', (data) => {
-        const { room } = data;
   
-        console.log('Mensaje no leído en la sala:', room);
-  
-        setNewMessage((prevMessages) => ({
-          ...prevMessages,
-          [room]: (prevMessages[room] || 0) + 1, // Incrementa el contador solo para esta sala
-        }));
-      });
+      // Fetch initial messages for the room
       fetchMessages();
-      readMessages(userId, room)
+      // readMessages(userId, room);
+  
+      // // Dispatch to update the unread messages for the user
+      // dispatch(fetchUnreadMessages(user.id));
+  
+      // Listen for incoming global chat messages
+      const handleGlobalChat = (data) => {
+        setChatMessages((prevMessages) => [...prevMessages, data]);
+      };
+      socket.on("globalChat", handleGlobalChat);
+  
+      // Cleanup: Remove listeners and leave the room
       return () => {
-        socket.off("globalChat");
-        socket.off("newUnreadGlobalMessage");
+        socket.off("globalChat", handleGlobalChat);
       };
     }
-  }, [username, room, socket]);
+  }, [room, socket, user, dispatch, username, userId]);
+
+  useEffect(() => {
+    if (user?.id && room) {
+      // Primero, marca los mensajes como leídos
+      readMessages(userId, room);
+  
+      // Luego, dispara el dispatch de mensajes no leídos
+      dispatch(fetchUnreadMessages(user.id));
+    }
+  }, [room, user?.id, dispatch, userId]); // Añadir dependencias necesarias
+  
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -139,13 +138,10 @@ const ChatWindowComponent = ({
     yesterday.setDate(today.getDate() - 1);
 
     if (date.toDateString() === today.toDateString()) {
-      // If it's today, show the time
       return `${date.toLocaleTimeString()}`;
     } else if (date.toDateString() === yesterday.toDateString()) {
-      // If it's yesterday, show "Yesterday"
       return `Yesterday at ${date.toLocaleTimeString()}`;
     } else {
-      // If it's earlier, show the full date and time
       return `${date.toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
@@ -284,6 +280,7 @@ const ChatWindowComponent = ({
             placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onClick={() =>  dispatch(fetchUnreadMessages(user.id))}
             onKeyDown={handleKeyDown}
             className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
           />

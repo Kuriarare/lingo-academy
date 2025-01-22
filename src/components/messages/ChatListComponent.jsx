@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { FaComments, FaUsers, FaUserFriends } from "react-icons/fa"; // Added FaUserFriends for Group Chat
 
 const ChatListComponent = ({ chats, onChatSelect, newMessage }) => {
+  console.log(chats); // Debugging chats prop
   return (
     <div className="h-[92vh] flex flex-col border p-3 bg-white">
       <h2 className="text-center mb-4 text-lg font-semibold text-gray-600">
@@ -11,25 +12,26 @@ const ChatListComponent = ({ chats, onChatSelect, newMessage }) => {
         {chats.map((chat) => (
           <li
             key={chat.id}
-            className="flex items-center p-3 mb-2 border-b cursor-pointer hover:bg-gray-50 transition duration-200"
+            className="flex items-center justify-between p-3 mb-2 border-b cursor-pointer hover:bg-gray-50 transition duration-200"
             onClick={() => onChatSelect(chat)}
           >
-            {/* Conditional rendering for chat icon */}
-            {chat.type === "teacher" ? (
-              <FaUsers className="text-gray-600 w-6 h-6 mr-3" /> // Community icon for teacher chat
-            ) : chat.type === "group" ? (
-              <FaUserFriends className="text-gray-600 w-6 h-6 mr-3" /> // Group chat icon
-            ) : (
-              <FaComments className="text-gray-600 w-6 h-6 mr-3" /> // Regular chat icon
-            )}
-            <div>
-              <span className="text-sm text-gray-700">{chat.name}</span>
-              {newMessage[chat.id] > 0 && (
-                <span className="text-xs text-red-500 ml-2">
-                  {newMessage[chat.id]} new
-                </span>
+            {/* Left section: Icon and Name */}
+            <div className="flex items-center">
+              {chat.type === "teacher" ? (
+                <FaUsers className="text-gray-600 w-6 h-6 mr-3" />
+              ) : chat.type === "group" ? (
+                <FaUserFriends className="text-gray-600 w-6 h-6 mr-3" />
+              ) : (
+                <FaComments className="text-gray-600 w-6 h-6 mr-3" />
               )}
+              <span className="text-sm text-gray-700">{chat.name}</span>
             </div>
+            {/* Right section: Unread count bubble */}
+            {chat.unreadCount > 0 && (
+               <span className="bg-red-500 text-white text-[11px] flex justify-center items-center rounded-full w-6 h-6 ml-auto">
+                {chat.unreadCount}
+              </span>
+            )}
           </li>
         ))}
       </ul>

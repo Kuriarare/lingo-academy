@@ -3,16 +3,19 @@ import { useLocation, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../redux/sidebarSlice";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { fetchUnreadMessages } from "../redux/messageSlice";
+import { io } from "socket.io-client";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
+let socket;
 const Dashboard = () => {
   const location = useLocation();
   const [activeLink, setActiveLink] = useState("");
-  const [unreadCount, setUnreadCount] = useState(0);
-  const user = useSelector((state) => state.user.userInfo.user);
+
   const dispatch = useDispatch();
 
+  const user = useSelector((state) => state.user.userInfo.user);
   const isSidebarOpen = useSelector((state) => state.sidebar.isSidebarOpen);
+  const { totalUnread } = useSelector((state) => state.messages);
 
   useEffect(() => {
     setActiveLink(location.pathname);
@@ -23,31 +26,33 @@ const Dashboard = () => {
   };
 
   const handleSidebarToggle = () => {
-    dispatch(toggleSidebar()); // Dispatch to toggle sidebar state
+    dispatch(toggleSidebar());
   };
 
   useEffect(() => {
-    if (!user || !user.id) return;
-    // Fetch unread messages count when app initializes or after user logs in
-    const fetchUnreadCount = async () => {
-      const userId = user.id; // Replace with actual logic to get the logged-in user's ID
-      try {
-        const response = await fetch(
-          `${BACKEND_URL}/chat/unread-global-messages/${userId}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setUnreadCount(data.length); // Assume the API response has a `count` property
-        } else {
-          console.error("Failed to fetch unread messages count");
-        }
-      } catch (error) {
-        console.error("Error fetching unread messages:", error);
-      }
-    };
+    if (user?.id) {
+      dispatch(fetchUnreadMessages(user.id));
+    }
+  }, [user, dispatch]);
 
-    fetchUnreadCount();
-  });
+  useEffect(() => {
+    if (user?.id) {
+      // Establece la conexión solo si no existe
+      if (!socket) {
+        socket = io(`${BACKEND_URL}`);
+      }
+
+      // Escucha los eventos
+      socket.on("newUnreadGlobalMessage", () => {
+        dispatch(fetchUnreadMessages(user.id));
+      });
+
+      // Limpieza al desmontar el componente
+      return () => {
+        socket.off("newUnreadGlobalMessage"); // Desuscribirse del evento
+      };
+    }
+  }, [user, dispatch]);
 
   return (
     <div
@@ -134,21 +139,29 @@ const Dashboard = () => {
               onClick={() => handleClick("/messages")}
             >
               <i className="fa-solid fa-comments py-1"></i>
-              {isSidebarOpen && (
-                <span className="ml-2">
-                  Messages{" "}
-                  {unreadCount > 0 && (
-                    <span
-                      className={`${
-                        !activeLink ? "text-white" : "text-red-500 font-bold"
-                      }`}
-                    >
-                      {unreadCount} new
+
+              {/* Condicional para mostrar el texto y la burbuja */}
+              {isSidebarOpen ? (
+                <span className="ml-2 flex items-center w-full">
+                  Messages
+                  {totalUnread > 0 && (
+                    <span className="bg-red-500 text-white text-[11px] flex justify-center items-center rounded-full w-6 h-6 ml-auto">
+                      {totalUnread}
                     </span>
                   )}
                 </span>
+              ) : (
+                <div className="relative flex items-center">
+                  {/* Solo se muestra el icono cuando el sidebar está cerrado */}
+                  <i className="fa-solid fa-comments py-1"></i>
+                  {/* Burbuja de notificación en la parte superior */}
+                  {totalUnread > 0 && (
+                    <span className="bg-red-500 text-white text-[11px] flex justify-center items-center rounded-full w-6 h-6 absolute top-[-5px] right-[-5px]">
+                      {totalUnread}
+                    </span>
+                  )}
+                </div>
               )}
-              {/* Added ml-2 */}
             </Link>
           </li>
         </ul>

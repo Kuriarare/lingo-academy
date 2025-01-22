@@ -6,21 +6,20 @@ import { io } from "socket.io-client";
 import Dashboard from "./dashboard";
 import Navbar from "../components/navbar";
 import back from "../assets/logos/back.png";
-import {teacherChats, generalChats} from '../data/roomData'
+import { teacherChats, generalChats } from '../data/roomData';
 import useMessagesSection from "../hooks/useMessagesSection";
+
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Messages = () => {
-
- 
   const user = useSelector((state) => state.user.userInfo.user);
-  console.log('User Id:', user.id);
+  const { unreadCounts } = useSelector((state) => state.messages);
+  console.log(unreadCounts); // Log unreadCounts to check the data structure
   const [selectedChat, setSelectedChat] = useState(null);
   const [showChatList, setShowChatList] = useState(true);
-  const [newMessage, setNewMessage] = useState({})
+  const [newMessage, setNewMessage] = useState({});
   const [socket, setSocket] = useState(null);
   const { handleChatSelect, handleBackClick } = useMessagesSection(setNewMessage, setSelectedChat, setShowChatList);
-
 
   useEffect(() => {
     const socketInstance = io(`${BACKEND_URL}`);
@@ -35,23 +34,18 @@ const Messages = () => {
     if (socket) {
       socket.on('newUnreadGlobalMessage', (data) => {
         const { room } = data;
-  
-        console.log('Mensaje no leído en la sala:', room);
-  
         setNewMessage((prevMessages) => ({
           ...prevMessages,
-          [room]: (prevMessages[room] || 0) + 1, // Incrementa el contador solo para esta sala
+          [room]: (prevMessages[room] || 0) + 1,
         }));
       });
-  
+
       return () => {
-        socket.off('newUnreadGlobalMessage'); // Limpieza del listener
+        socket.off('newUnreadGlobalMessage');
       };
     }
   }, [socket]);
 
-
-  // The chat list that will be populated based on the user role and language
   const chats = [];
 
   // Handle case for admin
@@ -62,15 +56,16 @@ const Messages = () => {
 
   // If the user is a teacher
   if (user.role === "teacher") {
-    const normalizedLanguage = user.language
-      ? user.language.toLowerCase()
-      : "english";
+    const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
+    
     if (generalChats[normalizedLanguage]) {
       chats.push(generalChats[normalizedLanguage]);
     }
+    
     if (teacherChats[normalizedLanguage]) {
       chats.push(teacherChats[normalizedLanguage]);
     }
+    
     if (user.students && user.students.length > 0) {
       chats.push({
         id: user.id,
@@ -91,16 +86,44 @@ const Messages = () => {
         type: "group",
       });
     }
-    const normalizedLanguage = user.language
-      ? user.language.toLowerCase()
-      : "english";
+
+    const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
     if (generalChats[normalizedLanguage]) {
       chats.push(generalChats[normalizedLanguage]);
     }
   }
+// Log chats to check the structure before mapping
+console.log(chats);
 
- 
-  
+const userLanguage = user.role === 'admin' ? '' : (user.language ? user.language.charAt(0).toUpperCase() + user.language.slice(1) : ''); 
+const isAdmin = user.role === 'admin'; // Check if the user is an admin
+
+// Map unread counts to each chat based on its id, considering dynamic room keys
+const updatedChats = chats.map((chat) => {
+  let roomKey = "";
+
+  // Get the language part from the chat name
+  const chatLanguage = chat.name.split(" - ")[1]; // 'English', 'Spanish', 'Polish'
+
+  // Determine the room key based on the chat type and language
+  if (chat.type === "general" && (isAdmin || chatLanguage === userLanguage)) {
+    roomKey = `general${chatLanguage}Room`; 
+  } else if (chat.type === "teacher" && (isAdmin || chatLanguage === userLanguage)) {
+    roomKey = `teachers${chatLanguage}Room`; 
+  } else if (chat.type === "group") {
+    roomKey = `randomRoom`; 
+  }
+
+  // Map the unread count dynamically using the roomKey
+  return {
+    ...chat,
+    unreadCount: unreadCounts[roomKey] || 0, // Attach the correct unread count dynamically
+  };
+});
+
+// Log updatedChats to check if the mapping is correct
+console.log(updatedChats);
+
 
   return (
     <div className="flex w-full relative h-[97vh]">
@@ -114,10 +137,9 @@ const Messages = () => {
 
         <section>
           <div className="flex w-full">
-            {/* Chat List for larger devices */}
             <section className="w-[300px] bg-gray-100 hidden lg:block">
               <ChatListComponent
-                chats={chats}
+                chats={updatedChats}
                 onChatSelect={handleChatSelect}
                 newMessage={newMessage}
                 setNewMessage={setNewMessage}
@@ -125,11 +147,9 @@ const Messages = () => {
               />
             </section>
 
-            {/* Chat window */}
             <section className="flex-1">
               {selectedChat ? (
                 <>
-                  {/* Back button for md and smaller screens */}
                   <div className="lg:hidden absolute top-16 left-5 z-10">
                     <button onClick={handleBackClick}>
                       <img src={back} alt="Back" className="w-8 h-8" />
@@ -155,11 +175,10 @@ const Messages = () => {
             </section>
           </div>
 
-          {/* Chat list for medium and small devices */}
           {showChatList && (
             <section className="lg:hidden">
               <ChatListComponent
-                chats={chats}
+                chats={updatedChats}
                 onChatSelect={handleChatSelect}
                 newMessage={newMessage}
                 setNewMessage={setNewMessage}
@@ -172,5 +191,6 @@ const Messages = () => {
     </div>
   );
 };
+
 
 export default Messages;

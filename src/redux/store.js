@@ -1,9 +1,8 @@
-// store.js
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from '../redux/userSlice';
-import sidebarReducer from '../redux/sidebarSlice'; // Import sidebarReducer
+import sidebarReducer from '../redux/sidebarSlice';
+import messageReducer from '../redux/messageSlice'; // Import the new slice
 
-// Utility functions to save and load state from localStorage
 const saveState = (state) => {
   try {
     const serializedState = JSON.stringify(state);
@@ -17,7 +16,7 @@ const loadState = () => {
   try {
     const serializedState = localStorage.getItem('state');
     if (serializedState === null) {
-      return undefined; // Let the reducer initialize the state
+      return undefined;
     }
     return JSON.parse(serializedState);
   } catch (e) {
@@ -26,23 +25,22 @@ const loadState = () => {
   }
 };
 
-// Load the state from localStorage
 const persistedState = loadState();
 
-// Configure the store
 const store = configureStore({
   reducer: {
     user: userReducer,
-    sidebar: sidebarReducer, // Add sidebarReducer to the store
+    sidebar: sidebarReducer,
+    messages: messageReducer, 
   },
-  preloadedState: persistedState, 
+  preloadedState: persistedState,
 });
 
-// Subscribe to store changes and save to localStorage
 store.subscribe(() => {
   saveState({
-    user: store.getState().user,      // Save only the user slice
-    sidebar: store.getState().sidebar, // Save the sidebar state as well
+    user: store.getState().user,
+    sidebar: store.getState().sidebar,
+    messages: store.getState().messages, 
   });
 });
 
