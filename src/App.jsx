@@ -1,14 +1,16 @@
 // src/App.js
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './components/login';
+import Login from './components/login/login';
 import Home from './sections/home';
 import Profile from './sections/profile';
-import Admin from './components/admin';
+import Admin from './components/admin/admin';
 import Learning from './sections/learning';
-import Shchedule from './sections/schedule';
+import Shchedule from './components/schedule/schedule';
 import RequireAuth from './components/requireAuth';
 import JitsiClassRoom from './components/JitsiClassRoom';
 import Messages from './sections/messages';
+import ForgotPassword from './components/login/forgotPassword';
+import ResetPassword from './components/login/resetPassword';
 
 function App() {
 
@@ -82,6 +84,8 @@ function App() {
             </RequireAuth>
           }
         />
+         <Route path="/forgotpassword" element={<ForgotPassword />} />
+         <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

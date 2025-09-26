@@ -1,7 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from '../redux/userSlice';
 import sidebarReducer from '../redux/sidebarSlice';
-import messageReducer from '../redux/messageSlice'; // Import the new slice
+import messageReducer from '../redux/messageSlice'; // Existing messages reducer
+import chatReducer from '../redux/chatSlice'; // New chat reducer
 
 const saveState = (state) => {
   try {
@@ -31,7 +32,8 @@ const store = configureStore({
   reducer: {
     user: userReducer,
     sidebar: sidebarReducer,
-    messages: messageReducer, 
+    messages: messageReducer,
+    chat: chatReducer, 
   },
   preloadedState: persistedState,
 });
@@ -40,7 +42,8 @@ store.subscribe(() => {
   saveState({
     user: store.getState().user,
     sidebar: store.getState().sidebar,
-    messages: store.getState().messages, 
+    messages: store.getState().messages,
+    chat: store.getState().chat, 
   });
 });
 

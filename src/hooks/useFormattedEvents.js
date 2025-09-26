@@ -5,19 +5,18 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(timezone);
 
 const useFormattedEvents = (user) => {
-  const endDate = dayjs().add(1, "month"); // Two months from now
+  const endDate = dayjs().add(1, "month"); 
 
   const formatEvents = useCallback((schedules, nameKey) => {
     return schedules.flatMap((event) => {
-      console.log('raw event', event);
 
       const initialDate = dayjs(event.initialDateTime).local();
       const originalStart = dayjs(event.startTime).local();
       const originalEnd = dayjs(event.endTime).local();
 
-      const eventDayOfWeek = initialDate.day(); // Day of the week (0=Sunday, 6=Saturday)
+      const eventDayOfWeek = initialDate.day(); 
 
-      // Calculate duration between original start and end times
+
       const durationMinutes = originalEnd.diff(originalStart, "minute");
 
       const now = dayjs().startOf("week").local(); // Always start from the beginning of the current week
@@ -33,10 +32,10 @@ const useFormattedEvents = (user) => {
 
         if (start.isBefore(endDate)) {
           return {
-            title: event[nameKey], // Event title: studentName or teacherName based on role
+            title: event[nameKey], 
             start: start.toDate(),
             end: end.toDate(),
-            studentId: event.studentId, // For teacher role
+            studentId: event.studentId, 
             eventId: event.id,
           };
         }

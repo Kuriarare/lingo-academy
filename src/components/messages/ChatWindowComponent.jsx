@@ -11,6 +11,7 @@ import useDeleteMessage from "../../hooks/useDeleteMessage";
 import useChatWindow from "../../hooks/useChatWindow";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnreadMessages } from "../../redux/messageSlice";
+import { useNavigate } from "react-router-dom";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ChatWindowComponent = ({
@@ -27,15 +28,15 @@ const ChatWindowComponent = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const scrollContainerRef = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo.user);
-
+  console.log("user", user);
 
   const {
     handleDeleteMessage,
     handleEditMessage,
     toggleOptionsMenu,
     openMessageId,
-
   } = useDeleteMessage(setChatMessages, socket, room);
 
   const { readMessages } = useChatWindow();
@@ -56,26 +57,25 @@ const ChatWindowComponent = ({
       console.error("Error fetching messages:", error);
     }
   };
- 
-  
+
   useEffect(() => {
     if (socket && room && user?.id) {
       // Emit join event to the socket
       socket.emit("join", { username, room });
-  
+
       // Fetch initial messages for the room
       fetchMessages();
       // readMessages(userId, room);
-  
+
       // // Dispatch to update the unread messages for the user
       // dispatch(fetchUnreadMessages(user.id));
-  
+
       // Listen for incoming global chat messages
       const handleGlobalChat = (data) => {
         setChatMessages((prevMessages) => [...prevMessages, data]);
       };
       socket.on("globalChat", handleGlobalChat);
-  
+
       // Cleanup: Remove listeners and leave the room
       return () => {
         socket.off("globalChat", handleGlobalChat);
@@ -87,12 +87,11 @@ const ChatWindowComponent = ({
     if (user?.id && room) {
       // Primero, marca los mensajes como leídos
       readMessages(userId, room);
-  
+
       // Luego, dispara el dispatch de mensajes no leídos
       dispatch(fetchUnreadMessages(user.id));
     }
   }, [room, user?.id, dispatch, userId]); // Añadir dependencias necesarias
-  
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -149,13 +148,52 @@ const ChatWindowComponent = ({
     }
   };
 
+  const handleJoinGeneralClass = () => {
+    const userName = user.name;
+    const email = user.email;
+    let roomId = "";  
+    if (user?.language === "english") {
+      roomId = 'generalEnglishRoom'
+      // alert(roomId);
+    } else if (user?.language === "spanish") {
+      roomId = 'generalSpanishRoom';
+      // alert(roomId);
+    } else if (user?.language === "polish") {
+      roomId = 'generalPolishRoom';
+      // alert(roomId);
+    }
+    navigate("/classroom", {
+      state: { roomId, userName, email, fromMessage: true, },
+    });
+  }
   return (
-    <div className=" chat-pattern w-[100%] h-[92vh] flex flex-col border bg-white relative">
-      {" "}
-      {/* Set height to 92vh */}
-      <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
-        {studentName}
-      </h2>
+    <div className=" chat-pattern w-[100%] h-[92vh] flex flex-col bg-white relative">
+      <div className="2xl:p-[18.5px] p-[19px] bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3]">
+        <h2 className="text-lg font-semibold text-white tracking-tight text-center">
+          {studentName.includes("General Chat ") ? (
+            <>
+              {studentName}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 inline-block ml-2 cursor-pointer hover:text-purple-300 transition-colors"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                onClick={handleJoinGeneralClass}
+              >
+                <path d="M23 7l-7 4 7 4V7z" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+            </>
+          ) : (
+            studentName
+          )}
+          <span className="text-purple-100 block text-sm font-normal mt-1">
+            Active now
+          </span>
+        </h2>
+      </div>
       <PerfectScrollbar
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 pl-10"
@@ -167,8 +205,8 @@ const ChatWindowComponent = ({
                 const showTimestamp =
                   index === 0 ||
                   new Date(msg.timestamp) -
-                    new Date(chatMessages[index - 1].timestamp) >
-                    3 * 60 * 1000;
+                  new Date(chatMessages[index - 1].timestamp) >
+                  3 * 60 * 1000;
 
                 const showUsername =
                   msg.email !== email &&
@@ -188,14 +226,12 @@ const ChatWindowComponent = ({
                       </div>
                     )}
                     <li
-                      className={`flex ${
-                        isSender ? "justify-end" : "justify-start"
-                      }  text-[15px] ${isFirstFromUser ? "mt-4" : ""}`} // Apply mt-4 only to the first message from a user
+                      className={`flex ${isSender ? "justify-end" : "justify-start"
+                        }  text-[15px] ${isFirstFromUser ? "mt-4" : ""}`} // Apply mt-4 only to the first message from a user
                     >
                       <div
-                        className={`flex relative ${
-                          isSender ? "items-end" : "items-start"
-                        }`}
+                        className={`flex relative ${isSender ? "items-end" : "items-start"
+                          }`}
                       >
                         <div className="absolute left-[-32px] top-[-10px]">
                           {/* Render image from URL only if it's available */}
@@ -221,11 +257,10 @@ const ChatWindowComponent = ({
                           )}
                         </div>
                         <div
-                          className={`relative p-3 max-w-lg ${
-                            isSender
-                              ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
-                              : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-                          }`}
+                          className={`relative p-3 max-w-lg ${isSender
+                            ? "bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
+                            : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
+                            }`}
                         >
                           {showUsername && (
                             <div className="text-xs font-bold mb-1">
@@ -280,14 +315,14 @@ const ChatWindowComponent = ({
             placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onClick={() =>  dispatch(fetchUnreadMessages(user.id))}
+            onClick={() => dispatch(user.id)}
             onKeyDown={handleKeyDown}
             className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
           />
         </div>
         <button
           onClick={sendMessage}
-          className="p-2 bg-[#273296] text-white rounded-full m-1"
+          className="p-2 bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white rounded-full m-1"
         >
           <img
             src={send}

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import Dashboard from "../sections/dashboard";
-import Navbar from "./navbar";
+import Dashboard from "../../sections/dashboard";
+import Navbar from "../navbar";
 import UserModal from "./userModal";
 import DeleteUserModal from "./deleteUserModal";
 import { useSelector } from "react-redux";
 import StudentAssignment from "./studentAssignment"; // Import the new component
-import RemoveStudent from "./admin/RemoveStudent";
-import DisplayAllStudents from "./admin/DisplayAllStudents";
+import RemoveStudent from "./RemoveStudent";
+import DisplayAllStudents from "./DisplayAllStudents";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 const Admin = () => {

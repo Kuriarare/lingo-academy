@@ -11,10 +11,11 @@ body {
   width: 100%;
   padding: 0.6rem 2.5rem;
 }
-
+/* bg-gradient-to-r from-[#9E2FD0] to-[#A567C2]  */
 .custom-bg {
-  background: linear-gradient(87deg, rgb(17, 205, 239), rgb(17, 113, 239));
+  background: linear-gradient(to right,#A567C2, #9E2FD0 );
 }
+
 .custom-bg-profile {
   background: linear-gradient(87deg, rgb(23, 43, 77), rgb(26, 23, 77));
 }
@@ -223,3 +224,110 @@ body {
   height: 500px; /* Set a fixed height for the calendar container */
   overflow-y: auto; /* Enable vertical scrolling if the calendar exceeds the height */
 }
+
+/* Custom Toolbar */
+.rbc-toolbar {
+  background: linear-gradient(to right, #A567C2, #9E2FD0);
+  padding: 15px 20px !important;
+  border-radius: 15px 15px 0 0;
+  color: white;
+  
+  button {
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255,255,255,0.1) !important;
+      transform: translateY(-1px);
+    }
+    
+    &.rbc-active {
+      background: #4CAF50 !important;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    }
+  }
+}
+
+/* Time Grid */
+.rbc-time-header {
+  background: #f8f9fa;
+  
+  .rbc-label {
+    padding: 10px;
+    font-weight: 600;
+    color: #673AB7;
+  }
+}
+
+.rbc-time-content {
+  border-top: 2px solid #eee;
+  
+  .rbc-time-gutter {
+    color: #666;
+    font-size: 0.8em;
+  }
+}
+
+/* Language Learning Badges */
+.event-language-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #4CAF50;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7em;
+  font-weight: bold;
+}
+
+/* Current Time Indicator */
+.rbc-current-time-indicator {
+  background-color: #4CAF50 !important;
+  height: 3px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #4CAF50;
+    border-radius: 50%;
+    top: -5px;
+    left: -6px;
+  }
+}
+
+/* Styles default toolbar to match the design */
+.rbc-toolbar {
+  background: linear-gradient(to right, #A567C2, #9E2FD0) !important;
+  padding: 15px 20px !important;
+  border-radius: 15px 15px 0 0 !important;
+  color: white !important;
+  
+  button {
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    
+    &:hover {
+      background: rgba(255,255,255,0.1) !important;
+    }
+    
+    &.rbc-active {
+      background: #4CAF50 !important;
+    }
+  }
+}
+
+ /* Add this to your global CSS for custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+.custom-scrollbar { scroll-behavior: smooth; }
+li { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #9E2FD0; }

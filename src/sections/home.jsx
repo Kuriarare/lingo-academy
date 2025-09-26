@@ -2,127 +2,149 @@ import { useSelector } from "react-redux";
 import Dashboard from "./dashboard";
 import Navbar from "../components/navbar";
 import { DashboardCard } from "../components/home/DashboardCard";
-import { FiBook, FiClock, FiAward, FiCalendar } from "react-icons/fi";
+import { FiBook, FiClock, FiAward } from "react-icons/fi";
 import { InfoCard } from "../components/home/InfoCard";
 import { UpcomingClass } from "../components/home/UpcomingClass";
+import { useEffect, useState } from "react";
+import { getNextClasses } from "../data/helpers";
+import { useNavigate } from "react-router-dom";
+import { handleJoinClass } from "../data/joinClassHandler";
 
 const Home = () => {
   const user = useSelector((state) => state.user.userInfo.user);
+  const [hasAlertShown, setHasAlertShown] = useState(false);
+  const nextClasses = getNextClasses(user);
+  const navigate = useNavigate();
 
-  console.log("User:", user);
-  const home = "HOME PAGE";
+  useEffect(() => {
+    if (
+      user?.email === "christian.lingolandias.com@gmail.com" &&
+      !hasAlertShown
+    ) {
+      alert(
+        "Hom, hom, hom, te tuteo hom. Espero que tus clases sean exitosas hom. El homazo de homs c:   CON CARIÑO, DEL HOM PAL HOM"
+      );
+      setHasAlertShown(true);
+    }
+  }, [user, hasAlertShown]);
 
   return (
-    <div className="flex w-full h-[97vh] ">
-      {/* Dashboard on the left */}
+    <div className="flex w-full h-[97vh] bg-gray-50">
       <Dashboard />
 
-      {/* Home component on the right */}
       <div className="w-full h-full overflow-y-auto">
+        {/* Header Section */}
         <section className="w-full custom-bg">
           <div className="container">
-            <Navbar header={home} />
+            <Navbar header="HOME PAGE" />
           </div>
         </section>
 
-        {/* Content of the Home component */}
-        <div className="min-h-[92vh] ">
-          <div className="lg:px-8 md:px-5 md:pt-8 px-3 pt-4 pb-4">
-            {/* Welcome Section */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-600 mb-2">
-                Hello {user.name}, welcome to Lingolandias Academy
-              </h1>
-              <p className="text-gray-600">
-                Please visit the &quot;My Schedule&quot; section on the sidebar to join your upcoming classes.
-              </p>
-            </div>
+        {/* Main Content Container */}
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          {/* Welcome Section */}
+          <section className="mb-12 animate-fade-in">
+            <h1 className="text-3xl font-bold text-[#2D2D2D] mb-2">
+              Welcome, {user.name}
+              <span className="text-[#9E2FD0] ml-2">👋</span>
+            </h1>
+            <p className="text-lg text-gray-600">
+              Ready for your next lesson? Visit the{" "}
+              <span className="text-[#9E2FD0] font-medium">My Schedule</span>{" "}
+              section to join classes.
+            </p>
+          </section>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <DashboardCard
-                title="Total Classes"
-                value="0"
-                icon={<FiBook />}
-                gradient="bg-gradient-to-r from-[#11CDE7] to-[#1171EF]"
-              />
-              <DashboardCard
-                title="Study Hours"
-                value="0"
-                icon={<FiClock />}
-                gradient="bg-gradient-to-r from-[#172B4D] to-[#1A174D]"
-              />
-              <DashboardCard
-                title="Activities"
-                value="0"
-                icon={<FiAward />}
-                gradient="bg-gradient-to-r from-[#11CDE7] to-[#1171EF]"
-              />
-              {/* <DashboardCard
-                title="Streak Days"
-                value="0"
-                icon={<FiCalendar />}
-                gradient="bg-gradient-to-r from-[#172B4D] to-[#1A174D]"
-              /> */}
-            </div>
+          {/* Stats Dashboard */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-fade-in">
+            <DashboardCard
+              title="Total Classes"
+              value="0"
+              icon={<FiBook className="w-6 h-6" />}
+              gradient="bg-[#9E2FD0] hover:bg-[#8B26B8]"
+            />
+            <DashboardCard
+              title="Study Hours"
+              value="0"
+              icon={<FiClock className="w-6 h-6" />}
+              gradient="bg-[#26D9A1] hover:bg-[#20B98B]"
+            />
+            <DashboardCard
+              title="Activities"
+              value="0"
+              icon={<FiAward className="w-6 h-6" />}
+              gradient="bg-[#F6B82E] hover:bg-[#D89D20]"
+            />
+          </section>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              {/* Academy Info */}
-              <div className="lg:col-span-2">
-                <h2 className="text-2xl font-bold text-gray-600 mb-6">About Our Academy</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InfoCard
-                    question="How long will it take?"
-                    answer="Learning a foreign language is a process, so we will set your goals together and choose an individual teaching path so that you can start communicating in English as soon as possible."
-                    gradient="bg-gradient-to-r from-[#11CDE7] to-[#1171EF]"
-                  />
-                  <InfoCard
-                    question="Why do I lack freedom in speaking?"
-                    answer="The lack of freedom in speaking English has various causes, however, our task and goal is to detect your individual causes of this condition and its guaranteed elimination."
-                    gradient="bg-gradient-to-r from-[#172B4D] to-[#1A174D]"
-                  />
-                  <InfoCard
-                    question="Will we learn grammar?"
-                    answer="Yes and no. Yes: because grammar is important and crucial for proper communication. No: thanks to our methods you will learn grammar without even knowing it, so it is as if you were not learning it."
-                    gradient="bg-gradient-to-r from-[#172B4D] to-[#1A174D]"
-                  />
-                  <InfoCard
-                    question="What if we can't attend the scheduled classes?"
-                    answer="Don't worry about anything! The window for rescheduling classes is 24 hours before the scheduled meeting, and thanks to the human approach of our teachers, in exceptional cases, with the right attitude, you will be able to do something even after 24 hours."
-                    gradient="bg-gradient-to-r from-[#11CDE7] to-[#1171EF]"
-                  />
-                </div>
-              </div>
-
-              {/* Upcoming Classes */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-600 mb-6">Upcoming Classes</h2>
-                <UpcomingClass
-                  time="2:00 PM"
-                  teacher="Sarah Johnson"
-                  topic="Business English"
-                  level="Advanced"
+          {/* Content Grid */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Academy FAQ Section */}
+            <section className="lg:col-span-2 animate-fade-in">
+              <h2 className="text-2xl font-semibold text-[#2D2D2D] mb-6 pb-2 border-b border-gray-200">
+                Academy FAQs
+              </h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <InfoCard
+                  question="How long will it take?"
+                  answer="Learning a foreign language is a process, so we will set your goals together and choose an individual teaching path so that you can start communicating in English as soon as possible."
+                  gradient="bg-white border-l-4 border-[#9E2FD0] shadow-sm hover:shadow-md"
                 />
-                <UpcomingClass
-                  time="4:30 PM"
-                  teacher="Michael Smith"
-                  topic="Pronunciation"
-                  level="Intermediate"
+                <InfoCard
+                  question="Why do I lack freedom in speaking?"
+                  answer="The lack of freedom in speaking English has various causes, however, our task and goal is to detect your individual causes of this condition and its guaranteed elimination."
+                  gradient="bg-white border-l-4 border-[#26D9A1] shadow-sm hover:shadow-md"
                 />
-                <UpcomingClass
-                  time="6:00 PM"
-                  teacher="Emma Davis"
-                  topic="Grammar Focus"
-                  level="Advanced"
+                <InfoCard
+                  question="Will we learn grammar?"
+                  answer="Yes and no. Yes: because grammar is important and crucial for proper communication. No: thanks to our methods you will learn grammar without even knowing it, so it is as if you were not learning it."
+                  gradient="bg-white border-l-4 border-[#F6B82E] shadow-sm hover:shadow-md"
+                />
+                <InfoCard
+                  question="What if we can't attend classes?"
+                  answer="Don't worry about anything! The window for rescheduling classes is 24 hours before the scheduled meeting, and thanks to the human approach of our teachers, in exceptional cases, with the right attitude, you will be able to do something even after 24 hours."
+                  gradient="bg-white border-l-4 border-[#13AD97] shadow-sm hover:shadow-md"
                 />
               </div>
-            </div>
+            </section>
+
+            {/* Schedule Section */}
+            <section className="bg-white rounded-xl shadow-sm p-5 h-fit sticky top-6 border border-gray-100 animate-fade-in">
+              <h2 className="text-lg font-medium text-gray-500 mb-4 tracking-wide">
+                NEXT SESSIONS
+              </h2>
+              {nextClasses.map((classSession) => {
+          // For teachers, we use classSession.nextOccurrence;
+          // For students, we use classSession.occurrence.
+          const displayDate =
+            user.role === "teacher"
+              ? classSession.nextOccurrence
+              : classSession.occurrence;
+          
+          return (
+            <UpcomingClass
+              key={`${classSession.id}-${displayDate.format()}`}
+              time={displayDate.format("h:mm A")}
+              teacher={
+                user.role === "teacher"
+                  ? classSession.studentName   // teacher sees the student's name
+                  : classSession.teacherName   // student sees the teacher's name
+              }
+              date={displayDate.format("MMM D")}
+              // Instead of a joinLink prop, we pass an onJoin callback:
+              onJoin={() =>
+                handleJoinClass({ user, classSession, navigate })
+              }
+            />
+          );
+        })}
+            </section>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
 };
 
 export default Home;
+

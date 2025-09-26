@@ -10,6 +10,13 @@ import EmojiPicker from "emoji-picker-react";
 import useDeleteMessage from "../hooks/useDeleteMessage";
 import MessageOptionsCard from "./messages/MessageOptionsCard";
 import { FiX } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import {
+  fetchLastMessageForRoom,
+  fetchMessagesForTeacher,
+  fetchUnreadCountsForStudent,
+} from "../redux/chatSlice";
+import useChatWindow from "../hooks/useChatWindow";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -25,6 +32,7 @@ const ChatWindow = ({
 }) => {
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
+  const dispatch = useDispatch();
 
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
@@ -32,6 +40,7 @@ const ChatWindow = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [fileUrl, setFileUrl] = useState(""); // Estado para almacenar la URL del archivo
+  // const dispatch = useDispatch();
 
   const scrollContainerRef = useRef(null);
   const {
@@ -40,6 +49,8 @@ const ChatWindow = ({
     toggleOptionsMenu,
     openMessageId,
   } = useDeleteMessage(setChatMessages, socket, room);
+
+  const { readChat } = useChatWindow(room, email);
 
   // Función para detectar links y envolverlos en etiquetas <a>
   const formatMessageWithLinks = (text, isSender) => {
@@ -51,7 +62,7 @@ const ChatWindow = ({
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
+          className={`${isSender ? "text-white " : "text-blue-600 underline"}`}
         >
           {part}
         </a>
@@ -108,22 +119,54 @@ const ChatWindow = ({
   }, [socket, room]); // Only re-run if
 
   useEffect(() => {
+    let socketInstance;
+    
+    const handleNewChat = () => {
+      // Use current user from Redux store directly
+      if (user?.role === "teacher") {
+        dispatch(fetchMessagesForTeacher());
+      } else if (user?.role === "user") {
+        dispatch(fetchUnreadCountsForStudent());
+      }
+    };
+  
     if (username && room) {
-      const socketInstance = io(`${BACKEND_URL}`);
+      socketInstance = io(`${BACKEND_URL}`);
       setSocket(socketInstance);
-
-      fetchMessages();
+  
+      // Initial setup
+      const initializeChat = async () => {
+        await fetchMessages();
+        await readChat(room, email);
+      };
+      initializeChat();
+  
+      // Event listeners
       socketInstance.emit("join", { username, room });
-
+      
       socketInstance.on("chat", (data) => {
         setChatMessages((prevMessages) => [...prevMessages, data]);
       });
-
-      return () => {
-        socketInstance.disconnect();
-      };
+  
+      socketInstance.on("newChat", () => {
+        readChat(room, email);
+        handleNewChat(); // Unified handler
+      });
+  
+      // Add unified chat handler
+      socketInstance.on("newChat", handleNewChat);
     }
-  }, [username, room]);
+  
+    return () => {
+      if (socketInstance) {
+        // Clean up all listeners
+        socketInstance.off("chat");
+        socketInstance.off("newChat");
+        socketInstance.off("newChat", handleNewChat);
+        socketInstance.disconnect();
+      }
+    };
+  }, [username, room, dispatch, email]); // Added missing email dependency
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -153,6 +196,7 @@ const ChatWindow = ({
           message: fileUrl,
           timestamp,
         });
+        // dispatch(fetchLastMessageForRoom(room));
       }
     }
   };
@@ -167,7 +211,8 @@ const ChatWindow = ({
         message: fileUrl,
         timestamp,
       });
-      setFileUrl(null); // Limpiar la URL del archivo
+      setFileUrl(null);
+      // dispatch(fetchLastMessageForRoom(room));
     }
   };
   const handleFileChange = async (event) => {
@@ -267,7 +312,7 @@ const ChatWindow = ({
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
+          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
         >
           {fileName}.pdf
         </a>
@@ -287,7 +332,7 @@ const ChatWindow = ({
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
+          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
         >
           {fileName}.{fileExtension}
         </a>
@@ -300,7 +345,7 @@ const ChatWindow = ({
           download
           target="_blank"
           rel="noopener noreferrer"
-          className={`${isSender ? "text-white" : "text-blue-600 underline"}`}
+          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
         >
           {fileUrl}
         </a>
@@ -313,14 +358,14 @@ const ChatWindow = ({
 
     // Adjust the height of the textarea dynamically
     const textarea = e.target;
-    textarea.style.height = "auto"; // Reset height to auto to calculate scrollHeight
+    textarea.style.height = "auto"; 
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   return (
     <div
       className="chat-pattern 2xl:w-[350px] xl:w-[330px]  w-full flex flex-col border  "
-      style={{ height: height || "600px" }}
+      style={{ height: height || "630px" }}
     >
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
         {user.role === "user" ? (
@@ -359,87 +404,87 @@ const ChatWindow = ({
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 relative"
       >
-     <ul>
-  {chatMessages.map((msg, index) => {
-    const showTimestamp =
-      index === 0 ||
-      new Date(msg.timestamp) - new Date(chatMessages[index - 1].timestamp) >
-        3 * 60 * 1000;
-    const isSender = msg.email === email; // Identifying the sender using the email
-    const isFileMessage = msg.message.startsWith("http");
+        <ul>
+          {chatMessages.map((msg, index) => {
+            const showTimestamp =
+              index === 0 ||
+              new Date(msg.timestamp) -
+                new Date(chatMessages[index - 1].timestamp) >
+                3 * 60 * 1000;
+            const isSender = msg.email === email; // Identifying the sender using the email
+            const isFileMessage = msg.message.startsWith("http");
 
-    return (
-      <div key={index} className="mb-2">
-        {showTimestamp && (
-          <div className="text-center text-gray-500 text-[12px] my-2">
-            {formatTimestamp(msg.timestamp)}
-          </div>
-        )}
-        <li
-          className={`flex ${
-            isSender ? "justify-end" : "justify-start"
-          } mb-2 text-[15px]`}
-        >
-          <div
-            className={`flex flex-col ${
-              isSender ? "items-end" : "items-start"
-            } relative`}
-          >
-            {/* Dots Menu (only for Sender) */}
-            {isSender && (
-              <div
-                className="absolute left-0 top-[-15px] flex items-center z-20"
-                onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
-              >
-                {/* Dots button */}
-                <button className="p-1 hover:bg-gray-200 rounded-full">
-                  <BsThreeDots className="text-gray-500" />
-                </button>
-              </div>
-            )}
-
-            {/* Message content */}
-            <div
-              className={`p-2 rounded-xl ${
-                isSender
-                  ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
-                  : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-              }`}
-              style={{
-                whiteSpace: "pre-wrap", // Keeps spaces and line breaks intact
-                wordWrap: "break-word", // Ensures long words wrap
-                overflowWrap: "break-word", // Breaks long words or URLs
-                wordBreak: "break-word", // Breaks long words or URLs (for extra security)
-              }}
-            >
-              <span>
-                {isFileMessage ? (
-                  renderFileMessage(msg.message, isSender)
-                ) : (
-                  <>
-                    {/* Render links in messages */}
-                    {formatMessageWithLinks(msg.message, isSender)}
-                  </>
+            return (
+              <div key={index} className="mb-2">
+                {showTimestamp && (
+                  <div className="text-center text-gray-500 text-[12px] my-2">
+                    {formatTimestamp(msg.timestamp)}
+                  </div>
                 )}
-              </span>
-            </div>
+                <li
+                  className={`flex ${
+                    isSender ? "justify-end" : "justify-start"
+                  } mb-2 text-[15px]`}
+                >
+                  <div
+                    className={`flex flex-col ${
+                      isSender ? "items-end" : "items-start"
+                    } relative`}
+                  >
+                    {/* Dots Menu (only for Sender) */}
+                    {isSender && (
+                      <div
+                        className="absolute left-0 top-[-15px] flex items-center z-20"
+                        onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
+                      >
+                        {/* Dots button */}
+                        <button className="p-1 hover:bg-gray-200 rounded-full">
+                          <BsThreeDots className="text-gray-500" />
+                        </button>
+                      </div>
+                    )}
 
-            {/* Options card that appears on click */}
-            {openMessageId === msg.id && (
-              <div className="absolute top-2 left-0 z-30">
-                <MessageOptionsCard
-                  onEdit={() => handleEditMessage(msg)}
-                  onDelete={() => handleDeleteNormalMessage(msg.id)}
-                />
+                    {/* Message content */}
+                    <div
+                      className={`p-2 rounded-xl ${
+                        isSender
+                          ? "bg-[#273296] text-white text-left rounded-l-lg rounded-tr-lg rounded-br-none"
+                          : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
+                      }`}
+                      style={{
+                        whiteSpace: "pre-wrap", // Keeps spaces and line breaks intact
+                        wordWrap: "break-word", // Ensures long words wrap
+                        overflowWrap: "break-word", // Breaks long words or URLs
+                        wordBreak: "break-word", // Breaks long words or URLs (for extra security)
+                      }}
+                    >
+                      <span>
+                        {isFileMessage ? (
+                          renderFileMessage(msg.message, isSender)
+                        ) : (
+                          <>
+                            {/* Render links in messages */}
+                            {formatMessageWithLinks(msg.message, isSender)}
+                          </>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Options card that appears on click */}
+                    {openMessageId === msg.id && (
+                      <div className="absolute top-2 left-0 z-30">
+                        <MessageOptionsCard
+                          onEdit={() => handleEditMessage(msg)}
+                          onDelete={() => handleDeleteNormalMessage(msg.id)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </li>
               </div>
-            )}
-          </div>
-        </li>
-      </div>
-    );
-  })}
-</ul>
-
+            );
+          })}
+        </ul>
       </PerfectScrollbar>
 
       <div className="flex-shrink-0 flex items-center ml-1">

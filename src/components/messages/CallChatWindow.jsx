@@ -141,7 +141,7 @@ const CallChatWindow = ({
       {" "}
       {/* Set height to 92vh */}
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
-        {studentName ? `Chat with ${studentName}` : "Teachers Chat - English"}
+        Group Chat
       </h2>
       <PerfectScrollbar
         containerRef={(ref) => (scrollContainerRef.current = ref)}

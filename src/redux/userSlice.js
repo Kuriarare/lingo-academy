@@ -107,6 +107,7 @@ const userSlice = createSlice({
     logout: (state) => {
       state.userInfo = null;
       localStorage.removeItem("token");
+      localStorage.removeItem("state");
     },
   },
   extraReducers: (builder) => {

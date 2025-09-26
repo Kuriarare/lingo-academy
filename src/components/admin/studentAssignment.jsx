@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Calendar, dayjsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
-import avatar from "../assets/logos/avatar.jpg";
+import avatar from "../../assets/logos/avatar.jpg";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 import utc from "dayjs/plugin/utc";
