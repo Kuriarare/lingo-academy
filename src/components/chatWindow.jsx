@@ -1,24 +1,17 @@
-import { useState, useEffect, useRef } from "react";
-import { io } from "socket.io-client";
-import send from "../assets/logos/send.png";
-import { BsEmojiSmile, BsPaperclip, BsThreeDots } from "react-icons/bs";
-import axios from "axios";
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
-import useDeleteMessage from "../hooks/useDeleteMessage";
-import MessageOptionsCard from "./messages/MessageOptionsCard";
+import { BsEmojiSmile, BsPaperclip, BsThreeDots } from "react-icons/bs";
 import { FiX } from "react-icons/fi";
-import { useDispatch } from "react-redux";
-import {
-  fetchLastMessageForRoom,
-  fetchMessagesForTeacher,
-  fetchUnreadCountsForStudent,
-} from "../redux/chatSlice";
-import useChatWindow from "../hooks/useChatWindow";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import send from "../assets/logos/send.png";
+import useDeleteMessage from "../hooks/useDeleteMessage";
+import useSocketManager from "../hooks/useSocketManager";
+import useMessageHandler from "../hooks/useMessageHandler";
+import useMessageFormatter from "../hooks/useMessageFormatter.jsx";
+import useChatInput from "../hooks/useChatInput";
+import MessageOptionsCard from "./messages/MessageOptionsCard";
 
 const ChatWindow = ({
   username,
@@ -32,141 +25,39 @@ const ChatWindow = ({
 }) => {
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
-  const dispatch = useDispatch();
-
-  const [socket, setSocket] = useState(null);
-  const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [fileUrl, setFileUrl] = useState(""); // Estado para almacenar la URL del archivo
-  // const dispatch = useDispatch();
-
   const scrollContainerRef = useRef(null);
+
+  const { socket, chatMessages, setChatMessages } = useSocketManager(
+    room,
+    username,
+    email
+  );
+  const { uploading, sendMessage, handleFileChange } = useMessageHandler(
+    socket,
+    room,
+    username,
+    email
+  );
+  const { formatMessageWithLinks, formatTimestamp, renderFileMessage } =
+    useMessageFormatter();
+  const {
+    message,
+    setMessage,
+    showEmojiPicker,
+    setShowEmojiPicker,
+    handleInput,
+    handleKeyDown,
+    handleEmojiClick,
+    resetTextarea,
+  } = useChatInput((message, setMessage, resetTextarea) =>
+    sendMessage(message, setMessage, resetTextarea)
+  );
   const {
     handleDeleteNormalMessage,
     handleEditMessage,
     toggleOptionsMenu,
     openMessageId,
   } = useDeleteMessage(setChatMessages, socket, room);
-
-  const { readChat } = useChatWindow(room, email);
-
-  // Función para detectar links y envolverlos en etiquetas <a>
-  const formatMessageWithLinks = (text, isSender) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.split(urlRegex).map((part, index) =>
-      urlRegex.test(part) ? (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white " : "text-blue-600 underline"}`}
-        >
-          {part}
-        </a>
-      ) : (
-        part
-      )
-    );
-  };
-
-  const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return `${date.toLocaleTimeString()}`;
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday at ${date.toLocaleTimeString()}`;
-    } else {
-      return `${date.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-      })} at ${date.toLocaleTimeString()}`;
-    }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/chat/messages/${room}`, {
-        params: { email },
-      });
-      setChatMessages(response.data.reverse());
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (socket && room) {
-      socket.on("normalChatDeleted", (data) => {
-        console.log(`Message with ID ${data.messageId} was deleted`);
-
-        // Remove the deleted message from the local state
-        setChatMessages((prevMessages) =>
-          prevMessages.filter((msg) => msg.id !== data.messageId)
-        );
-      });
-
-      return () => {
-        socket.off("normalChatDeleted"); // Clean up the event listener on component unmount
-      };
-    }
-  }, [socket, room]); // Only re-run if
-
-  useEffect(() => {
-    let socketInstance;
-    
-    const handleNewChat = () => {
-      // Use current user from Redux store directly
-      if (user?.role === "teacher") {
-        dispatch(fetchMessagesForTeacher());
-      } else if (user?.role === "user") {
-        dispatch(fetchUnreadCountsForStudent());
-      }
-    };
-  
-    if (username && room) {
-      socketInstance = io(`${BACKEND_URL}`);
-      setSocket(socketInstance);
-  
-      // Initial setup
-      const initializeChat = async () => {
-        await fetchMessages();
-        await readChat(room, email);
-      };
-      initializeChat();
-  
-      // Event listeners
-      socketInstance.emit("join", { username, room });
-      
-      socketInstance.on("chat", (data) => {
-        setChatMessages((prevMessages) => [...prevMessages, data]);
-      });
-  
-      socketInstance.on("newChat", () => {
-        readChat(room, email);
-        handleNewChat(); // Unified handler
-      });
-  
-      // Add unified chat handler
-      socketInstance.on("newChat", handleNewChat);
-    }
-  
-    return () => {
-      if (socketInstance) {
-        // Clean up all listeners
-        socketInstance.off("chat");
-        socketInstance.off("newChat");
-        socketInstance.off("newChat", handleNewChat);
-        socketInstance.disconnect();
-      }
-    };
-  }, [username, room, dispatch, email]); // Added missing email dependency
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -175,196 +66,9 @@ const ChatWindow = ({
     }
   }, [chatMessages]);
 
-  const sendMessage = async () => {
-    if (message && room && socket) {
-      // Si hay un mensaje de texto, enviar el mensaje como de costumbre
-      const timestamp = new Date();
-      socket.emit("chat", { username, email, room, message, timestamp });
-      setMessage("");
-      resetTextarea();
-    } else {
-      // Si no hay mensaje de texto, ejecutar la función para cargar el archivo
-      await handleFileChange(); // Esperamos a que se cargue el archivo
-
-      // Después de la carga, obtener la URL y enviarla como mensaje
-      if (fileUrl) {
-        const timestamp = new Date();
-        socket.emit("chat", {
-          username,
-          email,
-          room,
-          message: fileUrl,
-          timestamp,
-        });
-        // dispatch(fetchLastMessageForRoom(room));
-      }
-    }
-  };
-
-  const sendFileMessage = (fileUrl) => {
-    if (fileUrl && room && socket) {
-      const timestamp = new Date();
-      socket.emit("chat", {
-        username,
-        email,
-        room,
-        message: fileUrl,
-        timestamp,
-      });
-      setFileUrl(null);
-      // dispatch(fetchLastMessageForRoom(room));
-    }
-  };
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("userId", "user-id"); // Pasa el ID del usuario, si es necesario
-
-    // Log FormData to check its contents
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
-    try {
-      const response = await fetch(`${BACKEND_URL}/upload/chat-upload`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Error uploading file");
-      }
-
-      const data = await response.json();
-      const fileUrl = data.fileUrl;
-      console.log("File uploaded:", fileUrl);
-      sendFileMessage(fileUrl);
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-      resetTextarea();
-    }
-  };
-
-  const resetTextarea = () => {
-    const textarea = document.querySelector("textarea");
-    if (textarea) {
-      textarea.style.height = "auto"; // Reset to initial height
-    }
-  };
-
-  const handleEmojiClick = (emojiObject) => {
-    setMessage((prevMessage) => prevMessage + emojiObject.emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const removeAccents = (str) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  };
-
-  const cleanFileName = (fileUrl) => {
-    // Extract the file name (without extension)
-    let fileName = fileUrl.split("/").pop().split(".")[0];
-
-    // Remove the numbers and dashes at the start of the filename
-    fileName = fileName.replace(/^\d+-|^\d+$/g, "");
-
-    // Remove accents from the file name
-    fileName = removeAccents(fileName);
-
-    // Remove extra spaces and dashes
-    fileName = fileName.replace(/[-\s]+/g, " ").trim();
-
-    return fileName;
-  };
-
-  const renderFileMessage = (fileUrl, isSender) => {
-    const fileExtension = fileUrl.split(".").pop().toLowerCase();
-    const fileName = cleanFileName(fileUrl);
-
-    if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
-      // Renderiza una imagen
-      return (
-        <img
-          src={fileUrl}
-          alt="shared file"
-          className="max-w-full max-h-40 cursor-pointer"
-          onClick={() => window.open(fileUrl, "_blank")}
-        />
-      );
-    } else if (fileExtension === "pdf") {
-      // Renderiza el nombre del archivo en lugar de "Download PDF"
-      return (
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
-        >
-          {fileName}.pdf
-        </a>
-      );
-    } else if (["mp3", "wav"].includes(fileExtension)) {
-      // Renderiza un reproductor de audio
-      return (
-        <audio controls className="max-w-full">
-          <source src={fileUrl} type={`audio/${fileExtension}`} />
-          Tu navegador no soporta el elemento de audio.
-        </audio>
-      );
-    } else if (["docx", "pptx", "xlsx", "txt", "odt"].includes(fileExtension)) {
-      // Handle document and PowerPoint files (Word, Excel, PowerPoint, etc.)
-      return (
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
-        >
-          {fileName}.{fileExtension}
-        </a>
-      );
-    } else {
-      // Enlace de descarga para otros tipos de archivos
-      return (
-        <a
-          href={fileUrl}
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
-        >
-          {fileUrl}
-        </a>
-      );
-    }
-  };
-
-  const handleInput = (e) => {
-    setMessage(e.target.value);
-
-    // Adjust the height of the textarea dynamically
-    const textarea = e.target;
-    textarea.style.height = "auto"; 
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  };
-
   return (
     <div
-      className="chat-pattern 2xl:w-[350px] xl:w-[330px]  w-full flex flex-col border  "
+      className="chat-pattern 2xl:w-[350px] xl:w-[330px] w-full flex flex-col border"
       style={{ height: height || "630px" }}
     >
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
@@ -411,7 +115,7 @@ const ChatWindow = ({
               new Date(msg.timestamp) -
                 new Date(chatMessages[index - 1].timestamp) >
                 3 * 60 * 1000;
-            const isSender = msg.email === email; // Identifying the sender using the email
+            const isSender = msg.email === email;
             const isFileMessage = msg.message.startsWith("http");
 
             return (
@@ -431,20 +135,17 @@ const ChatWindow = ({
                       isSender ? "items-end" : "items-start"
                     } relative`}
                   >
-                    {/* Dots Menu (only for Sender) */}
                     {isSender && (
                       <div
                         className="absolute left-0 top-[-15px] flex items-center z-20"
-                        onClick={() => toggleOptionsMenu(msg.id)} // Ensure toggle is triggered on click
+                        onClick={() => toggleOptionsMenu(msg.id)}
                       >
-                        {/* Dots button */}
                         <button className="p-1 hover:bg-gray-200 rounded-full">
                           <BsThreeDots className="text-gray-500" />
                         </button>
                       </div>
                     )}
 
-                    {/* Message content */}
                     <div
                       className={`p-2 rounded-xl ${
                         isSender
@@ -452,25 +153,21 @@ const ChatWindow = ({
                           : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
                       }`}
                       style={{
-                        whiteSpace: "pre-wrap", // Keeps spaces and line breaks intact
-                        wordWrap: "break-word", // Ensures long words wrap
-                        overflowWrap: "break-word", // Breaks long words or URLs
-                        wordBreak: "break-word", // Breaks long words or URLs (for extra security)
+                        whiteSpace: "pre-wrap",
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        wordBreak: "break-word",
                       }}
                     >
                       <span>
                         {isFileMessage ? (
                           renderFileMessage(msg.message, isSender)
                         ) : (
-                          <>
-                            {/* Render links in messages */}
-                            {formatMessageWithLinks(msg.message, isSender)}
-                          </>
+                          <>{formatMessageWithLinks(msg.message, isSender)}</>
                         )}
                       </span>
                     </div>
 
-                    {/* Options card that appears on click */}
                     {openMessageId === msg.id && (
                       <div className="absolute top-2 left-0 z-30">
                         <MessageOptionsCard
@@ -501,7 +198,7 @@ const ChatWindow = ({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
-            rows={1} // Start with 1 row
+            rows={1}
           />
           <input
             type="file"
@@ -519,7 +216,7 @@ const ChatWindow = ({
           </label>
         </div>
         <button
-          onClick={sendMessage}
+          onClick={() => sendMessage(message, setMessage, resetTextarea)}
           className="p-2 bg-[#273296] text-white rounded-full m-1"
         >
           <img

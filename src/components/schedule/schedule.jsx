@@ -11,32 +11,15 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import CustomToolbar from "../customToolBar";
-import { fetchMessagesForTeacher, fetchUnreadCountsForStudent } from "../../redux/chatSlice";
+import {
+  fetchMessagesForTeacher,
+  fetchUnreadCountsForStudent,
+} from "../../redux/chatSlice";
 import { io } from "socket.io-client";
+import { meetingRooms, teacherChats } from "../../constants";
+import EditEventModal from "./EditEventModal";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const engRoom = "English Teachers Meeting";
-const spaRoom = "Spanish Teachers Meeting";
-const polRoom = "Polish Teachers Meeting";
-
-
-const teacherChats = {
-  english: {
-    id: "uuid-teacher-english",
-    name: "Teachers Chat - English",
-    type: "teacher",
-  },
-  spanish: {
-    id: "uuid-teacher-spanish",
-    name: "Teachers Chat - Spanish",
-    type: "teacher",
-  },
-  polish: {
-    id: "uuid-teacher-polish",
-    name: "Teachers Chat - Polish",
-    type: "teacher",
-  },
-};
 
 const Schedule = () => {
   const user = useSelector((state) => state.user.userInfo.user);
@@ -141,9 +124,9 @@ const handleJoinMeeting = (roomName = null) => {
   // If roomName is provided, it's a teacher meeting room
   if (roomName) {
     // Map the roomName to the teacherChats IDs
-    if (roomName === engRoom) roomId = teacherChats.english.id;
-    else if (roomName === spaRoom) roomId = teacherChats.spanish.id;
-    else if (roomName === polRoom) roomId = teacherChats.polish.id;
+    if (roomName === meetingRooms.english) roomId = teacherChats.english.id;
+    else if (roomName === meetingRooms.spanish) roomId = teacherChats.spanish.id;
+    else if (roomName === meetingRooms.polish) roomId = teacherChats.polish.id;
   } else {
     // If no roomName, it's a group class - use teacher ID logic
     if (user.role === "teacher") {
@@ -279,174 +262,43 @@ const handleJoinMeeting = (roomName = null) => {
               {!loading && (user.role === "teacher" || user.role === "admin") && (
                 <section className="flex justify-end m-3 gap-8">
                   {/* Display buttons based on role and language */}
-                  {user.role === "admin" && (
-                    <>
-                      <button
-                        onClick={() => handleJoinMeeting(engRoom)}
-                        className="button-69"
-                        role="button"
-                      >
-                        Teachers Meeting - English
-                      </button>
-                      <button
-                        onClick={() => handleJoinMeeting(spaRoom)}
-                        className="button-69"
-                        role="button"
-                      >
-                        Teachers Meeting - Spanish
-                      </button>
-                      <button
-                        onClick={() => handleJoinMeeting(polRoom)}
-                        className="button-69"
-                        role="button"
-                      >
-                        Teachers Meeting - Polish
-                      </button>
-                    </>
-                  )}
+                  {(user.role === "admin" || user.role === "teacher") &&
+                    Object.entries(meetingRooms).map(([lang, roomName]) => {
+                      const shouldRender =
+                        user.role === "admin" ||
+                        (user.role === "teacher" &&
+                          user.language.includes(lang));
+                      if (!shouldRender) return null;
 
-                  {/* For teacher, show the appropriate button based on language */}
-                  {user.role === "teacher" && (
-                    <>
-                      {user.language.includes("english") && (
+                      return (
                         <button
-                          onClick={() => handleJoinMeeting(engRoom)}
+                          key={lang}
+                          onClick={() => handleJoinMeeting(roomName)}
                           className="button-69"
                           role="button"
                         >
-                          Teachers Meeting - English
+                          {roomName}
                         </button>
-                      )}
-                      {user.language.includes("spanish") && (
-                        <button
-                          onClick={() => handleJoinMeeting(spaRoom)}
-                          className="button-69"
-                          role="button"
-                        >
-                          Teachers Meeting - Spanish
-                        </button>
-                      )}
-                      {user.language.includes("polish") && (
-                        <button
-                          onClick={() => handleJoinMeeting(polRoom)}
-                          className="button-69"
-                          role="button"
-                        >
-                          Teachers Meeting - Polish
-                        </button>
-                      )}
-                    </>
-                  )}
+                      );
+                    })}
                 </section>
               )}
             </div>
           </div>
         </div>
-        {/* Modal - Form to edit the event */}
-        {isModalOpen && (
-          <div className="modal-overlay relative">
-            <div className="modal-content">
-              <h3>Edit Event</h3>
-              <div className="calendar-container">
-                {/* Mini Calendar for selecting a date */}
-                <Calendar
-                  localizer={localizer}
-                  startAccessor="start"
-                  endAccessor="end"
-                  defaultView="week"
-                  step={60} // Step size of 60 minutes
-                  timeslots={1} // Show each minute slot
-                  eventPropGetter={() => ({
-                    style: {
-                      backgroundColor: "#273296",
-                      color: "white",
-                      borderRadius: "5px",
-                      border: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    },
-                  })}
-                  formats={{
-                    eventTimeRangeFormat: () => "",
-                  }}
-                  onSelectEvent={handleEventClick}
-                  selectable
-                  onSelectSlot={handleSelectSlot}
-                />
-                {/* <Calendar
-                  localizer={localizer}
-                  events={events}
-                  defaultView="month"
-                  views={["month"]}
-                  onSelectSlot={({ start }) => setSelectedDate(start)}
-                /> */}
-              </div>
-
-              {/* Form to edit the event */}
-              {openModalFrom && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                  <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                    <form onSubmit={handleSubmitEvent}>
-                      <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                          Start Time (HH:MM format, 24-hour)
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="HH:MM"
-                          name="start"
-                          value={eventDetails.start || ""}
-                          onChange={handleEventDetailsChange}
-                          className="border rounded w-full py-2 px-3 text-gray-700"
-                          required
-                        />
-                      </div>
-                      <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                          End Time (HH:MM format, 24-hour)
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="HH:MM"
-                          name="end"
-                          value={eventDetails.end || ""}
-                          onChange={handleEventDetailsChange}
-                          className="border rounded w-full py-2 px-3 text-gray-700"
-                          required
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="bg-blue-600 text-white py-2 px-4 rounded-md w-full"
-                      >
-                        Update Event
-                      </button>
-                      <button
-                        type="submit"
-                        className="bg-red-600 text-white mt-2 py-2 px-4 rounded-md w-full"
-                        onClick={() => setOpenModalFrom(false)}
-                      >
-                        Close
-                      </button>
-                    </form>
-                  </div>
-                </div>
-
-              )}
-
-              <button
-                className="button-69 mt-2"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setEditingEvent(false);
-                }}
-              >
-                Close Modal
-              </button>
-            </div>
-          </div>
-        )}
+        <EditEventModal
+          isModalOpen={isModalOpen}
+          localizer={localizer}
+          handleEventClick={handleEventClick}
+          handleSelectSlot={handleSelectSlot}
+          openModalFrom={openModalFrom}
+          handleSubmitEvent={handleSubmitEvent}
+          eventDetails={eventDetails}
+          handleEventDetailsChange={handleEventDetailsChange}
+          setOpenModalFrom={setOpenModalFrom}
+          setIsModalOpen={setIsModalOpen}
+          setEditingEvent={setEditingEvent}
+        />
       </div>
     </div>
   );

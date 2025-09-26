@@ -1,24 +1,23 @@
-// import vero from '../assets/images/weronika.jpg';
-// import christian from '../assets/images/christian.jpg';
+export const meetingRooms = {
+  english: "English Teachers Meeting",
+  spanish: "Spanish Teachers Meeting",
+  polish: "Polish Teachers Meeting",
+};
 
-// const courses = [
-//     {
-//         id: 1,
-//         title: "English Course",
-//         description: "With this detailed English course you will learn how to speak English fluently and confidently.",
-//         image: vero,   
-//         button : "Read more "
-//     },
-
-//     {
-//         id: 2,
-//         title: "Spanish Course",
-//         description: "With this detailed Spanish course you will learn how to speak Spanish fluently and confidently.",
-//         image: christian,   
-//         button : "Read more "
-//     },
-
- 
-// ];
-
-// export default courses;
+export const teacherChats = {
+  english: {
+    id: "uuid-teacher-english",
+    name: "Teachers Chat - English",
+    type: "teacher",
+  },
+  spanish: {
+    id: "uuid-teacher-spanish",
+    name: "Teachers Chat - Spanish",
+    type: "teacher",
+  },
+  polish: {
+    id: "uuid-teacher-polish",
+    name: "Teachers Chat - Polish",
+    type: "teacher",
+  },
+};
