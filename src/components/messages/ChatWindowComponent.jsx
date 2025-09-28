@@ -115,11 +115,15 @@ const ChatWindowComponent = ({
       }
       socket.emit("globalChat", messageData);
       setMessage("");
+      const textarea = document.querySelector("textarea");
+      if (textarea) {
+        textarea.style.height = "auto";
+      }
     }
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
     }
@@ -128,6 +132,13 @@ const ChatWindowComponent = ({
   const handleEmojiClick = (emojiObject) => {
     setMessage((prevMessage) => prevMessage + emojiObject.emoji);
     setShowEmojiPicker(false);
+  };
+
+  const handleInput = (e) => {
+    setMessage(e.target.value);
+    const textarea = e.target;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const formatTimestamp = (timestamp) => {
@@ -226,12 +237,14 @@ const ChatWindowComponent = ({
                       </div>
                     )}
                     <li
-                      className={`flex ${isSender ? "justify-end" : "justify-start"
-                        }  text-[15px] ${isFirstFromUser ? "mt-4" : ""}`} // Apply mt-4 only to the first message from a user
+                      className={`flex ${
+                        isSender ? "justify-end" : "justify-start"
+                      } text-[15px] ${isFirstFromUser ? "mt-4" : ""}`}
                     >
                       <div
-                        className={`flex relative ${isSender ? "items-end" : "items-start"
-                          }`}
+                        className={`flex flex-col relative ${
+                          isSender ? "items-end" : "items-start"
+                        }`}
                       >
                         <div className="absolute left-[-32px] top-[-10px]">
                           {/* Render image from URL only if it's available */}
@@ -258,9 +271,9 @@ const ChatWindowComponent = ({
                         </div>
                         <div
                           className={`relative p-3 max-w-lg ${isSender
-                            ? "bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
+                            ? "bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white text-left rounded-l-lg rounded-tr-lg rounded-br-none"
                             : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-                            }`}
+                        }`}
                         >
                           {showUsername && (
                             <div className="text-xs font-bold mb-1">
@@ -291,7 +304,16 @@ const ChatWindowComponent = ({
                           )}
 
                           {/* Message Content */}
-                          <span>{msg.message}</span>
+                          <span
+                            style={{
+                              whiteSpace: "pre-wrap",
+                              wordWrap: "break-word",
+                              overflowWrap: "break-word",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {msg.message}
+                          </span>
                         </div>
                       </div>
                     </li>
@@ -310,14 +332,14 @@ const ChatWindowComponent = ({
           >
             <BsEmojiSmile className="text-[21px] text-slate-400" />
           </button>
-          <input
-            type="text"
+          <textarea
             placeholder="Type a message..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleInput}
             onClick={() => dispatch(user.id)}
             onKeyDown={handleKeyDown}
-            className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+            className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+            rows={1}
           />
         </div>
         <button

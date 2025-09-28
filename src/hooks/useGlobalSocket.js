@@ -8,7 +8,7 @@ import { socket } from "../socket";
 
 const useGlobalSocket = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.userInfo.user);
+  const user = useSelector((state) => state.user.userInfo?.user);
 
   useEffect(() => {
     if (user) {

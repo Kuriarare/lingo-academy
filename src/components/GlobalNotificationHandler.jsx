@@ -4,7 +4,7 @@ import useNotificationSound from "../hooks/useNotificationSound";
 import notificationSound from "../assets/sounds/notification.wav";
 
 const GlobalNotificationHandler = () => {
-  const user = useSelector((state) => state.user.userInfo.user);
+  const user = useSelector((state) => state.user.userInfo?.user);
   const unreadCountsByRoom = useSelector(
     (state) => state.chat.unreadCountsByRoom
   );
