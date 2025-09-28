@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchMessagesForTeacher,
@@ -7,10 +8,10 @@ import {
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const useChatWindow = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.userInfo.user);
+  const userRole = useSelector((state) => state.user.userInfo.user?.role);
 
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = useCallback((timestamp) => {
     const date = new Date(timestamp);
     const today = new Date();
     const yesterday = new Date();
@@ -26,9 +27,9 @@ const useChatWindow = () => {
         day: "numeric",
       })} at ${date.toLocaleTimeString()}`;
     }
-  };
+  }, []);
 
-  const readMessages = async (userId, room) => {
+  const readMessages = useCallback(async (userId, room) => {
     try {
       const response = await fetch(
         `${BACKEND_URL}/chat/delete-unread-global-messages/`,
@@ -49,9 +50,9 @@ const useChatWindow = () => {
     } catch (error) {
       console.error("Error reading messages:", error);
     }
-  };
+  }, []);
 
-  const readChat = async (room, email) => {
+  const readChat = useCallback(async (room, email) => {
     try {
       const response = await fetch(`${BACKEND_URL}/chat/read-chat/`, {
         method: "PATCH",
@@ -62,9 +63,9 @@ const useChatWindow = () => {
       });
   
       if (response.ok) {
-        if (user.role === "teacher") {
+        if (userRole === "teacher") {
           dispatch(fetchMessagesForTeacher());
-        } else if (user.role === "user") {
+        } else if (userRole === "user") {
           dispatch(fetchUnreadCountsForStudent());
         }
       } else {
@@ -73,10 +74,13 @@ const useChatWindow = () => {
     } catch (error) {
       console.error("Error reading chat:", error);
     }
-  };
+  }, [dispatch, userRole]);
   
 
-  return { formatTimestamp, readMessages, readChat };
+  return useMemo(
+    () => ({ formatTimestamp, readMessages, readChat }),
+    [formatTimestamp, readMessages, readChat]
+  );
 };
 
 export default useChatWindow;

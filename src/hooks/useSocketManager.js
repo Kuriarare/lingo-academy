@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { socket as socketInstance } from "../socket";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,10 +17,10 @@ const useSocketManager = (room, username, email) => {
   const [chatMessages, setChatMessages] = useState([]);
   const user = useSelector((state) => state.user.userInfo.user);
   const dispatch = useDispatch();
-  const { readChat } = useChatWindow(room, email);
+  const { readChat } = useChatWindow();
   const playSound = useNotificationSound(notificationSound);
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/chat/messages/${room}`, {
         params: { email },
@@ -29,7 +29,7 @@ const useSocketManager = (room, username, email) => {
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-  };
+  }, [room, email]);
 
   useEffect(() => {
     if (socket && room) {
@@ -70,7 +70,7 @@ const useSocketManager = (room, username, email) => {
         socket.emit("leave", { room });
       };
     }
-  }, [username, room, dispatch, email, readChat, playSound]);
+  }, [username, room, email, socket, fetchMessages, readChat, playSound]);
 
   return { socket, chatMessages, setChatMessages };
 };
