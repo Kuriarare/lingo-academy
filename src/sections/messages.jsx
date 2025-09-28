@@ -150,7 +150,7 @@ console.log(updatedChats);
             <section className="flex-1">
               {selectedChat ? (
                 <>
-                  <div className="lg:hidden absolute top-16 left-5 z-10">
+                  <div className="lg:hidden absolute top-24 left-5 z-10">
                     <button onClick={handleBackClick}>
                       <img src={back} alt="Back" className="w-8 h-8" />
                     </button>

@@ -4,13 +4,6 @@ const useChatInput = (sendMessage) => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const resetTextarea = () => {
-    const textarea = document.querySelector("textarea");
-    if (textarea) {
-      textarea.style.height = "auto";
-    }
-  };
-
   const handleInput = (e) => {
     setMessage(e.target.value);
     const textarea = e.target;
@@ -18,11 +11,17 @@ const useChatInput = (sendMessage) => {
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
+  const resetTextarea = () => {
+    const textarea = document.querySelector("textarea");
+    if (textarea) {
+      textarea.style.height = "auto";
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage(message, setMessage, resetTextarea);
-      resetTextarea();
     }
   };
 

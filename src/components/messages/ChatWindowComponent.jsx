@@ -1,18 +1,18 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import send from "../../assets/logos/send.png";
 import { BsEmojiSmile, BsThreeDots } from "react-icons/bs";
-import axios from "axios";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
 import avatar from "../../assets/logos/avatar.jpg";
 import MessageOptionsCard from "./MessageOptionsCard";
-import useDeleteMessage from "../../hooks/useDeleteMessage";
-import useChatWindow from "../../hooks/useChatWindow";
+import useDeleteMessage from "../../hooks/useDeleteMessage.js";
+import useChatWindow from "../../hooks/useChatWindow.js";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnreadMessages } from "../../redux/messageSlice";
 import { useNavigate } from "react-router-dom";
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import useGlobalChat from "../../hooks/useGlobalChat.js";
+import useChatInputHandler from "../../hooks/useChatInputHandler.js";
 
 const ChatWindowComponent = ({
   username,
@@ -23,14 +23,43 @@ const ChatWindowComponent = ({
   userId,
   socket,
 }) => {
-  const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const scrollContainerRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo.user);
-  console.log("user", user);
+
+  const { chatMessages, setChatMessages, sendMessage } = useGlobalChat(
+    socket,
+    room,
+    username,
+    email,
+    userUrl
+  );
+
+  const [message, setMessage] = useState("");
+  const {
+    showEmojiPicker,
+    setShowEmojiPicker,
+    handleInput,
+    handleEmojiClick,
+  } = useChatInputHandler(message, setMessage);
+
+  const handleSendMessage = () => {
+    if (message.trim() === "") return;
+    sendMessage(message);
+    setMessage("");
+    const textarea = document.querySelector("textarea");
+    if (textarea) {
+      textarea.style.height = "auto";
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   const {
     handleDeleteMessage,
@@ -41,57 +70,12 @@ const ChatWindowComponent = ({
 
   const { readMessages } = useChatWindow();
 
-  const fetchMessages = async () => {
-    try {
-      // Fetch messages based on the room and email to ensure proper user identification
-      const response = await axios.get(
-        `${BACKEND_URL}/chat/global-chats/${room}`,
-        {
-          params: { email }, // Passing email to the backend to fetch the right data
-        }
-      );
-
-      // Reverse the messages to show the latest on top
-      setChatMessages(response.data.reverse());
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (socket && room && user?.id) {
-      // Emit join event to the socket
-      socket.emit("join", { username, room });
-
-      // Fetch initial messages for the room
-      fetchMessages();
-      // readMessages(userId, room);
-
-      // // Dispatch to update the unread messages for the user
-      // dispatch(fetchUnreadMessages(user.id));
-
-      // Listen for incoming global chat messages
-      const handleGlobalChat = (data) => {
-        setChatMessages((prevMessages) => [...prevMessages, data]);
-      };
-      socket.on("globalChat", handleGlobalChat);
-
-      // Cleanup: Remove listeners and leave the room
-      return () => {
-        socket.off("globalChat", handleGlobalChat);
-      };
-    }
-  }, [room, socket, user, dispatch, username, userId]);
-
   useEffect(() => {
     if (user?.id && room) {
-      // Primero, marca los mensajes como leídos
       readMessages(userId, room);
-
-      // Luego, dispara el dispatch de mensajes no leídos
       dispatch(fetchUnreadMessages(user.id));
     }
-  }, [room, user?.id, dispatch, userId]); // Añadir dependencias necesarias
+  }, [room, user?.id, dispatch, userId, readMessages]);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -99,47 +83,6 @@ const ChatWindowComponent = ({
         scrollContainerRef.current.scrollHeight;
     }
   }, [chatMessages]);
-
-  const sendMessage = () => {
-    if (message && room && socket) {
-      const timestamp = new Date();
-      const messageData = {
-        username,
-        room,
-        email,
-        message,
-        timestamp,
-      };
-      if (userUrl) {
-        messageData.userUrl = userUrl;
-      }
-      socket.emit("globalChat", messageData);
-      setMessage("");
-      const textarea = document.querySelector("textarea");
-      if (textarea) {
-        textarea.style.height = "auto";
-      }
-    }
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const handleEmojiClick = (emojiObject) => {
-    setMessage((prevMessage) => prevMessage + emojiObject.emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const handleInput = (e) => {
-    setMessage(e.target.value);
-    const textarea = e.target;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  };
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -336,14 +279,14 @@ const ChatWindowComponent = ({
             placeholder="Type a message..."
             value={message}
             onChange={handleInput}
-            onClick={() => dispatch(user.id)}
+            onClick={() => dispatch(fetchUnreadMessages(user.id))}
             onKeyDown={handleKeyDown}
             className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
             rows={1}
           />
         </div>
         <button
-          onClick={sendMessage}
+          onClick={handleSendMessage}
           className="p-2 bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white rounded-full m-1"
         >
           <img
