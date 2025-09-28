@@ -27,6 +27,7 @@ const ChatWindow = ({
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
   const scrollContainerRef = useRef(null);
+  const fileInputRef = useRef(null);
   const { socket, chatMessages, setChatMessages } = useSocketManager(
     room,
     username,
@@ -36,12 +37,22 @@ const ChatWindow = ({
     room,
     chatMessages
   );
-  const { uploading, sendMessage, handleFileChange } = useMessageHandler(
-    socket,
-    room,
-    username,
-    email
-  );
+  const {
+    uploading,
+    error,
+    file,
+    sendMessage,
+    handleFileChange,
+    uploadFile,
+    clearFile,
+  } = useMessageHandler(socket, room, username, email);
+
+  const handleClearFile = () => {
+    clearFile();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
+  };
   const { formatMessageWithLinks, formatTimestamp, renderFileMessage } =
     useMessageFormatter();
   const {
@@ -217,53 +228,95 @@ const ChatWindow = ({
         </ul>
       </PerfectScrollbar>
 
-      <div className="flex-shrink-0 flex items-center ml-1">
-        <div className="relative flex-1 flex items-center">
-          <button
-            onClick={() => setShowEmojiPicker((prevState) => !prevState)}
-            className="absolute left-2 bg-transparent"
-          >
-            <BsEmojiSmile className="text-[21px] text-slate-400" />
-          </button>
-          <textarea
-            placeholder="Type a message..."
-            value={message}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
-            rows={1}
-          />
-          <input
-            type="file"
-            onChange={handleFileChange}
-            disabled={uploading}
-            className="absolute opacity-0 cursor-pointer"
-            id="fileInput"
-            style={{ pointerEvents: "none" }}
-          />
-          <label
-            htmlFor="fileInput"
-            className="absolute right-2 cursor-pointer"
-          >
-            <BsPaperclip className="text-[21px] text-slate-400" />
-          </label>
-        </div>
-        <button
-          onClick={() => sendMessage(message, setMessage, resetTextarea)}
-          className="p-2 bg-[#273296] text-white rounded-full m-1"
-        >
-          <img
-            src={send}
-            alt="send"
-            className="2xl:w-[24px] xl:w-[23px] w-[22px]"
-          />
-        </button>
-
-        {showEmojiPicker && (
-          <div className="absolute bottom-16 left-2 z-10">
-            <EmojiPicker onEmojiClick={handleEmojiClick} />
+      <div>
+        {file && (
+          <div className="p-4 border-t border-b border-gray-200 bg-gray-50 mb-2 mx-2 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700 truncate">
+                {file.name}
+              </span>
+              <button
+                onClick={handleClearFile}
+                className="text-red-500 hover:text-red-700"
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="text-center text-sm text-gray-500 mt-2">
+              Your file is ready to send, press Send.
+            </div>
           </div>
         )}
+
+        {uploading && (
+          <div className="flex items-center justify-center mb-2">
+            <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6"></div>
+            <span className="ml-2 text-sm text-gray-600">
+              Uploading file...
+            </span>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-2 bg-red-100 text-red-700 rounded-lg mb-2 text-sm mx-2">
+            {error}
+          </div>
+        )}
+        <div className="flex-shrink-0 flex items-center ml-1">
+          <div className="relative flex-1 flex items-center">
+            <button
+              onClick={() => setShowEmojiPicker((prevState) => !prevState)}
+              className="absolute left-2 bg-transparent"
+            >
+              <BsEmojiSmile className="text-[21px] text-slate-400" />
+            </button>
+            <textarea
+              placeholder="Type a message..."
+              value={message}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+              rows={1}
+              disabled={!!file}
+            />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              disabled={uploading}
+              className="absolute opacity-0 cursor-pointer"
+              id="fileInput"
+              style={{ pointerEvents: "none" }}
+            />
+            <label
+              htmlFor="fileInput"
+              className="absolute right-2 cursor-pointer"
+            >
+              <BsPaperclip className="text-[21px] text-slate-400" />
+            </label>
+          </div>
+          <button
+            onClick={
+              file
+                ? uploadFile
+                : () => sendMessage(message, setMessage, resetTextarea)
+            }
+            className="p-2 bg-[#273296] text-white rounded-full m-1"
+            disabled={uploading || (!message.trim() && !file)}
+          >
+            <img
+              src={send}
+              alt="send"
+              className="2xl:w-[24px] xl:w-[23px] w-[22px]"
+            />
+          </button>
+
+          {showEmojiPicker && (
+            <div className="absolute bottom-16 left-2 z-10">
+              <EmojiPicker onEmojiClick={handleEmojiClick} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

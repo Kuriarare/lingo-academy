@@ -4,48 +4,30 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const useMessageHandler = (socket, room, username, email) => {
   const [uploading, setUploading] = useState(false);
-  const [fileUrl, setFileUrl] = useState("");
+  const [error, setError] = useState(null);
+  const [file, setFile] = useState(null);
 
-  const sendMessage = async (message, setMessage, resetTextarea) => {
-    if (message && room && socket) {
+  const sendMessage = (message, setMessage, resetTextarea) => {
+    if (message.trim() && room && socket) {
       const timestamp = new Date();
       socket.emit("chat", { username, email, room, message, timestamp });
       setMessage("");
       resetTextarea();
-    } else {
-      await handleFileChange();
-      if (fileUrl) {
-        const timestamp = new Date();
-        socket.emit("chat", {
-          username,
-          email,
-          room,
-          message: fileUrl,
-          timestamp,
-        });
-      }
     }
   };
 
-  const sendFileMessage = (fileUrl) => {
-    if (fileUrl && room && socket) {
-      const timestamp = new Date();
-      socket.emit("chat", {
-        username,
-        email,
-        room,
-        message: fileUrl,
-        timestamp,
-      });
-      setFileUrl(null);
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
     }
   };
 
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
+  const uploadFile = async () => {
     if (!file) return;
 
     setUploading(true);
+    setError(null);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -63,15 +45,39 @@ const useMessageHandler = (socket, room, username, email) => {
 
       const data = await response.json();
       const uploadedFileUrl = data.fileUrl;
-      sendFileMessage(uploadedFileUrl);
-    } catch (error) {
-      console.error("Error uploading file:", error);
+
+      if (uploadedFileUrl && room && socket) {
+        const timestamp = new Date();
+        socket.emit("chat", {
+          username,
+          email,
+          room,
+          message: uploadedFileUrl,
+          timestamp,
+        });
+      }
+    } catch (err) {
+      setError("Failed to upload file. Please try again.");
+      console.error("Error uploading file:", err);
     } finally {
       setUploading(false);
+      setFile(null);
     }
   };
 
-  return { uploading, sendMessage, handleFileChange };
+  const clearFile = () => {
+    setFile(null);
+  };
+
+  return {
+    uploading,
+    error,
+    file,
+    sendMessage,
+    handleFileChange,
+    uploadFile,
+    clearFile,
+  };
 };
 
 export default useMessageHandler;
