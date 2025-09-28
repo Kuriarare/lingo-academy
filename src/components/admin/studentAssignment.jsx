@@ -198,64 +198,71 @@ const StudentAssignment = ({ teachers, students }) => {
   };
 
   return (
-    <section className="flex flex-col md:flex-row gap-4 m-6 p-4 box-shadow-form">
+    <section className="flex flex-col md:flex-row gap-6 m-6 p-6 bg-gray-50 rounded-xl shadow-md justify-center items-start">
       {/* Students List */}
-      {/* Students List */}
-      <div className="w-1/4 max-h-[12rem] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Students</h2>
-        {studentsWithoutTeacher.length === 0 ? (
-          <p>No students available without a teacher.</p>
-        ) : (
-          studentsWithoutTeacher.map((student) => (
-            <div
-              key={student.id}
-              className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-                selectedStudent?.id === student.id ? "bg-blue-100" : ""
-              }`}
-              onClick={() => handleStudentSelect(student)}
-            >
-              <img
-                src={!student.avatarUrl ? avatar : student.avatarUrl}
-                alt={`${student.name} ${student.lastName}`}
-                className="w-8 h-8 rounded-full"
-              />
-              <div>
-                <span className="font-medium">{`${student.name} ${student.lastName}`}</span>
-                <span className="text-sm text-gray-500 block">
-                  {student.email}
-                </span>
+      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Students</h2>
+        <div className="max-h-[12rem] overflow-y-auto pr-2">
+          {studentsWithoutTeacher.length === 0 ? (
+            <p className="text-gray-500">No students available.</p>
+          ) : (
+            studentsWithoutTeacher.map((student) => (
+              <div
+                key={student.id}
+                className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
+                  selectedStudent?.id === student.id
+                    ? "border-blue-500 bg-blue-50 shadow-sm"
+                    : "border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+                }`}
+                onClick={() => handleStudentSelect(student)}
+              >
+                <img
+                  src={!student.avatarUrl ? avatar : student.avatarUrl}
+                  alt={`${student.name} ${student.lastName}`}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div>
+                  <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
+                  <span className="text-sm text-gray-500 block">
+                    {student.email}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
 
       {/* Teachers List */}
-      <div className="w-1/4 max-h-[12rem] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Teachers</h2>
-        {teachers.map((teacher) => (
-          <div
-            key={teacher.id}
-            className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-              selectedTeacher?.id === teacher.id ? "bg-blue-100" : ""
-            }`}
-            onClick={() => handleTeacherSelect(teacher)}
-          >
-            <img
-              src={!teacher.avatarUrl ? avatar : teacher.avatarUrl}
-              alt={`${teacher.name} ${teacher.lastName}`}
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <span className="font-medium">{`${teacher.name} ${teacher.lastName}`}</span>
-              <span className="text-sm text-gray-500 block">
-                {teacher.email}
-              </span>
+      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Teachers</h2>
+        <div className="max-h-[12rem] overflow-y-auto pr-2">
+          {teachers.map((teacher) => (
+            <div
+              key={teacher.id}
+              className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
+                selectedTeacher?.id === teacher.id
+                  ? "border-blue-500 bg-blue-50 shadow-sm"
+                  : "border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+              }`}
+              onClick={() => handleTeacherSelect(teacher)}
+            >
+              <img
+                src={!teacher.avatarUrl ? avatar : teacher.avatarUrl}
+                alt={`${teacher.name} ${teacher.lastName}`}
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <span className="font-medium text-gray-800">{`${teacher.name} ${teacher.lastName}`}</span>
+                <span className="text-sm text-gray-500 block">
+                  {teacher.email}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-      <div className="flex flex-col justify-end">
+      <div className="flex flex-col justify-end mt-4 md:mt-0">
         <button
           onClick={handleCalendarOpen}
           disabled={!selectedTeacher || !selectedStudent}
@@ -277,7 +284,7 @@ const StudentAssignment = ({ teachers, students }) => {
 
           {/* Modal Content */}
           <div className="fixed inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white w-[700px] rounded-lg shadow-lg p-4 max-w-6xl relative">
+            <div className="bg-white w-full md:w-3/4 lg:w-1/2 rounded-lg shadow-lg p-4 max-w-4xl relative">
               {/* Close Button */}
               <button
                 className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -383,7 +390,7 @@ const StudentAssignment = ({ teachers, students }) => {
       )}
 
       {/* Assign Button */}
-      <div className="flex flex-col justify-end">
+      <div className="flex flex-col justify-end mt-4 md:mt-0">
         <button
           onClick={handleAssignClick}
           disabled={!selectedTeacher || !selectedStudent || events.length === 0}

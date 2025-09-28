@@ -56,64 +56,72 @@ const RemoveStudent = ({ teachers }) => {
   };
 
   return (
-    <section className="flex flex-col md:flex-row gap-4 m-6 p-4 box-shadow-form">
+    <section className="flex flex-col md:flex-row gap-6 m-6 p-6 bg-gray-50 rounded-xl shadow-md justify-center items-start">
       {/* Teachers List */}
-      <div className="w-1/4 max-h-[12rem] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Teachers</h2>
-        {teachers.map((teacher) => (
-          <div
-            key={teacher.id}
-            className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-              selectedTeacher?.id === teacher.id ? "bg-blue-100" : ""
-            }`}
-            onClick={() => handleTeacherSelect(teacher)}
-          >
-            <img
-              src={!teacher.avatarUrl ? avatar : teacher.avatarUrl}
-              alt={`${teacher.name} ${teacher.lastName}`}
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <span className="font-medium">{`${teacher.name} ${teacher.lastName}`}</span>
-              <span className="text-sm text-gray-500 block">{teacher.email}</span>
+      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Teachers</h2>
+        <div className="max-h-[12rem] overflow-y-auto pr-2">
+          {teachers.map((teacher) => (
+            <div
+              key={teacher.id}
+              className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
+                selectedTeacher?.id === teacher.id
+                  ? "border-blue-500 bg-blue-50 shadow-sm"
+                  : "border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+              }`}
+              onClick={() => handleTeacherSelect(teacher)}
+            >
+              <img
+                src={!teacher.avatarUrl ? avatar : teacher.avatarUrl}
+                alt={`${teacher.name} ${teacher.lastName}`}
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <span className="font-medium text-gray-800">{`${teacher.name} ${teacher.lastName}`}</span>
+                <span className="text-sm text-gray-500 block">{teacher.email}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Students List */}
-      <div className="w-1/4 max-h-[12rem] overflow-y-auto">
+      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
         {selectedTeacher && selectedTeacher.students && selectedTeacher.students.length > 0 && (
           <>
-            <h2 className="text-xl font-bold mb-4">Students</h2>
-            {selectedTeacher.students.map((student) => (
-              <div
-                key={student.id}
-                className={`p-2 border rounded-md cursor-pointer mb-2 flex items-center gap-2 ${
-                  selectedStudents.includes(student.id) ? "bg-red-100" : ""
-                }`}
-                onClick={() => handleStudentSelect(student.id)}
-              >
-                <img
-                  src={!student.avatarUrl ? avatar : student.avatarUrl}
-                  alt={`${student.name} ${student.lastName}`}
-                  className="w-8 h-8 rounded-full"
-                />
-                <div>
-                  <span className="font-medium">{`${student.name} ${student.lastName}`}</span>
-                  <span className="text-sm text-gray-500 block">{student.email}</span>
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">Students</h2>
+            <div className="max-h-[12rem] overflow-y-auto pr-2">
+              {selectedTeacher.students.map((student) => (
+                <div
+                  key={student.id}
+                  className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
+                    selectedStudents.includes(student.id)
+                      ? "border-red-500 bg-red-50 shadow-sm"
+                      : "border-gray-200 hover:bg-gray-100 hover:border-red-300"
+                  }`}
+                  onClick={() => handleStudentSelect(student.id)}
+                >
+                  <img
+                    src={!student.avatarUrl ? avatar : student.avatarUrl}
+                    alt={`${student.name} ${student.lastName}`}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
+                    <span className="text-sm text-gray-500 block">{student.email}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </>
         )}
         {selectedTeacher && selectedTeacher.students && selectedTeacher.students.length === 0 && (
-          <p>No students available for this teacher.</p>
+          <p className="text-gray-500">No students available for this teacher.</p>
         )}
       </div>
 
       {/* Remove Button */}
-      <div className="flex flex-col justify-end">
+      <div className="flex flex-col justify-end mt-4 md:mt-0">
         <button
           onClick={removeStudents}
           disabled={!selectedTeacher || selectedStudents.length === 0}
