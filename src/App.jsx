@@ -11,12 +11,14 @@ import JitsiClassRoom from './components/JitsiClassRoom';
 import Messages from './sections/messages';
 import ForgotPassword from './components/login/forgotPassword';
 import ResetPassword from './components/login/resetPassword';
+import GlobalNotificationHandler from './components/GlobalNotificationHandler';
 
 function App() {
 
 
   return (
     <Router>
+      <GlobalNotificationHandler />
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/login" element={<Login />} />

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 import { useSelector } from "react-redux";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
@@ -11,6 +11,7 @@ import useSocketManager from "../hooks/useSocketManager";
 import useMessageHandler from "../hooks/useMessageHandler";
 import useMessageFormatter from "../hooks/useMessageFormatter.jsx";
 import useChatInput from "../hooks/useChatInput";
+import useArchivedMessages from "../hooks/useArchivedMessages";
 import MessageOptionsCard from "./messages/MessageOptionsCard";
 
 const ChatWindow = ({
@@ -26,11 +27,14 @@ const ChatWindow = ({
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
   const scrollContainerRef = useRef(null);
-
   const { socket, chatMessages, setChatMessages } = useSocketManager(
     room,
     username,
     email
+  );
+  const { allMessages, fetchArchivedMessages, hasMore } = useArchivedMessages(
+    room,
+    chatMessages
   );
   const { uploading, sendMessage, handleFileChange } = useMessageHandler(
     socket,
@@ -59,12 +63,31 @@ const ChatWindow = ({
     openMessageId,
   } = useDeleteMessage(setChatMessages, socket, room);
 
-  useEffect(() => {
+  const isArchivedFetch = useRef(false);
+  const prevScrollHeight = useRef(null);
+
+  const handleLoadMore = async () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop =
-        scrollContainerRef.current.scrollHeight;
+      prevScrollHeight.current = scrollContainerRef.current.scrollHeight;
     }
-  }, [chatMessages]);
+    isArchivedFetch.current = true;
+    await fetchArchivedMessages();
+  };
+
+  useLayoutEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    if (isArchivedFetch.current) {
+      // Restore scroll position after loading older messages
+      scrollContainer.scrollTop =
+        scrollContainer.scrollHeight - prevScrollHeight.current;
+      isArchivedFetch.current = false; // Reset the flag
+    } else {
+      // Scroll to bottom for new messages or on initial load
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  }, [allMessages]);
 
   return (
     <div
@@ -108,12 +131,22 @@ const ChatWindow = ({
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 overflow-hidden mb-4 p-3 relative"
       >
+        {hasMore && (
+          <div className="text-center">
+            <button
+              onClick={handleLoadMore}
+              className="my-2 py-1 px-4 bg-white border border-gray-300 text-gray-600 text-sm rounded-full hover:bg-gray-100 transition-colors focus:outline-none"
+            >
+              Load more messages
+            </button>
+          </div>
+        )}
         <ul>
-          {chatMessages.map((msg, index) => {
+          {allMessages.map((msg, index) => {
             const showTimestamp =
               index === 0 ||
               new Date(msg.timestamp) -
-                new Date(chatMessages[index - 1].timestamp) >
+                new Date(allMessages[index - 1].timestamp) >
                 3 * 60 * 1000;
             const isSender = msg.email === email;
             const isFileMessage = msg.message.startsWith("http");

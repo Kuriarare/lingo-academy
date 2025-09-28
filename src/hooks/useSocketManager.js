@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import { socket as socketInstance } from "../socket";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -7,15 +7,18 @@ import {
   fetchUnreadCountsForStudent,
 } from "../redux/chatSlice";
 import useChatWindow from "./useChatWindow";
+import useNotificationSound from "./useNotificationSound";
+import notificationSound from "../assets/sounds/notification.wav";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const useSocketManager = (room, username, email) => {
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState(socketInstance);
   const [chatMessages, setChatMessages] = useState([]);
   const user = useSelector((state) => state.user.userInfo.user);
   const dispatch = useDispatch();
   const { readChat } = useChatWindow(room, email);
+  const playSound = useNotificationSound(notificationSound);
 
   const fetchMessages = async () => {
     try {
@@ -43,49 +46,31 @@ const useSocketManager = (room, username, email) => {
   }, [socket, room]);
 
   useEffect(() => {
-    let socketInstance;
-
-    const handleNewChat = () => {
-      if (user?.role === "teacher") {
-        dispatch(fetchMessagesForTeacher());
-      } else if (user?.role === "user") {
-        dispatch(fetchUnreadCountsForStudent());
-      }
-    };
-
     if (username && room) {
-      socketInstance = io(`${BACKEND_URL}`);
-      setSocket(socketInstance);
-
       const initializeChat = async () => {
         await fetchMessages();
         await readChat(room, email);
       };
       initializeChat();
 
-      socketInstance.emit("join", { username, room });
+      socket.emit("join", { username, room });
 
-      socketInstance.on("chat", (data) => {
-        setChatMessages((prevMessages) => [...prevMessages, data]);
-      });
-
-      socketInstance.on("newChat", () => {
+      const handleChatMessage = (data) => {
+        if (data.email !== email) {
+          playSound();
+        }
         readChat(room, email);
-        handleNewChat();
-      });
+        setChatMessages((prevMessages) => [...prevMessages, data]);
+      };
 
-      socketInstance.on("newChat", handleNewChat);
+      socket.on("chat", handleChatMessage);
+
+      return () => {
+        socket.off("chat", handleChatMessage);
+        socket.emit("leave", { room });
+      };
     }
-
-    return () => {
-      if (socketInstance) {
-        socketInstance.off("chat");
-        socketInstance.off("newChat");
-        socketInstance.off("newChat", handleNewChat);
-        socketInstance.disconnect();
-      }
-    };
-  }, [username, room, dispatch, email]);
+  }, [username, room, dispatch, email, readChat, playSound]);
 
   return { socket, chatMessages, setChatMessages };
 };

@@ -9,9 +9,6 @@ import {
   fetchMessagesForTeacher,
   fetchUnreadCountsForStudent,
 } from "../redux/chatSlice";
-import { io } from "socket.io-client";
-import { use } from "react";
-let socket;
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const JitsiClassRoom = () => {
@@ -47,31 +44,6 @@ const JitsiClassRoom = () => {
   //   }
   // }, [user]);
 
-  useEffect(() => {
-    if (user && roomId) {
-      if (!socket) {
-        socket = io(`${BACKEND_URL}`);
-      }
-
-      const handleNewChat = () => {
-        if (user.role === "teacher") {
-          dispatch(fetchMessagesForTeacher());
-        } else if (user.role === "user") {
-          dispatch(fetchUnreadCountsForStudent());
-        }
-      };
-
-      socket.on("newChat", handleNewChat);
-
-      return () => {
-        if (socket) {
-          socket.off("newChat", handleNewChat);
-          socket.disconnect();
-          socket = null;
-        }
-      };
-    }
-  }, [user, roomId, dispatch]);
 
   const unreadCount = unreadCountsByRoom[roomId] || 0;
 
