@@ -6,16 +6,10 @@ const useChatInput = (sendMessage) => {
 
   const handleInput = (e) => {
     setMessage(e.target.value);
-    const textarea = e.target;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const resetTextarea = () => {
-    const textarea = document.querySelector("textarea");
-    if (textarea) {
-      textarea.style.height = "auto";
-    }
+    // The textarea height is now fixed, so no reset is needed.
   };
 
   const handleKeyDown = (event) => {

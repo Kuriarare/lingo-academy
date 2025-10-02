@@ -25,54 +25,45 @@ const getStatusText = (chat) => {
 
   
 return (
-  <div className="h-[92vh] flex flex-col border-gray-100 bg-white">
-    {/* Header with brand color gradient */}
-    <div className="p-5 bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3]">
-      <h2 className="text-[17px] font-semibold text-white">
-        Conversations
-        <span className="text-purple-100 font-normal block text-sm mt-1">
-          {chats.length} active chats
-        </span>
-      </h2>
+  <div className="h-[92vh] flex flex-col bg-white shadow-lg border-r border-gray-200">
+    {/* Header */}
+    <div className="p-4 bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white" style={{ paddingTop: '1.1rem', paddingBottom: '1.1rem' }}>
+      <h2 className="text-xl font-bold">Conversations</h2>
+      <p className="text-sm text-purple-200">{chats.length} active chats</p>
     </div>
 
     {/* Chat List */}
-    <ul className="flex-1 overflow-y-auto custom-scrollbar">
+    <ul className="flex-1 overflow-y-auto custom-scrollbar p-2">
       {chats.map((chat) => (
         <li
           key={chat.id}
-          className="group relative border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+          className="rounded-lg mb-2 hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
           onClick={() => onChatSelect(chat)}
         >
-          <div className="flex items-center p-4 space-x-3">
-            <div className={`p-2 rounded-lg ${getIconStyle(chat.type)}`}>
-              {chat.type === "teacher" ? (
-                <FaUsers className="text-[#9E2FD0] w-5 h-5" />
-              ) : chat.type === "group" ? (
-                <FaUserFriends className="text-[#9E2FD0] w-5 h-5" />
-              ) : (
-                <FaComments className="text-[#9E2FD0] w-5 h-5" />
-              )}
+          <div className="flex items-center p-4">
+            <div className="relative">
+              <div className={`p-3 rounded-full ${getIconStyle(chat.type)}`}>
+                {chat.type === "teacher" ? (
+                  <FaUsers className="text-[#9E2FD0] w-6 h-6" />
+                ) : chat.type === "group" ? (
+                  <FaUserFriends className="text-[#9E2FD0] w-6 h-6" />
+                ) : (
+                  <FaComments className="text-[#9E2FD0] w-6 h-6" />
+                )}
+              </div>
+              <span className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full ${getOnlineStatus(chat)} border-2 border-white`}></span>
             </div>
 
-            {/* Chat Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-800 truncate">
-                  {chat.name}
-                </span>
+            <div className="flex-1 ml-4">
+              <div className="flex items-center justify-between">
+                <p className="text-md font-semibold text-gray-900">{chat.name}</p>
                 {chat.unreadCount > 0 && (
-                  <span className="bg-[#9E2FD0] text-white text-xs font-medium px-[6px] py-[2px] rounded-full">
+                  <span className="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                     {chat.unreadCount}
                   </span>
                 )}
               </div>
-              <div className="flex items-center space-x-2">
-                <span className={`w-2 h-2 rounded-full ${getOnlineStatus(chat)}`}></span>
-                <span className="text-xs text-gray-500 font-light">
-                  {getStatusText(chat)}
-                </span>
-              </div>
+              <p className="text-sm text-gray-500">{getStatusText(chat)}</p>
             </div>
           </div>
         </li>

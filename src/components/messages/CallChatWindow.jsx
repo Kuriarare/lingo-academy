@@ -137,128 +137,100 @@ const CallChatWindow = ({
   };
 
   return (
-    <div className=" chat-pattern 2xl:w-[340px] xl:w-[330px] md:w-[300px] h-[100vh] flex flex-col border bg-white relative">
-      {" "}
-      {/* Set height to 92vh */}
-      <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
-        Group Chat
-      </h2>
+    <div className="2xl:w-[340px] xl:w-[330px] md:w-[300px] h-[100vh] flex flex-col bg-gray-50 border-l border-gray-200">
+      {/* Header */}
+      <div className="p-4 bg-white shadow-md z-10">
+        <h2 className="text-xl font-bold text-gray-800 text-center">
+          Group Chat
+          <span className="block text-sm font-normal text-green-500 mt-1">
+            Live
+          </span>
+        </h2>
+      </div>
+
+      {/* Messages */}
       <PerfectScrollbar
         containerRef={(ref) => (scrollContainerRef.current = ref)}
-        className="flex-1 overflow-hidden mb-4 p-3 pl-10"
+        className="flex-1 p-6"
       >
-        <div className="w-full flex justify-center ">
-          <div className="max-w-[800px] w-full">
-            <ul className="w-full">
-              {chatMessages.map((msg, index) => {
-                const showTimestamp =
-                  index === 0 ||
-                  new Date(msg.timestamp) -
-                    new Date(chatMessages[index - 1].timestamp) >
-                    3 * 60 * 1000;
+        <ul className="space-y-4">
+          {chatMessages.map((msg, index) => {
+            const showTimestamp =
+              index === 0 ||
+              new Date(msg.timestamp) -
+                new Date(chatMessages[index - 1].timestamp) >
+                3 * 60 * 1000;
 
-                const showUsername =
-                  msg.email !== email &&
-                  (index === 0 || msg.email !== chatMessages[index - 1].email);
+            const showUsername =
+              msg.email !== email &&
+              (index === 0 || msg.email !== chatMessages[index - 1].email);
 
-                const isSender = msg.email === email;
+            const isSender = msg.email === email;
+            const isFirstFromUser =
+              index === 0 || msg.email !== chatMessages[index - 1].email;
 
-                // Check if it's the first message from this user in a sequence
-                const isFirstFromUser =
-                  index === 0 || msg.email !== chatMessages[index - 1].email;
-
-                return (
-                  <div key={index} className="mb-1">
-                    {showTimestamp && (
-                      <div className="text-center  text-gray-800 text-[12px] my-2">
-                        {formatTimestamp(msg.timestamp)}
+            return (
+              <div key={index}>
+                {showTimestamp && (
+                  <div className="text-center text-gray-500 text-xs my-4">
+                    {formatTimestamp(msg.timestamp)}
+                  </div>
+                )}
+                <li className={`flex items-end gap-3 ${isSender ? "justify-end" : "justify-start"}`}>
+                  {!isSender && isFirstFromUser && (
+                    <img
+                      src={msg.userUrl || avatar}
+                      alt="Avatar"
+                      className="w-10 h-10 rounded-full shadow-md"
+                    />
+                  )}
+                  <div
+                    className={`relative max-w-xs p-4 rounded-2xl shadow-lg ${
+                      isSender
+                        ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-br-none"
+                        : "bg-white text-gray-800 rounded-bl-none"
+                    } ${!isFirstFromUser && !isSender ? "ml-14" : ""}`}
+                  >
+                    {showUsername && (
+                      <p className="text-sm font-bold mb-1">{msg.username}</p>
+                    )}
+                    <p className="text-sm" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+                      {msg.message}
+                    </p>
+                    {isSender && (
+                      <div className="absolute top-1/2 -left-10 transform -translate-y-1/2">
+                        <button
+                          onClick={() => toggleOptionsMenu(msg.id)}
+                          className="p-2 hover:bg-gray-200 rounded-full"
+                        >
+                          <BsThreeDots className="text-gray-500" />
+                        </button>
+                        {openMessageId === msg.id && (
+                          <div className="absolute top-0 left-8 z-10">
+                            <MessageOptionsCard
+                              onEdit={() => handleEditMessage(msg)}
+                              onDelete={() => handleDeleteMessage(msg.id)}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
-                    <li
-                      className={`flex ${
-                        isSender ? "justify-end" : "justify-start"
-                      }  text-[14px] ${isFirstFromUser ? "mt-4" : ""}`} // Apply mt-4 only to the first message from a user
-                    >
-                      <div
-                        className={`flex relative ${
-                          isSender ? "items-end" : "items-start"
-                        }`}
-                      >
-                        <div className="absolute left-[-32px] top-[-10px]">
-                          {/* Render image from URL only if it's available */}
-                          {msg.userUrl && !isSender && isFirstFromUser && (
-                            <div className="flex items-start space-x-2">
-                              <div className="flex items-center bg-[#f0f0f0] rounded-[16px] max-w-[250px]">
-                                <img
-                                  src={msg.userUrl}
-                                  alt="URL Link"
-                                  className="w-[30px] h-[30px] object-cover rounded-full"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Render Avatar if no URL and first message from user */}
-                          {!msg.userUrl && !isSender && isFirstFromUser && (
-                            <img
-                              src={avatar}
-                              alt="Avatar"
-                              className="w-[30px] h-[30px] rounded-full"
-                            />
-                          )}
-                        </div>
-                        <div
-                          className={`p-3 max-w-lg ${
-                            isSender
-                              ? "bg-[#273296] text-white text-right rounded-l-lg rounded-tr-lg rounded-br-none"
-                              : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
-                          }`}
-                        >
-                          {showUsername && (
-                            <div className="text-xs font-bold mb-1">
-                              {msg.username}
-                            </div>
-                          )}
-                          {/* Dots Menu (only for Sender) */}
-                          {isSender && (
-                            <div className="absolute top-1/2 left-[-30px] transform -translate-y-1/2 z-20">
-                              <button
-                                onClick={() => toggleOptionsMenu(msg.id)}
-                                className="p-1 hover:bg-gray-200 rounded-full"
-                              >
-                                <BsThreeDots className="text-gray-500" />
-                              </button>
-
-                              {/* Render Options Card if visible */}
-                              {openMessageId === msg.id && (
-                                <div className="absolute top-0 left-8 z-10">
-                                  <MessageOptionsCard
-                                    onEdit={() => handleEditMessage(msg)}
-                                    onDelete={() => handleDeleteMessage(msg.id)}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          <span>{msg.message}</span>
-                        </div>
-                      </div>
-                    </li>
                   </div>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
+                </li>
+              </div>
+            );
+          })}
+        </ul>
       </PerfectScrollbar>
-      <div className="flex-shrink-0 flex items-center ml-1">
-        <div className="relative flex-1 flex items-center">
+
+      {/* Input */}
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="relative flex items-center">
           <button
-            onClick={() => setShowEmojiPicker((prevState) => !prevState)}
-            className="absolute left-2 bg-transparent"
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            className="p-2 text-gray-500 hover:text-purple-600"
           >
-            <BsEmojiSmile className="text-[21px] text-slate-400" />
+            <BsEmojiSmile size={24} />
           </button>
           <input
             type="text"
@@ -266,22 +238,17 @@ const CallChatWindow = ({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 text-[14px]"
+            className="w-full p-3 pl-12 border-none rounded-full focus:outline-none bg-gray-100 text-gray-800 text-sm"
           />
+          <button
+            onClick={sendMessage}
+            className="ml-3 p-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full shadow-lg hover:opacity-90 transition-opacity flex-shrink-0"
+          >
+            <img src={send} alt="send" className="w-6 h-6" />
+          </button>
         </div>
-        <button
-          onClick={sendMessage}
-          className="p-2 bg-[#273296] text-white rounded-full m-1"
-        >
-          <img
-            src={send}
-            alt="send"
-            className="2xl:w-[24px] xl:w-[23px] md:w-[22px]"
-          />
-        </button>
-
         {showEmojiPicker && (
-          <div className="absolute bottom-12 left-[200px] z-10 transform -translate-x-1/2">
+          <div className="absolute bottom-20 right-4 z-10">
             <EmojiPicker onEmojiClick={handleEmojiClick} />
           </div>
         )}
