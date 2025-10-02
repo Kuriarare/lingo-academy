@@ -153,7 +153,7 @@ const Navbar = ({ header }) => {
                     Profile
                   </a>
                   <a
-                    href="#"
+                    href="/settings"
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#4a5568] hover:bg-gray-50 transition-colors"
                   >
                     <i className="fa-solid fa-cog w-5 text-center text-[#273296]"></i>
@@ -167,7 +167,7 @@ const Navbar = ({ header }) => {
                     Guide
                   </a>
                   <a
-                    href="#"
+                    href="/help-center"
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#4a5568] hover:bg-gray-50 transition-colors"
                   >
                     <i className="fa-solid fa-life-ring w-5 text-center text-[#273296]"></i>

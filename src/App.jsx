@@ -13,6 +13,8 @@ import ForgotPassword from './components/login/forgotPassword';
 import ResetPassword from './components/login/resetPassword';
 import GlobalNotificationHandler from './components/GlobalNotificationHandler';
 import FilePreviewModal from './components/FilePreviewModal';
+import HelpCenter from './components/help-center/HelpCenter';
+import Settings from './components/settings/Settings';
 
 function App() {
 
@@ -85,6 +87,22 @@ function App() {
           element={
             <RequireAuth>
                <Messages  />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/help-center"
+          element={
+            <RequireAuth>
+              <HelpCenter />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <RequireAuth>
+              <Settings />
             </RequireAuth>
           }
         />

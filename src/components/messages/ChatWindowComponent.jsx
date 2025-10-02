@@ -182,7 +182,7 @@ const ChatWindowComponent = ({
                     <li
                       className={`flex ${
                         isSender ? "justify-end" : "justify-start"
-                      } text-[15px] ${isFirstFromUser ? "mt-4" : ""}`}
+                      } text-[14px] ${isFirstFromUser ? "mt-4" : ""}`}
                     >
                       <div
                         className={`flex flex-col relative ${
@@ -281,7 +281,7 @@ const ChatWindowComponent = ({
             onChange={handleInput}
             onClick={() => dispatch(fetchUnreadMessages(user.id))}
             onKeyDown={handleKeyDown}
-            className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+            className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden text-[14px]"
             rows={1}
           />
         </div>

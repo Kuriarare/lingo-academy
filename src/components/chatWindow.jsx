@@ -200,7 +200,7 @@ const ChatWindow = ({
                 <li
                   className={`flex ${
                     isSender ? "justify-end" : "justify-start"
-                  } mb-2 text-[15px]`}
+                  } mb-2 text-[14px]`}
                 >
                   <div
                     className={`flex flex-col ${
@@ -337,7 +337,7 @@ const ChatWindow = ({
               value={message}
               onChange={handleInput}
               onKeyDown={handleKeyDown}
-              className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+              className="w-full p-2 pl-10 border rounded-xl focus:outline-none bg-[#E8EBEE] text-blue-950 resize-none overflow-hidden text-[14px]"
               rows={1}
               disabled={!!file}
             />

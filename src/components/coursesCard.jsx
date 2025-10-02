@@ -1,27 +1,28 @@
 
-const CoursesCard = ( {title, description, image, button}) => {
+const CoursesCard = ({ title, description, image, button, level, duration }) => {
   return (
-    
-
-<div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-    <a href="#">
-        <img className="rounded-t-lg" src={image} alt="" />
-    </a>
-    <div className="p-5">
-        <a href="#">
-            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{title}</h5>
-        </a>
-        <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{description  }</p>
-        <a href="#" className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-           {button}
-             <svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-            </svg>
-        </a>
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+      <div className="relative">
+        <img className="w-full h-56 object-cover" src={image} alt={title} />
+        <div className="absolute top-4 left-4 bg-purple-600 text-white py-1 px-3 rounded-full text-sm font-semibold">
+          {level}
+        </div>
+      </div>
+      <div className="p-6 flex flex-col flex-grow">
+        <h3 className="text-2xl font-bold text-gray-800 mb-2">{title}</h3>
+        <p className="text-gray-600 mb-4 flex-grow min-h-[6rem]">{description}</p>
+        <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+          <span>{duration}</span>
+        </div>
+        <button className="w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors duration-300 flex items-center justify-center mt-auto">
+          {button}
+          <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </button>
+      </div>
     </div>
-</div>
-
-  )
-}
+  );
+};
 
 export default CoursesCard

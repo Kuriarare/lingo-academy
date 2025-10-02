@@ -177,7 +177,7 @@ const CallChatWindow = ({
                     <li
                       className={`flex ${
                         isSender ? "justify-end" : "justify-start"
-                      }  text-[15px] ${isFirstFromUser ? "mt-4" : ""}`} // Apply mt-4 only to the first message from a user
+                      }  text-[14px] ${isFirstFromUser ? "mt-4" : ""}`} // Apply mt-4 only to the first message from a user
                     >
                       <div
                         className={`flex relative ${
@@ -266,7 +266,7 @@ const CallChatWindow = ({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 2xl:text-[15px] xl:text-[14px] md:text-[13px]"
+            className="w-full p-2 pl-10 border rounded-full focus:outline-none bg-[#E8EBEE] text-blue-950 text-[14px]"
           />
         </div>
         <button
