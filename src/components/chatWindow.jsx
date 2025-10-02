@@ -4,8 +4,7 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
 import { BsEmojiSmile, BsPaperclip, BsThreeDots } from "react-icons/bs";
-import { FiX } from "react-icons/fi";
-import { IoChevronBack } from "react-icons/io5";
+import { FiX, FiArrowLeft } from "react-icons/fi";
 import send from "../assets/logos/send.png";
 import useDeleteMessage from "../hooks/useDeleteMessage";
 import useSocketManager from "../hooks/useSocketManager";
@@ -15,6 +14,7 @@ import useChatInput from "../hooks/useChatInput";
 import useArchivedMessages from "../hooks/useArchivedMessages";
 import MessageOptionsCard from "./messages/MessageOptionsCard";
 import { openFilePreview } from "../redux/filePreviewSlice";
+import Dropdown from "./schedule/Dropdown";
 
 const ChatWindow = ({
   username,
@@ -25,6 +25,7 @@ const ChatWindow = ({
   isChatOpen,
   setIsChatOpen,
   setShowChat,
+  handleJoinMeeting,
 }) => {
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
@@ -140,24 +141,28 @@ const ChatWindow = ({
   return (
     <>
       <div
-        className="2xl:w-[350px] xl:w-[330px] w-full flex flex-col bg-white border border-gray-200 shadow-2xl rounded-lg"
+        className="w-full flex flex-col bg-white border border-gray-200 shadow-lg rounded-lg"
         style={{ height: height || "630px" }}
       >
         {/* Header */}
-        <div className="p-3 custom-bg border-b border-gray-200 flex justify-between items-center gap-4">
+        <div className="p-3 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] text-white rounded-t-lg flex justify-between items-center gap-4">
           {isChatOpen && (
             <button
               onClick={() => {
                 setIsChatOpen(!isChatOpen);
                 setShowChat(!setShowChat);
               }}
-              className="text-white hover:text-gray-200"
+              className="text-white p-2 rounded-full hover:bg-white/20 transition-colors"
             >
-              <IoChevronBack size={24} />
+              <FiArrowLeft size={20} />
             </button>
           )}
-          <div className="flex-1 min-w-0 text-center">
-            <h2 className="text-base font-semibold text-white truncate">
+          <div className="flex-1 min-w-0">
+            <h2
+              className={`text-base font-semibold text-white truncate ${
+                studentName ? "text-center" : "text-left"
+              }`}
+            >
               {user.role === "user" ? (
                 <>
                   {teacher ? teacher.name : "No teacher yet"}
@@ -175,6 +180,31 @@ const ChatWindow = ({
               )}
             </h2>
           </div>
+          {user.role === "user" && (
+            <Dropdown>
+              <button
+                onClick={() => handleJoinMeeting()}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                role="menuitem"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.124-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.124-1.283.356-1.857m0 0a3.001 3.001 0 015.644 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                Group Class
+              </button>
+            </Dropdown>
+          )}
         </div>
 
         {/* Messages */}

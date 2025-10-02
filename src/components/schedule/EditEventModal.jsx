@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar } from 'react-big-calendar';
+import { FiCheck, FiX } from 'react-icons/fi';
 
 const EditEventModal = ({
   isModalOpen,
@@ -19,7 +20,7 @@ const EditEventModal = ({
   return (
     <div className="modal-overlay relative">
       <div className="modal-content">
-        <h3>Edit Event</h3>
+        <h3>Edit Calendar</h3>
         <div className="calendar-container">
           <Calendar
             localizer={localizer}
@@ -82,16 +83,16 @@ const EditEventModal = ({
                 </div>
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white py-2 px-4 rounded-md w-full"
+                  className="bg-green-500 text-white py-2 px-4 rounded-md w-full flex items-center justify-center"
                 >
-                  Update Event
+                  <FiCheck className="mr-2" /> Update Event
                 </button>
                 <button
                   type="button"
-                  className="bg-red-600 text-white mt-2 py-2 px-4 rounded-md w-full"
+                  className="bg-red-500 text-white mt-2 py-2 px-4 rounded-md w-full flex items-center justify-center"
                   onClick={() => setOpenModalFrom(false)}
                 >
-                  Close
+                  <FiX className="mr-2" /> Close
                 </button>
               </form>
             </div>
@@ -99,13 +100,13 @@ const EditEventModal = ({
         )}
 
         <button
-          className="button-69 mt-2"
+          className="bg-gray-500 text-white mt-2 py-2 px-4 rounded-md w-full flex items-center justify-center"
           onClick={() => {
             setIsModalOpen(false);
             setEditingEvent(false);
           }}
         >
-          Close Modal
+          <FiX className="mr-2" /> Close Modal
         </button>
       </div>
     </div>

@@ -5,9 +5,19 @@ import ChatWindow from "../chatWindow";
 import back from "../../assets/logos/back.png";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMessagesForTeacher } from "../../redux/chatSlice";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiEdit, FiUsers, FiVideo, FiXCircle } from "react-icons/fi";
+import Dropdown from "../schedule/Dropdown";
+import { meetingRooms } from "../../constants";
 
-const ChatList = ({ chats, onChatSelect }) => {
+const ChatList = ({
+  chats,
+  onChatSelect,
+  user,
+  handleJoinMeeting,
+  setEditingEvent,
+  editingEvent,
+  loading,
+}) => {
   const lastMessagesByRoom = useSelector((state) => state.chat.lastMessagesByRoom);
   const unreadCountsByRoom = useSelector((state) => state.chat.unreadCountsByRoom);
 
@@ -46,12 +56,63 @@ const ChatList = ({ chats, onChatSelect }) => {
   return (
     <div className="h-[630px] flex flex-col bg-slate-50 rounded-lg overflow-hidden font-inter">
       {/* Professional Header */}
-      <div className="px-5 py-4 custom-bg text-white">
+      <div className="px-5 py-4 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] text-white rounded-t-lg">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold tracking-tight">Messages</h2>
-          <button className="hover:text-gray-200 p-1 rounded-md">
-            <FiSearch size={20} />
-          </button>
+          <Dropdown>
+            {(user.role === "teacher" || user.role === "admin") && (
+              <button
+                onClick={() => {
+                  setEditingEvent((prev) => !prev);
+                  if (!editingEvent) {
+                    alert(
+                      "Edit mode enabled: Select a calendar to modify, then click a new time slot to move it."
+                    );
+                  }
+                }}
+                className="block w-full text-left px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-gray-100 flex items-center"
+                role="menuitem"
+              >
+                {editingEvent ? (
+                  <>
+                    <FiXCircle className="mr-2" /> Cancel Edit Mode
+                  </>
+                ) : (
+                  <>
+                    <FiEdit className="mr-2" /> Edit Calendar
+                  </>
+                )}
+              </button>
+            )}
+            {(user.role === "teacher" || user.role === "user") && (
+              <button
+                onClick={() => handleJoinMeeting()}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                role="menuitem"
+              >
+                <FiUsers className="mr-2" /> Group Class
+              </button>
+            )}
+            {!loading &&
+              (user.role === "teacher" || user.role === "admin") &&
+              Object.entries(meetingRooms).map(([lang, roomName]) => {
+                const shouldRender =
+                  user.role === "admin" ||
+                  (user.role === "teacher" && user.language.includes(lang));
+                if (!shouldRender) return null;
+
+                return (
+                  <button
+                    key={lang}
+                    onClick={() => handleJoinMeeting(roomName)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    role="menuitem"
+                  >
+                    <FiVideo className="mr-2" /> {roomName}
+                  </button>
+                );
+              })}
+          </Dropdown>
         </div>
       </div>
 
@@ -163,15 +224,32 @@ ChatList.propTypes = {
   onChatSelect: PropTypes.func.isRequired,
 };
 
-const MainChat = ({ username, teacherChat, email }) => {
+const MainChat = ({
+  user,
+  username,
+  teacherChat,
+  email,
+  handleJoinMeeting,
+  setEditingEvent,
+  editingEvent,
+  loading,
+}) => {
   const dispatch = useDispatch();
 
   const [selectedChat, setSelectedChat] = useState(null);
   dispatch(fetchMessagesForTeacher());
   return (
-    <div className="h-[630px] xl:w-[350px] lg:w-[300px] bg-white rounded-lg  overflow-hidden">
+    <div className="h-[630px] bg-white rounded-lg overflow-hidden shadow-lg">
       {!selectedChat ? (
-        <ChatList chats={teacherChat} onChatSelect={setSelectedChat} />
+        <ChatList
+          chats={teacherChat}
+          onChatSelect={setSelectedChat}
+          user={user}
+          handleJoinMeeting={handleJoinMeeting}
+          setEditingEvent={setEditingEvent}
+          editingEvent={editingEvent}
+          loading={loading}
+        />
       ) : (
         <div className="relative h-full">
           <button

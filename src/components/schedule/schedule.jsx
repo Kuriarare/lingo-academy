@@ -18,6 +18,7 @@ import {
 import { io } from "socket.io-client";
 import { meetingRooms, teacherChats } from "../../constants";
 import EditEventModal from "./EditEventModal";
+import Dropdown from "./Dropdown";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -94,7 +95,7 @@ const Schedule = () => {
   const localizer = dayjsLocalizer(dayjs);
 
   const CustomEvent = ({ event }) => (
-    <div className="flex items-center justify-center text-center h-full text-[13px] flex-wrap">
+    <div className="flex items-center justify-center text-center h-full text-[10px] sm:text-[13px] flex-wrap">
       <span>{event.title}</span>
     </div>
   );
@@ -151,8 +152,8 @@ const handleJoinMeeting = (roomName = null) => {
           </div>
         </section>
 
-        <section className="mt-4 lg:flex pr-2 lg:pl:0 pl-2">
-          <div className="lg:w-3/4 mx-4 h-[630px] lg:mb-0 mb-10">
+        <section className="mt-4 flex flex-col xl:flex-row gap-4 px-4">
+          <div className="lg:flex-grow h-[630px]">
             {events.length > 0 ? (
 
               <Calendar
@@ -183,10 +184,13 @@ const handleJoinMeeting = (roomName = null) => {
                 })}
                 style={{
 
-                  borderRadius: '20px',
-                  padding: '20px',
+                  borderTopLeftRadius: '0px',
+                  borderBottomLeftRadius: '0px',
+                  borderTopRightRadius: '4px',
+                  borderBottomRightRadius: '4px',
+                  padding: '4px',
                   background: 'white',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 }}
                 formats={{
                   eventTimeRangeFormat: () => "",
@@ -203,12 +207,17 @@ const handleJoinMeeting = (roomName = null) => {
 
           </div>
 
-          <div>
+          <div className="w-full xl:w-[350px] flex-shrink-0">
             {user.role === "teacher" ? (
               <MainChat
+                user={user}
                 username={user.name}
                 teacherChat={teacherChat}
                 email={user.email}
+                handleJoinMeeting={handleJoinMeeting}
+                setEditingEvent={setEditingEvent}
+                editingEvent={editingEvent}
+                loading={loading}
               />
             ) : (
               <ChatWindow
@@ -216,76 +225,11 @@ const handleJoinMeeting = (roomName = null) => {
                 room={chatRoom}
                 email={user.email}
                 peerInfo={teacherInfo}
+                handleJoinMeeting={handleJoinMeeting}
               />
             )}
           </div>
         </section>
-
-        <div className="flex justify-between mt-4 mx-4">
-          <div className="flex justify-between">
-            {/* <h2>*Click on an event to join the class directly*</h2> */}
-            {/* Teachers Meeting button appears after loading */}
-            {!loading &&
-              (user.role === "teacher" || user.role === "admin") && (
-                <section className="flex justify-end m-3 gap-8">
-                  {user.role === "teacher" && (
-                    <button
-                      className="button-69 "
-                      onClick={() => {
-                        setEditingEvent((prev) => !prev)
-                        alert("Select the name/event you want to edit from your calendar and then select the date and time you want to edit it to.");
-                      }}
-                    >
-                      {editingEvent
-                        ? "Select an event to edit"
-                        : "Edit Event"}
-                    </button>
-                  )}
-                </section>
-              )}
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div>
-              {(user.role === "teacher" || user.role === "user") && (
-                <button
-                  onClick={() => handleJoinMeeting()}
-                  className="button-69"
-                  role="button"
-                >
-                  Group Class
-                </button>
-              )}
-            </div>
-            <div>
-              {/* Teachers Meeting button appears after loading */}
-              {!loading && (user.role === "teacher" || user.role === "admin") && (
-                <section className="flex justify-end m-3 gap-8">
-                  {/* Display buttons based on role and language */}
-                  {(user.role === "admin" || user.role === "teacher") &&
-                    Object.entries(meetingRooms).map(([lang, roomName]) => {
-                      const shouldRender =
-                        user.role === "admin" ||
-                        (user.role === "teacher" &&
-                          user.language.includes(lang));
-                      if (!shouldRender) return null;
-
-                      return (
-                        <button
-                          key={lang}
-                          onClick={() => handleJoinMeeting(roomName)}
-                          className="button-69"
-                          role="button"
-                        >
-                          {roomName}
-                        </button>
-                      );
-                    })}
-                </section>
-              )}
-            </div>
-          </div>
-        </div>
         <EditEventModal
           isModalOpen={isModalOpen}
           localizer={localizer}
