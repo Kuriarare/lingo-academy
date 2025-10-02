@@ -12,27 +12,14 @@ import { handleJoinClass } from "../data/joinClassHandler";
 
 const Home = () => {
   const user = useSelector((state) => state.user.userInfo.user);
-  const [hasAlertShown, setHasAlertShown] = useState(false);
   const nextClasses = getNextClasses(user);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (
-      user?.email === "christian.lingolandias.com@gmail.com" &&
-      !hasAlertShown
-    ) {
-      alert(
-        "Hom, hom, hom, te tuteo hom. Espero que tus clases sean exitosas hom. El homazo de homs c:   CON CARIÑO, DEL HOM PAL HOM"
-      );
-      setHasAlertShown(true);
-    }
-  }, [user, hasAlertShown]);
-
   return (
-    <div className="flex w-full h-[97vh] bg-gray-50">
+    <div className="flex w-full min-h-screen bg-gray-50">
       <Dashboard />
 
-      <div className="w-full h-full overflow-y-auto">
+      <div className="w-full">
         {/* Header Section */}
         <section className="w-full custom-bg">
           <div className="container">

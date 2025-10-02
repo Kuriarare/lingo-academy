@@ -116,8 +116,8 @@ const Dashboard = () => {
     <div
       className={`p-4 bg-white h-screen transition-all duration-300 shadow-xl border-r border-gray-100 ${
         isSidebarOpen
-          ? "absolute top-0 left-0 z-50 w-64 translate-x-0 lg:relative lg:w-64"
-          : "absolute top-0 w-64 z-50 lg:relative lg:w-16 lg:block lg:translate-x-0 -translate-x-full"
+          ? "fixed top-0 left-0 z-50 w-64 translate-x-0 lg:sticky lg:top-0 lg:w-64"
+          : "fixed top-0 w-64 z-50 lg:sticky lg:top-0 lg:w-16 lg:block lg:translate-x-0 -translate-x-full"
       }`}
     >
       <div className="flex flex-col h-full">

@@ -68,9 +68,6 @@ const Navbar = ({ header }) => {
   };
 
   const handleLogout = async () => {
-    if (user?.email === "christian.lingolandias.com@gmail.com") {
-      alert("Ya se va el hom :( ?");
-    }
     dispatch(logout());
     logoutAndNavigate();
     try {
