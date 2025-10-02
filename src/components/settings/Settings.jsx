@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FiMoon, FiBell, FiUser, FiEye, FiDroplet, FiType, FiShield, FiLogOut, FiGlobe, FiInfo } from 'react-icons/fi';
+import Dashboard from '../../sections/dashboard';
+import Navbar from '../navbar';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('appearance');
@@ -103,38 +105,46 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-16">
-        {showBanner && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mb-8 flex justify-between items-center shadow-md">
-            <div className="flex items-center">
-              <FiInfo className="text-2xl mr-3" />
-              <p className="font-semibold">This page is for demonstration purposes only. Settings are not yet functional.</p>
-            </div>
-            <button onClick={() => setShowBanner(false)} className="text-xl font-bold">&times;</button>
+    <div className="flex w-full min-h-screen">
+      <Dashboard />
+      <div className="w-full">
+        <section className="w-full custom-bg">
+          <div className="container">
+            <Navbar header="Settings" />
           </div>
-        )}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold text-gray-900">Settings</h1>
-          <p className="text-lg text-gray-500 mt-2">Manage your preferences</p>
-        </div>
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-4 space-y-2">
-              <button onClick={() => setActiveTab('appearance')} className={`w-full text-left flex items-center gap-3 p-3 rounded-lg font-semibold ${activeTab === 'appearance' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}>
-                <FiEye /> Appearance
-              </button>
-              <button onClick={() => setActiveTab('notifications')} className={`w-full text-left flex items-center gap-3 p-3 rounded-lg font-semibold ${activeTab === 'notifications' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}>
-                <FiBell /> Notifications
-              </button>
-              <button onClick={() => setActiveTab('account')} className={`w-full text-left flex items-center gap-3 p-3 rounded-lg font-semibold ${activeTab === 'account' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}>
-                <FiUser /> Account
-              </button>
+        </section>
+        <div className="p-8">
+          {showBanner && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mb-8 flex justify-between items-center shadow-md">
+              <div className="flex items-center">
+                <FiInfo className="text-2xl mr-3" />
+                <p className="font-semibold">This page is for demonstration purposes only. Settings are not yet functional.</p>
+              </div>
+              <button onClick={() => setShowBanner(false)} className="text-xl font-bold">&times;</button>
             </div>
+          )}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-extrabold text-gray-900">Settings</h1>
+            <p className="text-lg text-gray-500 mt-2">Manage your preferences</p>
           </div>
-          <div className="md:col-span-3">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              {renderContent()}
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-1">
+              <div className="bg-white rounded-xl shadow-lg p-4 space-y-2">
+                <button onClick={() => setActiveTab('appearance')} className={`w-full text-left flex items-center gap-3 p-3 rounded-lg font-semibold ${activeTab === 'appearance' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}>
+                  <FiEye /> Appearance
+                </button>
+                <button onClick={() => setActiveTab('notifications')} className={`w-full text-left flex items-center gap-3 p-3 rounded-lg font-semibold ${activeTab === 'notifications' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}>
+                  <FiBell /> Notifications
+                </button>
+                <button onClick={() => setActiveTab('account')} className={`w-full text-left flex items-center gap-3 p-3 rounded-lg font-semibold ${activeTab === 'account' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}>
+                  <FiUser /> Account
+                </button>
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <div className="bg-white rounded-xl shadow-lg p-8">
+                {renderContent()}
+              </div>
             </div>
           </div>
         </div>

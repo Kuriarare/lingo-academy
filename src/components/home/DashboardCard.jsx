@@ -1,23 +1,20 @@
 import PropTypes from 'prop-types';
 
-export const DashboardCard = ({ title, value, icon, gradient }) => (
-  <div className={`${gradient} p-6 rounded-lg transition-colors duration-200`}>
-    <div className="flex items-center justify-between text-white">
-      <div>
-        <p className="text-sm font-medium mb-2">{title}</p>
-        <h3 className="text-2xl font-bold">{value}</h3>
-      </div>
-      <div className="p-3 bg-white/10 rounded-full">
-        {icon}
-      </div>
+export const DashboardCard = ({ title, value, icon, color }) => (
+  <div className="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-6 transform hover:-translate-y-2 transition-transform duration-300 ease-in-out">
+    <div className={`p-4 rounded-full bg-opacity-20`} style={{ backgroundColor: color[1] }}>
+      <div className="text-3xl" style={{ color: color[0] }}>{icon}</div>
+    </div>
+    <div>
+      <p className="text-lg font-semibold text-gray-700">{title}</p>
+      <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
     </div>
   </div>
 );
-
 
 DashboardCard.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   icon: PropTypes.node.isRequired,
-  gradient: PropTypes.string.isRequired,
+  color: PropTypes.arrayOf(PropTypes.string).isRequired,
 };

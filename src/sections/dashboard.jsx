@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../redux/sidebarSlice";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiHome, FiCalendar, FiBookOpen, FiMessageSquare, FiUser, FiLogIn, FiSettings, FiHelpCircle, FiUsers, FiChevronLeft } from "react-icons/fi";
 import { fetchUnreadMessages } from "../redux/messageSlice";
 import { io } from "socket.io-client";
 import { Slide, ToastContainer, toast } from "react-toastify";
@@ -28,10 +28,6 @@ const Dashboard = () => {
 
   const handleClick = (name) => {
     setActiveLink(name);
-  };
-
-  const handleSidebarToggle = () => {
-    dispatch(toggleSidebar());
   };
 
   // Message fetching effects
@@ -104,7 +100,6 @@ const Dashboard = () => {
       return Object.values(unreadCountsByRoom).reduce((sum, count) => sum + count, 0);
     }
     if (user?.role === 'user') {
-      // Students only have their teacher's unreads
       return studentUnreadCount || 0;
     }
     return 0;
@@ -112,136 +107,103 @@ const Dashboard = () => {
 
   const totalScheduleUnread = getScheduleUnreads();
 
+  const navLinks = [
+    { to: "/home", icon: <FiHome />, text: "Dashboard" },
+    { to: "/schedule", icon: <FiCalendar />, text: "My Schedule", unread: totalScheduleUnread },
+    { to: "/learning", icon: <FiBookOpen />, text: "Learning" },
+    { to: "/messages", icon: <FiMessageSquare />, text: "Messages", unread: totalUnread },
+  ];
+
+  const bottomLinks = [
+    { to: "/profile", icon: <FiUser />, text: "Profile" },
+    ...(user?.role === "admin" ? [{ to: "/admin", icon: <FiUsers />, text: "Admin" }] : []),
+    { to: "/settings", icon: <FiSettings />, text: "Settings" },
+    { to: "/help-center", icon: <FiHelpCircle />, text: "Help Center" },
+  ];
+
   return (
     <div
-      className={`p-4 bg-white h-screen transition-all duration-300 shadow-xl border-r border-gray-100 ${
+      className={`h-screen bg-white shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 fixed top-0 left-0 z-50 lg:sticky lg:top-0 ${
         isSidebarOpen
-          ? "fixed top-0 left-0 z-50 w-64 translate-x-0 lg:sticky lg:top-0 lg:w-64"
-          : "fixed top-0 w-64 z-50 lg:sticky lg:top-0 lg:w-16 lg:block lg:translate-x-0 -translate-x-full"
+          ? "w-64 translate-x-0"
+          : "w-64 -translate-x-full lg:w-20 lg:translate-x-0"
       }`}
     >
-      <div className="flex flex-col h-full">
-        {/* Header Section */}
-        <div className="flex items-center justify-between mb-6 px-2">
-          <Link
-            to="/home"
-            className={`flex items-center no-underline group ${
-              isSidebarOpen ? "gap-3" : "justify-center w-full"
-            }`}
+      <div className="flex items-center justify-center py-6 border-b border-gray-200 px-4">
+        <Link to="/home" className="flex items-center gap-3">
+          <div className="bg-[#8E44AD] text-white w-10 h-10 flex items-center justify-center rounded-lg text-2xl font-bold">
+            L
+          </div>
+          {isSidebarOpen && (
+            <span className="text-2xl font-bold text-[#8E44AD] tracking-tight">
+              Lingolandias
+            </span>
+          )}
+        </Link>
+        {isSidebarOpen && (
+          <button
+            onClick={() => dispatch(toggleSidebar())}
+            className="lg:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-full"
           >
-            <div className="bg-[#9E2FD0] p-2 rounded-lg group-hover:bg-[#1a237e] transition-colors">
-              <i className="fa-solid fa-map-location-dot text-white text-xl"></i>
-            </div>
-            {isSidebarOpen && (
-              <span className="text-2xl font-bold text-[#9E2FD0] tracking-tight">
-                Lingolandias
-              </span>
-            )}
-          </Link>
-          <button 
-            onClick={handleSidebarToggle} 
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-full text-[#9E2FD0]"
-          >
-            {isSidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
+            <FiChevronLeft size={22} />
           </button>
-        </div>
+        )}
+      </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 flex flex-col gap-1">
-          <ul className="space-y-1">
-            {[
-              { to: "/home", icon: "fa-gauge-high", text: "Dashboard" },
-              { to: "/schedule", icon: "fa-calendar-days", text: "My Schedule" },
-              { to: "/learning", icon: "fa-graduation-cap", text: "Learning" },
-              { to: "/messages", icon: "fa-comments", text: "Messages" },
-            ].map((item) => (
+      <nav className="flex-1 flex flex-col gap-1 px-4 py-6">
+        <ul className="space-y-2">
+          {navLinks.map((item) => (
+            <li key={item.to}>
+              <Link
+                to={item.to}
+                className={`group relative flex items-center p-3 rounded-xl transition-all duration-300 ${
+                  activeLink === item.to
+                    ? "bg-[#8E44AD] text-white shadow-lg transform -translate-y-1"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-[#8E44AD]"
+                } ${isSidebarOpen ? "gap-4" : "justify-center"}`}
+                onClick={() => handleClick(item.to)}
+              >
+                <div className="text-xl">{item.icon}</div>
+                {isSidebarOpen && (
+                  <span className="font-semibold">{item.text}</span>
+                )}
+                {item.unread > 0 && (
+                  <span className={`absolute text-xs font-bold text-white bg-red-500 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isSidebarOpen 
+                      ? "right-3 top-1/2 -translate-y-1/2 w-6 h-6"
+                      : "top-1 right-1 w-5 h-5"
+                  }`}>
+                    {item.unread}
+                  </span>
+                )}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-auto pt-6 border-t border-gray-200">
+          <ul className="space-y-2">
+            {bottomLinks.map((item) => (
               <li key={item.to}>
                 <Link
                   to={item.to}
-                  className={`group relative flex items-center p-3 rounded-xl transition-all duration-200 ${
+                  className={`group relative flex items-center p-3 rounded-xl transition-all duration-300 ${
                     activeLink === item.to
-                      ? "bg-[#9E2FD0] text-white shadow-md"
-                      : "text-[#6b7280] hover:bg-gray-50 hover:text-[#273296] hover:translate-x-1"
-                  } ${
-                    isSidebarOpen ? "gap-3" : "justify-center"
-                  }`}
+                      ? "bg-[#8E44AD] text-white shadow-lg"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-[#8E44AD]"
+                  } ${isSidebarOpen ? "gap-4" : "justify-center"}`}
                   onClick={() => handleClick(item.to)}
                 >
-                  <i className={`fa-solid ${item.icon} text-lg w-6 text-center`} />
+                  <div className="text-xl">{item.icon}</div>
                   {isSidebarOpen && (
-                    <span className="font-medium">{item.text}</span>
-                  )}
-                  
-                  {/* Messages Notification Badge */}
-                  {item.to === "/messages" && totalUnread > 0 && (
-                    <span className={`${
-                      isSidebarOpen 
-                        ? "bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"
-                        : `absolute top-1 right-1 bg-red-500 w-4 h-4 rounded-full text-[9px] 
-                           flex items-center justify-center text-white transition-all
-                           group-hover:w-auto group-hover:px-2 group-hover:min-w-[1.5rem]`
-                    }`}>
-                      {isSidebarOpen ? totalUnread : (
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          {totalUnread}
-                        </span>
-                      )}
-                    </span>
-                  )}
-
-                  {/* Schedule Notification Badge */}
-                  {item.to === "/schedule" && totalScheduleUnread > 0 && (
-                    <span className={`${
-                      isSidebarOpen 
-                        ? "bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"
-                        : `absolute top-1 right-1 bg-red-500 w-4 h-4 rounded-full text-[9px] 
-                           flex items-center justify-center text-white transition-all
-                           group-hover:w-auto group-hover:px-2 group-hover:min-w-[1.5rem]`
-                    }`}>
-                      {isSidebarOpen ? totalScheduleUnread : (
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          {totalScheduleUnread}
-                        </span>
-                      )}
-                    </span>
+                    <span className="font-semibold">{item.text}</span>
                   )}
                 </Link>
               </li>
             ))}
           </ul>
-
-          {/* Bottom Section */}
-          <div className="mt-auto border-t border-gray-100 pt-4">
-            <ul className="space-y-1">
-              {[
-                { to: "/profile", icon: "fa-user", text: "Profile" },
-                ...(user?.role === "admin" 
-                  ? [{ to: "/admin", icon: "fa-unlock", text: "Admin" }] 
-                  : [])
-              ].map((item) => (
-                <li key={item.to}>
-                  <Link
-                    to={item.to}
-                    className={`flex items-center p-3 rounded-xl transition-all duration-200 ${
-                      activeLink === item.to
-                        ? "bg-[#9E2FD0] text-white shadow-md"
-                        : "text-[#6b7280] hover:bg-gray-50 hover:text-[#273296] hover:translate-x-1"
-                    } ${
-                      isSidebarOpen ? "gap-3" : "justify-center"
-                    }`}
-                    onClick={() => handleClick(item.to)}
-                  >
-                    <i className={`fa-solid ${item.icon} text-lg w-6 text-center`} />
-                    {isSidebarOpen && (
-                      <span className="font-medium">{item.text}</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </nav>
-      </div>
+        </div>
+      </nav>
       <div className="absolute top-4 lg:right-[-36rem] right-2">
         <ToastContainer />
       </div>

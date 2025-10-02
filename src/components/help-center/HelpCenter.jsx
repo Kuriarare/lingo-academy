@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FiChevronDown, FiChevronUp, FiInfo } from 'react-icons/fi';
+import Dashboard from '../../sections/dashboard';
+import Navbar from '../navbar';
 
 const FaqItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,45 +48,53 @@ const HelpCenter = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-16">
-        {showBanner && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mb-8 flex justify-between items-center shadow-md">
-            <div className="flex items-center">
-              <FiInfo className="text-2xl mr-3" />
-              <p className="font-semibold">This page is for demonstration purposes only. Links and some content are placeholders.</p>
-            </div>
-            <button onClick={() => setShowBanner(false)} className="text-xl font-bold">&times;</button>
+    <div className="flex w-full min-h-screen">
+      <Dashboard />
+      <div className="w-full">
+        <section className="w-full custom-bg">
+          <div className="container">
+            <Navbar header="Help Center" />
           </div>
-        )}
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-extrabold text-gray-900">Lingolandias Help Center</h1>
-          <p className="text-xl text-gray-600 mt-4">
-            Your success is our priority. Find the help you need below.
-          </p>
-        </div>
-
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Frequently Asked Questions</h2>
-            <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <FaqItem key={index} question={faq.question} answer={faq.answer} />
-              ))}
+        </section>
+        <div className="p-8">
+          {showBanner && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mb-8 flex justify-between items-center shadow-md">
+              <div className="flex items-center">
+                <FiInfo className="text-2xl mr-3" />
+                <p className="font-semibold">This page is for demonstration purposes only. Links and some content are placeholders.</p>
+              </div>
+              <button onClick={() => setShowBanner(false)} className="text-xl font-bold">&times;</button>
             </div>
-          </div>
-
-          <div className="mt-12 text-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Still need help?</h2>
-            <p className="text-gray-600 mb-6">
-              Our support team is always here to help. Reach out to us anytime.
+          )}
+          <div className="text-center mb-16">
+            <h1 className="text-6xl font-extrabold text-gray-900">Lingolandias Help Center</h1>
+            <p className="text-xl text-gray-600 mt-4">
+              Your success is our priority. Find the help you need below.
             </p>
-            <a
-              href="mailto:support@lingolandias.com"
-              className="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300"
-            >
-              Contact Support
-            </a>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white p-8 rounded-2xl shadow-2xl">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">Frequently Asked Questions</h2>
+              <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                  <FaqItem key={index} question={faq.question} answer={faq.answer} />
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Still need help?</h2>
+              <p className="text-gray-600 mb-6">
+                Our support team is always here to help. Reach out to us anytime.
+              </p>
+              <a
+                href="mailto:support@lingolandias.com"
+                className="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300"
+              >
+                Contact Support
+              </a>
+            </div>
           </div>
         </div>
       </div>

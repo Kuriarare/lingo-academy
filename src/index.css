@@ -4,7 +4,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #f4f6fb;
+  background: #E6F8F5;
 }
 
 .container {
@@ -13,7 +13,7 @@ body {
 }
 /* bg-gradient-to-r from-[#9E2FD0] to-[#A567C2]  */
 .custom-bg {
-  background: linear-gradient(to right,#A567C2, #9E2FD0 );
+  background: #8E44AD;
 }
 
 .custom-bg-profile {

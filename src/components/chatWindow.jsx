@@ -257,11 +257,11 @@ const ChatWindow = ({
                           </button>
                         </div>
                       )}
-                      <p className="text-sm" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+                      <div className="text-sm" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
                         {isFileMessage
                           ? renderFileMessage(msg.message, isSender)
                           : formatMessageWithLinks(msg.message, isSender)}
-                      </p>
+                      </div>
                       {openMessageId === msg.id && (
                         <div className="absolute top-full mt-1 left-0 z-10">
                           <MessageOptionsCard

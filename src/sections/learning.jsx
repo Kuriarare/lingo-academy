@@ -75,7 +75,7 @@ const Learning = () => {
   };
 
   return (
-    <div className="flex w-full relative bg-gray-50">
+    <div className="flex w-full relative">
       <Dashboard />
       <div className="w-full">
         <section className="w-full custom-bg">
