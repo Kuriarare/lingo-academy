@@ -103,6 +103,22 @@ const ChatWindowComponent = ({
     }
   };
 
+  const getInitials = (name) => {
+    const names = name.split(" ");
+    const firstInitial = names[0] ? names[0].charAt(0).toUpperCase() : "";
+    const lastInitial = names.length > 1 ? names[names.length - 1].charAt(0).toUpperCase() : "";
+    return `${firstInitial}${lastInitial}`;
+  };
+
+  const generateColor = (name) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = `hsl(${hash % 360}, 75%, 60%)`;
+    return color;
+  };
+
   const handleJoinGeneralClass = () => {
     const userName = user.name;
     const email = user.email;
@@ -178,6 +194,9 @@ const ChatWindowComponent = ({
             const isFirstFromUser =
               index === 0 || msg.email !== chatMessages[index - 1].email;
 
+            const initials = getInitials(msg.username);
+            const avatarColor = generateColor(msg.username);
+
             return (
               <div key={index}>
                 {showTimestamp && (
@@ -187,11 +206,22 @@ const ChatWindowComponent = ({
                 )}
                 <li className={`flex items-end gap-3 ${isSender ? "justify-end" : "justify-start"}`}>
                   {!isSender && isFirstFromUser && (
-                    <img
-                      src={msg.userUrl || avatar}
-                      alt="Avatar"
-                      className="w-10 h-10 rounded-full shadow-md"
-                    />
+                    <>
+                      {msg.userUrl ? (
+                        <img
+                          src={msg.userUrl}
+                          alt="Avatar"
+                          className="w-10 h-10 rounded-full shadow-md"
+                        />
+                      ) : (
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-md shadow-md"
+                          style={{ backgroundColor: avatarColor }}
+                        >
+                          {initials}
+                        </div>
+                      )}
+                    </>
                   )}
                   <div
                     className={`relative max-w-md p-4 rounded-2xl shadow-lg ${
