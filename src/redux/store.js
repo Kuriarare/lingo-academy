@@ -3,6 +3,7 @@ import userReducer from '../redux/userSlice';
 import sidebarReducer from '../redux/sidebarSlice';
 import messageReducer from '../redux/messageSlice'; // Existing messages reducer
 import chatReducer from '../redux/chatSlice'; // New chat reducer
+import filePreviewReducer from './filePreviewSlice';
 
 const saveState = (state) => {
   try {
@@ -33,7 +34,8 @@ const store = configureStore({
     user: userReducer,
     sidebar: sidebarReducer,
     messages: messageReducer,
-    chat: chatReducer, 
+    chat: chatReducer,
+    filePreview: filePreviewReducer,
   },
   preloadedState: persistedState,
 });
@@ -43,7 +45,7 @@ store.subscribe(() => {
     user: store.getState().user,
     sidebar: store.getState().sidebar,
     messages: store.getState().messages,
-    chat: store.getState().chat, 
+    chat: store.getState().chat,
   });
 });
 

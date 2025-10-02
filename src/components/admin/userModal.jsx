@@ -43,7 +43,7 @@ const UserModal = ({ show, handleClose }) => {
     setEmail("");
     setPassword("");
     setRole("user");
-    setLanguage("");  
+    setLanguage("");
     handleClose();
   };
 

@@ -103,7 +103,7 @@ const ChatList = ({ chats, onChatSelect }) => {
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-semibold text-gray-900 tracking-tight">
+                      <h3 className="text-base font-semibold text-slate-800 tracking-tight">
                         {chat.name} {chat.lastName}
                       </h3>
                       {displayDate && (

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useLayoutEffect } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useRef, useLayoutEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import EmojiPicker from "emoji-picker-react";
@@ -13,6 +13,7 @@ import useMessageFormatter from "../hooks/useMessageFormatter.jsx";
 import useChatInput from "../hooks/useChatInput";
 import useArchivedMessages from "../hooks/useArchivedMessages";
 import MessageOptionsCard from "./messages/MessageOptionsCard";
+import { openFilePreview } from "../redux/filePreviewSlice";
 
 const ChatWindow = ({
   username,
@@ -26,6 +27,7 @@ const ChatWindow = ({
 }) => {
   const user = useSelector((state) => state.user.userInfo.user);
   const teacher = useSelector((state) => state.user.userInfo.user.teacher);
+  const dispatch = useDispatch();
   const scrollContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const { socket, chatMessages, setChatMessages } = useSocketManager(
@@ -53,8 +55,33 @@ const ChatWindow = ({
       fileInputRef.current.value = null;
     }
   };
+
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileClick = (fileUrl) => {
+    setSelectedFile(fileUrl);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedFile(null);
+  };
+
+  const handleDownload = () => {
+    if (selectedFile) {
+      window.open(selectedFile, "_blank");
+      handleCloseModal();
+    }
+  };
+
+  const handlePreview = () => {
+    if (selectedFile) {
+      dispatch(openFilePreview(selectedFile));
+      handleCloseModal();
+    }
+  };
+
   const { formatMessageWithLinks, formatTimestamp, renderFileMessage } =
-    useMessageFormatter();
+    useMessageFormatter(handleFileClick);
   const {
     message,
     setMessage,
@@ -101,10 +128,11 @@ const ChatWindow = ({
   }, [allMessages]);
 
   return (
-    <div
-      className="chat-pattern 2xl:w-[350px] xl:w-[330px] w-full flex flex-col border"
-      style={{ height: height || "630px" }}
-    >
+    <>
+      <div
+        className="chat-pattern 2xl:w-[350px] xl:w-[330px] w-full flex flex-col border relative"
+        style={{ height: height || "630px" }}
+      >
       <h2 className="flex items-center justify-center h-12 shadow-sm text-white bg-[#273296]">
         {user.role === "user" ? (
           <>
@@ -191,7 +219,11 @@ const ChatWindow = ({
                     )}
 
                     <div
-                      className={`p-2 rounded-xl ${
+                      className={`${
+                        isFileMessage && msg.message.match(/\.(jpeg|jpg|gif|png)$/)
+                          ? ""
+                          : "p-2"
+                      } rounded-xl ${
                         isSender
                           ? "bg-[#273296] text-white text-left rounded-l-lg rounded-tr-lg rounded-br-none"
                           : "bg-[#E8EBEE] text-blue-950 text-left rounded-r-lg rounded-bl-lg rounded-tl-none"
@@ -227,6 +259,36 @@ const ChatWindow = ({
           })}
         </ul>
       </PerfectScrollbar>
+
+      {selectedFile && (
+        <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center z-40">
+          <div className="bg-white rounded-lg shadow-xl p-5 w-64">
+            <h3 className="text-md font-semibold text-gray-800 mb-4 text-center">
+              File Options
+            </h3>
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={handlePreview}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Preview
+              </button>
+              <button
+                onClick={handleDownload}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Download
+              </button>
+              <button
+                onClick={handleCloseModal}
+                className="mt-2 px-4 py-2 bg-transparent text-gray-500 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div>
         {file && (
@@ -318,7 +380,8 @@ const ChatWindow = ({
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

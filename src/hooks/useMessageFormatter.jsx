@@ -1,6 +1,6 @@
 import React from "react";
 
-const useMessageFormatter = () => {
+const useMessageFormatter = (onFileClick) => {
   const formatMessageWithLinks = (text, isSender) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.split(urlRegex).map((part, index) =>
@@ -54,56 +54,38 @@ const useMessageFormatter = () => {
     const fileExtension = fileUrl.split(".").pop().toLowerCase();
     const fileName = cleanFileName(fileUrl);
 
-    if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
-      return (
-        <img
-          src={fileUrl}
-          alt="shared file"
-          className="max-w-full max-h-40 cursor-pointer"
-          onClick={() => window.open(fileUrl, "_blank")}
-        />
-      );
-    } else if (fileExtension === "pdf") {
-      return (
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
-        >
-          {fileName}.pdf
-        </a>
-      );
-    } else if (["mp3", "wav"].includes(fileExtension)) {
+    const fileElement = (
+      <div
+        onClick={() => onFileClick(fileUrl)}
+        className="cursor-pointer"
+      >
+        {["jpg", "jpeg", "png", "gif"].includes(fileExtension) ? (
+          <img
+            src={fileUrl}
+            alt="shared file"
+            className="max-w-full max-h-40"
+          />
+        ) : (
+          <span
+            className={`${
+              isSender ? "text-white underline" : "text-blue-600 underline"
+            }`}
+          >
+            {fileName}.{fileExtension}
+          </span>
+        )}
+      </div>
+    );
+
+    if (["mp3", "wav", "ogg"].includes(fileExtension)) {
       return (
         <audio controls className="max-w-full">
           <source src={fileUrl} type={`audio/${fileExtension}`} />
           Your browser does not support the audio element.
         </audio>
       );
-    } else if (["docx", "pptx", "xlsx", "txt", "odt"].includes(fileExtension)) {
-      return (
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
-        >
-          {fileName}.{fileExtension}
-        </a>
-      );
     } else {
-      return (
-        <a
-          href={fileUrl}
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isSender ? "text-white underline" : "text-blue-600 underline"}`}
-        >
-          {fileUrl}
-        </a>
-      );
+      return fileElement;
     }
   };
 

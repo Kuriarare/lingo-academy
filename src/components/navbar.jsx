@@ -39,10 +39,10 @@ const Navbar = ({ header }) => {
   //         transition: Slide,
   //       }
   //     );
-
+  //
   //     dispatch(updateUserStatus({ id, online }));
   //   });
-
+  //
   //   return () => {
   //     socket.disconnect();
   //   };
