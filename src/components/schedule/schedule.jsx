@@ -31,7 +31,6 @@ const Schedule = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(false);
-  // const [socket, setSocket] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -56,11 +55,10 @@ const Schedule = () => {
       setChatRoom(user.id);
     }
 
-    // If events are loaded or empty, stop loading
     if (events !== undefined) {
-      setLoading(false); // Only set loading to false if events are fetched (whether empty or full)
+      setLoading(false);
     }
-  }, [user, events]); // Dependencies for `user` and `events` updates
+  }, [user, events]);
 
   useEffect(() => {
     let socket;
@@ -71,7 +69,6 @@ const Schedule = () => {
         reconnection: true
       });
 
-      // Unified chat update handler
       const handleNewChat = () => {
         if (user.role === 'teacher') {
           dispatch(fetchMessagesForTeacher());
@@ -82,7 +79,6 @@ const Schedule = () => {
 
       socket.on("newChat", handleNewChat);
 
-      // Cleanup function
       return () => {
         if (socket) {
           socket.off("newChat", handleNewChat);
@@ -105,8 +101,7 @@ const Schedule = () => {
       handleEventEdit(event);
       setIsModalOpen(true);
     } else {
-      // If not editing, navigate to the class
-      const roomId = event.studentId; // Assuming studentId is passed in the event
+      const roomId = event.studentId;
       const userName = user.name;
       const email = user.email;
       navigate("/classroom", {
@@ -115,38 +110,33 @@ const Schedule = () => {
     }
   };
 
+  const handleJoinMeeting = (roomName = null) => {
+    const userName = user.name;
+    const email = user.email;
+    let roomId = "";
 
-const handleJoinMeeting = (roomName = null) => {
-  const userName = user.name;
-  const email = user.email;
-
-  let roomId = "";
-
-  // If roomName is provided, it's a teacher meeting room
-  if (roomName) {
-    // Map the roomName to the teacherChats IDs
-    if (roomName === meetingRooms.english) roomId = teacherChats.english.id;
-    else if (roomName === meetingRooms.spanish) roomId = teacherChats.spanish.id;
-    else if (roomName === meetingRooms.polish) roomId = teacherChats.polish.id;
-  } else {
-    // If no roomName, it's a group class - use teacher ID logic
-    if (user.role === "teacher") {
-      roomId = user.id;
-    } else if (user.role === "user") {
-      roomId = user.teacher.id;
+    if (roomName) {
+      if (roomName === meetingRooms.english) roomId = teacherChats.english.id;
+      else if (roomName === meetingRooms.spanish) roomId = teacherChats.spanish.id;
+      else if (roomName === meetingRooms.polish) roomId = teacherChats.polish.id;
+    } else {
+      if (user.role === "teacher") {
+        roomId = user.id;
+      } else if (user.role === "user") {
+        roomId = user.teacher.id;
+      }
     }
-  }
 
-  navigate("/classroom", {
-    state: { roomId, userName, email, fromMeeting: true },
-  });
-};
+    navigate("/classroom", {
+      state: { roomId, userName, email, fromMeeting: true },
+    });
+  };
 
   return (
-    <div className="flex w-full relative h-[97vh]">
+    <div className="flex w-full relative min-h-screen bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full">
-        <section className="w-full custom-bg">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
           <div className="container">
             <Navbar header={header} />
           </div>
@@ -155,7 +145,6 @@ const handleJoinMeeting = (roomName = null) => {
         <section className="mt-4 flex flex-col xl:flex-row gap-4 px-4">
           <div className="lg:flex-grow h-[630px]">
             {events.length > 0 ? (
-
               <Calendar
                 localizer={localizer}
                 events={events}
@@ -176,20 +165,9 @@ const handleJoinMeeting = (roomName = null) => {
                     fontSize: '0.9em',
                     padding: '2px 8px',
                     transition: 'transform 0.2s ease',
-                    ':hover': {
-                      transform: 'scale(1.02)',
-                      zIndex: 100,
-                    },
                   },
                 })}
                 style={{
-
-                  borderTopLeftRadius: '0px',
-                  borderBottomLeftRadius: '0px',
-                  borderTopRightRadius: '4px',
-                  borderBottomRightRadius: '4px',
-                  padding: '4px',
-                  background: 'white',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 }}
                 formats={{
@@ -204,7 +182,6 @@ const handleJoinMeeting = (roomName = null) => {
             ) : (
               <div>No events found.</div>
             )}
-
           </div>
 
           <div className="w-full xl:w-[350px] flex-shrink-0">

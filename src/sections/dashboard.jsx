@@ -30,7 +30,6 @@ const Dashboard = () => {
     setActiveLink(name);
   };
 
-  // Message fetching effects
   useEffect(() => {
     if (user?.id) {
       dispatch(fetchUnreadMessages(user.id));
@@ -45,7 +44,6 @@ const Dashboard = () => {
     }
   }, [user?.role, user?.students, dispatch]);
 
-  // Socket.io connection
   useEffect(() => {
     let socket;
     
@@ -94,7 +92,6 @@ const Dashboard = () => {
     };
   }, [user?.id, dispatch]);
 
-  // Calculate unreads based on role
   const getScheduleUnreads = () => {
     if (user?.role === 'teacher') {
       return Object.values(unreadCountsByRoom).reduce((sum, count) => sum + count, 0);
@@ -123,19 +120,19 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`h-screen bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 fixed top-0 left-0 z-50 lg:sticky lg:top-0 ${
+      className={`h-screen bg-white dark:bg-brand-dark-secondary shadow-lg border-r border-gray-200 dark:border-purple-500/20 flex flex-col transition-all duration-300 fixed top-0 left-0 z-50 lg:sticky lg:top-0 ${
         isSidebarOpen
           ? "w-64 translate-x-0"
           : "w-64 -translate-x-full lg:w-20 lg:translate-x-0"
       }`}
     >
-      <div className="flex items-center justify-center py-6 border-b border-gray-200 px-4">
+      <div className="flex items-center justify-center py-6 border-b border-gray-200 dark:border-purple-500/20 px-4">
         <Link to="/home" className="flex items-center gap-3">
-          <div className="bg-[#8E44AD] text-white w-10 h-10 flex items-center justify-center rounded-lg text-2xl font-bold">
+          <div className="bg-[#8E44AD] dark:bg-brand-purple text-white w-10 h-10 flex items-center justify-center rounded-lg text-2xl font-bold">
             L
           </div>
           {isSidebarOpen && (
-            <span className="text-2xl font-bold text-[#8E44AD] tracking-tight">
+            <span className="text-2xl font-bold text-[#8E44AD] dark:text-white tracking-tight">
               Lingolandias
             </span>
           )}
@@ -143,7 +140,7 @@ const Dashboard = () => {
         {isSidebarOpen && (
           <button
             onClick={() => dispatch(toggleSidebar())}
-            className="lg:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-full"
+            className="lg:hidden text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 p-2 rounded-full"
           >
             <FiChevronLeft size={22} />
           </button>
@@ -158,8 +155,8 @@ const Dashboard = () => {
                 to={item.to}
                 className={`group relative flex items-center p-3 rounded-xl transition-all duration-300 ${
                   activeLink === item.to
-                    ? "bg-[#8E44AD] text-white shadow-lg transform -translate-y-1"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-[#8E44AD]"
+                    ? "bg-[#8E44AD] dark:bg-brand-purple text-white shadow-lg transform -translate-y-1"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-[#8E44AD] dark:hover:text-white"
                 } ${isSidebarOpen ? "gap-4" : "justify-center"}`}
                 onClick={() => handleClick(item.to)}
               >
@@ -181,7 +178,7 @@ const Dashboard = () => {
           ))}
         </ul>
 
-        <div className="mt-auto pt-6 border-t border-gray-200">
+        <div className="mt-auto pt-6 border-t border-gray-200 dark:border-purple-500/20">
           <ul className="space-y-2">
             {bottomLinks.map((item) => (
               <li key={item.to}>
@@ -189,8 +186,8 @@ const Dashboard = () => {
                   to={item.to}
                   className={`group relative flex items-center p-3 rounded-xl transition-all duration-300 ${
                     activeLink === item.to
-                      ? "bg-[#8E44AD] text-white shadow-lg"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-[#8E44AD]"
+                      ? "bg-[#8E44AD] dark:bg-brand-purple text-white shadow-lg"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-[#8E44AD] dark:hover:text-white"
                   } ${isSidebarOpen ? "gap-4" : "justify-center"}`}
                   onClick={() => handleClick(item.to)}
                 >

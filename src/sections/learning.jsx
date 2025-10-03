@@ -75,17 +75,17 @@ const Learning = () => {
   };
 
   return (
-    <div className="flex w-full relative">
+    <div className="flex w-full relative bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full">
-        <section className="w-full custom-bg">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
           <div className="container">
             <Navbar header={header} />
           </div>
         </section>
         <div className="p-8">
           {showBanner && (
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mb-8 flex justify-between items-center shadow-md">
+            <div className="bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded-lg mb-8 flex justify-between items-center shadow-md">
               <div className="flex items-center">
                 <FiInfo className="text-2xl mr-3" />
                 <p className="font-semibold">This page is for demonstration purposes only. All course materials and images are placeholders.</p>
@@ -94,16 +94,16 @@ const Learning = () => {
             </div>
           )}
           <div className="text-center mb-16">
-            <h1 className="text-6xl font-extrabold text-gray-900">Unlock Your Potential</h1>
-            <p className="text-xl text-gray-600 mt-4">
+            <h1 className="text-6xl font-extrabold text-gray-900 dark:text-white">Unlock Your Potential</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mt-4">
               Dive into our world of languages and cultures.
             </p>
           </div>
 
           <div className="mb-16">
             <div className="flex items-center mb-8">
-              <FiVideo className="text-4xl text-purple-600 mr-4" />
-              <h2 className="text-4xl font-bold text-gray-800">{languageCourses.title}</h2>
+              <FiVideo className="text-4xl text-purple-600 dark:text-brand-purple mr-4" />
+              <h2 className="text-4xl font-bold text-gray-800 dark:text-white">{languageCourses.title}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {languageCourses.courses.map((course) => (
@@ -114,8 +114,8 @@ const Learning = () => {
 
           <div>
             <div className="flex items-center mb-8">
-              <FiBookOpen className="text-4xl text-purple-600 mr-4" />
-              <h2 className="text-4xl font-bold text-gray-800">{ebooks.title}</h2>
+              <FiBookOpen className="text-4xl text-purple-600 dark:text-brand-purple mr-4" />
+              <h2 className="text-4xl font-bold text-gray-800 dark:text-white">{ebooks.title}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {ebooks.courses.map((course) => (

@@ -21,7 +21,6 @@ const ChatList = ({
   const lastMessagesByRoom = useSelector((state) => state.chat.lastMessagesByRoom);
   const unreadCountsByRoom = useSelector((state) => state.chat.unreadCountsByRoom);
 
-  // Helper function to format the timestamp
   const getDisplayDate = (timestamp) => {
     const messageDate = new Date(timestamp);
     const today = new Date();
@@ -54,9 +53,8 @@ const ChatList = ({
   };
 
   return (
-    <div className="h-[630px] flex flex-col bg-slate-50 rounded-lg overflow-hidden font-inter">
-      {/* Professional Header */}
-      <div className="px-5 py-4 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] text-white rounded-t-lg">
+    <div className="h-[630px] flex flex-col bg-slate-50 dark:bg-brand-dark-secondary rounded-lg overflow-hidden font-inter">
+      <div className="px-5 py-4 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] dark:bg-gradient-to-r dark:from-brand-dark dark:to-brand-dark-secondary text-white rounded-t-lg">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold tracking-tight">Messages</h2>
           <Dropdown>
@@ -116,10 +114,9 @@ const ChatList = ({
         </div>
       </div>
 
-      {/* Chat Items */}
       <ul className="flex-1 overflow-y-auto p-0">
         {chats
-          .slice() // Create a copy to avoid mutating original array
+          .slice()
           .sort((a, b) => {
             const aLastMessage = lastMessagesByRoom[a.id];
             const bLastMessage = lastMessagesByRoom[b.id];
@@ -144,7 +141,7 @@ const ChatList = ({
             return (
               <li
                 key={chat.id}
-                className="bg-white my-1 ml-3 p-3 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 border border-transparent transition-all cursor-pointer"
+                className="bg-white dark:bg-brand-dark my-1 ml-3 p-3 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 border border-transparent transition-all cursor-pointer"
                 onClick={() => onChatSelect(chat)}
               >
                 <div className="flex items-center">
@@ -170,17 +167,17 @@ const ChatList = ({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-semibold text-slate-800 truncate">
+                      <h3 className="text-base font-semibold text-slate-800 dark:text-white truncate">
                         {chat.name} {chat.lastName}
                       </h3>
                       {displayDate && (
-                        <span className="text-xs text-gray-500 font-medium">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                           {displayDate}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-sm text-gray-600 truncate">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
                         {lastMessage ? (
                           lastMessage.type === "file" ? (
                             <span className="text-blue-600">
@@ -239,7 +236,7 @@ const MainChat = ({
   const [selectedChat, setSelectedChat] = useState(null);
   dispatch(fetchMessagesForTeacher());
   return (
-    <div className="h-[630px] bg-white rounded-lg overflow-hidden shadow-lg">
+    <div className="h-[630px] bg-white dark:bg-brand-dark-secondary rounded-lg overflow-hidden shadow-lg">
       {!selectedChat ? (
         <ChatList
           chats={teacherChat}

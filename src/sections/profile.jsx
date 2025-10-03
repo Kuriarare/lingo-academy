@@ -84,10 +84,10 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div className="flex w-full min-h-screen bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full h-screen overflow-y-auto">
-        <section className="w-full custom-bg-profile relative">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md relative">
           <div className="container">
             <Navbar header={header} />
             <div className="flex flex-col md:flex-row justify-between md:items-center text-white py-8">
@@ -111,49 +111,48 @@ const Profile = () => {
         <main className="p-4 md:p-8">
           <div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Right Column (Avatar and Details) - Reordered for mobile first */}
               <div className="lg:col-span-1 lg:order-2">
-                <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
+                <div className="bg-white dark:bg-brand-dark-secondary rounded-lg shadow-md p-6 flex flex-col items-center border border-gray-200 dark:border-purple-500/20">
                   <div className="relative mb-8">
                     <img
                       src={!avatarUrl ? avatar : avatarUrl}
                       alt="avatar"
-                      className="w-28 h-28 object-cover rounded-full"
+                      className="w-28 h-28 object-cover rounded-full border-4 border-purple-500/50"
                     />
-                    <div className="absolute bottom-0 right-0 bg-gray-300 flex justify-center items-center w-8 h-8 cursor-pointer rounded-full">
-                      <i className="fa-solid fa-camera camera-icon" onClick={handleOpenModal}></i>
+                    <div className="absolute bottom-0 right-0 bg-gray-300 dark:bg-gray-700 flex justify-center items-center w-8 h-8 cursor-pointer rounded-full">
+                      <i className="fa-solid fa-camera camera-icon text-gray-800 dark:text-white" onClick={handleOpenModal}></i>
                       <Modal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSaveAvatar} />
                     </div>
                   </div>
                   {(user.role === 'user') && (
                     <div className="w-full">
-                      <h3 className="font-bold text-xl mb-6 text-gray-800 border-b pb-4">My Learning</h3>
+                      <h3 className="font-bold text-xl mb-6 text-gray-800 dark:text-white border-b border-gray-200 dark:border-purple-500/20 pb-4">My Learning</h3>
                       <div className="grid grid-cols-1 gap-6 mt-6">
-                        <div className="flex items-center p-4 bg-gray-50 rounded-lg transition-transform transform hover:scale-105">
-                          <div className="bg-purple-100 p-3 rounded-full">
-                            <FiUser className="text-purple-600 h-6 w-6" />
+                        <div className="flex items-center p-4 bg-gray-50 dark:bg-brand-dark rounded-lg transition-transform transform hover:scale-105">
+                          <div className="bg-purple-100 dark:bg-purple-900/50 p-3 rounded-full">
+                            <FiUser className="text-purple-600 dark:text-brand-purple h-6 w-6" />
                           </div>
                           <div className="ml-4">
-                            <p className="text-sm text-gray-500">My Teacher</p>
-                            <p className="font-bold text-gray-900 text-lg">{teacherAssigned || 'Not Assigned'}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">My Teacher</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-lg">{teacherAssigned || 'Not Assigned'}</p>
                           </div>
                         </div>
-                        <div className="flex items-center p-4 bg-gray-50 rounded-lg transition-transform transform hover:scale-105">
-                          <div className="bg-green-100 p-3 rounded-full">
-                            <FiBookOpen className="text-green-600 h-6 w-6" />
+                        <div className="flex items-center p-4 bg-gray-50 dark:bg-brand-dark rounded-lg transition-transform transform hover:scale-105">
+                          <div className="bg-green-100 dark:bg-green-900/50 p-3 rounded-full">
+                            <FiBookOpen className="text-green-600 dark:text-brand-teal h-6 w-6" />
                           </div>
                           <div className="ml-4">
-                            <p className="text-sm text-gray-500">Language</p>
-                            <p className="font-bold text-gray-900 text-lg capitalize">{user.language || 'N/A'}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Language</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-lg capitalize">{user.language || 'N/A'}</p>
                           </div>
                         </div>
-                        <div className="flex items-center p-4 bg-gray-50 rounded-lg transition-transform transform hover:scale-105">
-                          <div className="bg-yellow-100 p-3 rounded-full">
-                            <FiAward className="text-yellow-600 h-6 w-6" />
+                        <div className="flex items-center p-4 bg-gray-50 dark:bg-brand-dark rounded-lg transition-transform transform hover:scale-105">
+                          <div className="bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-full">
+                            <FiAward className="text-yellow-600 dark:text-brand-orange h-6 w-6" />
                           </div>
                           <div className="ml-4">
-                            <p className="text-sm text-gray-500">Current Level</p>
-                            <p className="font-bold text-gray-900 text-lg">Beginner</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Current Level</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-lg">Beginner</p>
                           </div>
                         </div>
                       </div>
@@ -161,22 +160,22 @@ const Profile = () => {
                   )}
                   {user.role === 'teacher' && (
                     <div className="w-full">
-                      <h3 className="font-bold text-xl mb-6 text-gray-800 border-b pb-4">My Students</h3>
+                      <h3 className="font-bold text-xl mb-6 text-gray-800 dark:text-white border-b border-gray-200 dark:border-purple-500/20 pb-4">My Students</h3>
                       <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar mt-6">
                         {user.students && user.students.length > 0 ? (
                           user.students.map((student) => (
-                            <div key={student.id} className="flex items-center p-4 bg-gray-50 rounded-lg transition-transform transform hover:scale-105">
-                              <div className="bg-purple-100 p-3 rounded-full">
-                                <FiUser className="text-purple-600 h-6 w-6" />
+                            <div key={student.id} className="flex items-center p-4 bg-gray-50 dark:bg-brand-dark rounded-lg transition-transform transform hover:scale-105">
+                              <div className="bg-purple-100 dark:bg-purple-900/50 p-3 rounded-full">
+                                <FiUser className="text-purple-600 dark:text-brand-purple h-6 w-6" />
                               </div>
                               <div className="ml-4">
-                                <p className="font-bold text-gray-900 text-lg">{student.name} {student.lastName}</p>
-                                <p className="text-sm text-gray-500">{student.email}</p>
+                                <p className="font-bold text-gray-900 dark:text-white text-lg">{student.name} {student.lastName}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{student.email}</p>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-gray-500 text-center">You have no students assigned.</p>
+                          <p className="text-gray-500 dark:text-gray-400 text-center">You have no students assigned.</p>
                         )}
                       </div>
                     </div>
@@ -184,10 +183,9 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Left Column (Form) - Reordered for mobile first */}
-              <div className="lg:col-span-2 lg:order-1 bg-[#F7FAFC] rounded-lg box-shadow-form overflow-hidden">
-                <div className="flex justify-between items-center bg-white py-3 px-4 shadow-sm">
-                  <h2 className="text-lg font-semibold text-[#32325D]">My Account</h2>
+              <div className="lg:col-span-2 lg:order-1 bg-[#F7FAFC] dark:bg-brand-dark-secondary rounded-lg box-shadow-form overflow-hidden border border-gray-200 dark:border-purple-500/20">
+                <div className="flex justify-between items-center bg-white dark:bg-brand-dark py-3 px-4 shadow-sm">
+                  <h2 className="text-lg font-semibold text-[#32325D] dark:text-white">My Account</h2>
                   {isEditMode && (
                     <button
                       type="button"
@@ -200,50 +198,50 @@ const Profile = () => {
                 </div>
                 <div className="p-6">
                   <form>
-                    <h2 className="text-xs font-semibold text-[#8898AA] mb-6">USER INFORMATION</h2>
+                    <h2 className="text-xs font-semibold text-[#8898AA] dark:text-gray-400 mb-6">USER INFORMATION</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                       <div>
-                        <label htmlFor="name" className="text-sm font-semibold text-[#525F7F]">Name</label>
-                        <input type="text" id="name" name="name" value={name || ""} onChange={(e) => setName(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="name" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Name</label>
+                        <input type="text" id="name" name="name" value={name || ""} onChange={(e) => setName(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                       <div>
-                        <label htmlFor="lastName" className="text-sm font-semibold text-[#525F7F]">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" value={lastName || ""} onChange={(e) => setLastName(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="lastName" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" value={lastName || ""} onChange={(e) => setLastName(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                       <div>
-                        <label htmlFor="phone" className="text-sm font-semibold text-[#525F7F]">Phone</label>
-                        <input type="number" id="phone" name="phone" value={phone || ""} onChange={(e) => setPhone(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="phone" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Phone</label>
+                        <input type="number" id="phone" name="phone" value={phone || ""} onChange={(e) => setPhone(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                       <div>
-                        <label htmlFor="email" className="text-sm font-semibold text-[#525F7F]">Email</label>
-                        <input type="email" id="email" name="email" value={email || ""} readOnly className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs bg-gray-100" />
+                        <label htmlFor="email" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Email</label>
+                        <input type="email" id="email" name="email" value={email || ""} readOnly className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-500 bg-gray-100 dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" />
                       </div>
                     </div>
-                    <hr />
-                    <h2 className="text-xs font-semibold text-[#8898AA] mt-6 mb-6">CONTACT INFORMATION</h2>
+                    <hr className="border-gray-200 dark:border-purple-500/20" />
+                    <h2 className="text-xs font-semibold text-[#8898AA] dark:text-gray-400 mt-6 mb-6">CONTACT INFORMATION</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                       <div className="sm:col-span-2">
-                        <label htmlFor="address" className="text-sm font-semibold text-[#525F7F]">Address</label>
-                        <input type="text" id="address" name="address" value={address || ""} onChange={(e) => setAddress(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="address" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Address</label>
+                        <input type="text" id="address" name="address" value={address || ""} onChange={(e) => setAddress(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                       <div>
-                        <label htmlFor="city" className="text-sm font-semibold text-[#525F7F]">City</label>
-                        <input type="text" id="city" name="city" value={city || ""} onChange={(e) => setCity(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="city" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">City</label>
+                        <input type="text" id="city" name="city" value={city || ""} onChange={(e) => setCity(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                       <div>
-                        <label htmlFor="country" className="text-sm font-semibold text-[#525F7F]">Country</label>
-                        <input type="text" id="country" name="country" value={country || ""} onChange={(e) => setCountry(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="country" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Country</label>
+                        <input type="text" id="country" name="country" value={country || ""} onChange={(e) => setCountry(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                       <div>
-                        <label htmlFor="postal-code" className="text-sm font-semibold text-[#525F7F]">Postal code</label>
-                        <input type="number" id="postal-code" name="postal-code" value={postal || ""} onChange={(e) => setPostal(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs" readOnly={!isEditMode} />
+                        <label htmlFor="postal-code" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Postal code</label>
+                        <input type="number" id="postal-code" name="postal-code" value={postal || ""} onChange={(e) => setPostal(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20" readOnly={!isEditMode} />
                       </div>
                     </div>
-                    <hr />
-                    <h2 className="text-xs font-semibold text-[#8898AA] mt-6 mb-6">ABOUT ME</h2>
+                    <hr className="border-gray-200 dark:border-purple-500/20" />
+                    <h2 className="text-xs font-semibold text-[#8898AA] dark:text-gray-400 mt-6 mb-6">ABOUT ME</h2>
                     <div>
-                      <label htmlFor="biography" className="text-sm font-semibold text-[#525F7F]">Biography</label>
-                      <textarea id="biography" name="biography" value={biography || ""} onChange={(e) => setBiography(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] focus:outline-none box-shadow-inputs resize-none" rows="3" readOnly={!isEditMode} />
+                      <label htmlFor="biography" className="text-sm font-semibold text-[#525F7F] dark:text-gray-300">Biography</label>
+                      <textarea id="biography" name="biography" value={biography || ""} onChange={(e) => setBiography(e.target.value)} className="w-full mt-1 rounded-md py-2 px-3 text-[#8898AA] dark:text-gray-300 bg-white dark:bg-brand-dark focus:outline-none box-shadow-inputs border border-gray-300 dark:border-purple-500/20 resize-none" rows="3" readOnly={!isEditMode} />
                     </div>
                   </form>
                 </div>

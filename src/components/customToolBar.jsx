@@ -1,7 +1,6 @@
 const CustomToolbar = ({ label, onNavigate, onView }) => {
     return (
       <div className="rbc-toolbar flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
-        {/* Left Side: Branding + Navigation */}
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <span className="text-xl text-center sm:text-left">Classes Schedule</span>
           <div className="flex gap-2">
@@ -17,10 +16,8 @@ const CustomToolbar = ({ label, onNavigate, onView }) => {
           </div>
         </div>
   
-        {/* Center: Current Date Range */}
         <span className="text-lg text-center">{label}</span>
   
-        {/* Right Side: View Selector */}
         <div className="view-toggle flex gap-2">
           <button onClick={() => onView('week')}>Week</button>
           <button onClick={() => onView('day')}>Day</button>

@@ -14,7 +14,6 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const Messages = () => {
   const user = useSelector((state) => state.user.userInfo.user);
   const { unreadCounts } = useSelector((state) => state.messages);
-  console.log(unreadCounts); // Log unreadCounts to check the data structure
   const [selectedChat, setSelectedChat] = useState(null);
   const [showChatList, setShowChatList] = useState(true);
   const [newMessage, setNewMessage] = useState({});
@@ -48,13 +47,11 @@ const Messages = () => {
 
   const chats = [];
 
-  // Handle case for admin
   if (user.role === "admin") {
     chats.push(generalChats.english, generalChats.spanish, generalChats.polish);
     chats.push(teacherChats.english, teacherChats.spanish, teacherChats.polish);
   }
 
-  // If the user is a teacher
   if (user.role === "teacher") {
     const normalizedLanguage = user.language ? user.language.toLowerCase() : "english";
     
@@ -76,7 +73,6 @@ const Messages = () => {
     }
   }
 
-  // If the user is a student
   if (user.role === "user") {
     if (user.teacher) {
       chats.push({
@@ -92,44 +88,33 @@ const Messages = () => {
       chats.push(generalChats[normalizedLanguage]);
     }
   }
-// Log chats to check the structure before mapping
-console.log(chats);
 
-const userLanguage = user.role === 'admin' ? '' : (user.language ? user.language.charAt(0).toUpperCase() + user.language.slice(1) : ''); 
-const isAdmin = user.role === 'admin'; // Check if the user is an admin
+  const userLanguage = user.role === 'admin' ? '' : (user.language ? user.language.charAt(0).toUpperCase() + user.language.slice(1) : ''); 
+  const isAdmin = user.role === 'admin';
 
-// Map unread counts to each chat based on its id, considering dynamic room keys
-const updatedChats = chats.map((chat) => {
-  let roomKey = "";
+  const updatedChats = chats.map((chat) => {
+    let roomKey = "";
+    const chatLanguage = chat.name.split(" - ")[1];
 
-  // Get the language part from the chat name
-  const chatLanguage = chat.name.split(" - ")[1]; // 'English', 'Spanish', 'Polish'
+    if (chat.type === "general" && (isAdmin || chatLanguage === userLanguage)) {
+      roomKey = `general${chatLanguage}Room`; 
+    } else if (chat.type === "teacher" && (isAdmin || chatLanguage === userLanguage)) {
+      roomKey = `teachers${chatLanguage}Room`; 
+    } else if (chat.type === "group") {
+      roomKey = `randomRoom`; 
+    }
 
-  // Determine the room key based on the chat type and language
-  if (chat.type === "general" && (isAdmin || chatLanguage === userLanguage)) {
-    roomKey = `general${chatLanguage}Room`; 
-  } else if (chat.type === "teacher" && (isAdmin || chatLanguage === userLanguage)) {
-    roomKey = `teachers${chatLanguage}Room`; 
-  } else if (chat.type === "group") {
-    roomKey = `randomRoom`; 
-  }
-
-  // Map the unread count dynamically using the roomKey
-  return {
-    ...chat,
-    unreadCount: unreadCounts[roomKey] || 0, // Attach the correct unread count dynamically
-  };
-});
-
-// Log updatedChats to check if the mapping is correct
-console.log(updatedChats);
-
+    return {
+      ...chat,
+      unreadCount: unreadCounts[roomKey] || 0,
+    };
+  });
 
   return (
     <div className="flex w-full relative h-[97vh]">
       <Dashboard />
       <div className="w-full h-[100vh]">
-        <section className="w-full custom-bg">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
           <div className="container">
             <Navbar header="MESSAGES PAGE" />
           </div>
@@ -137,7 +122,7 @@ console.log(updatedChats);
 
         <section>
           <div className="flex w-full">
-            <section className="w-[300px] bg-gray-100 hidden lg:block">
+            <section className="w-[300px] bg-gray-100 dark:bg-brand-dark-secondary hidden lg:block">
               <ChatListComponent
                 chats={updatedChats}
                 onChatSelect={handleChatSelect}
@@ -164,8 +149,8 @@ console.log(updatedChats);
                   />
                 </>
               ) : (
-                <div className="lg:flex items-center justify-center h-full hidden">
-                  <p>Select a chat to start chatting</p>
+                <div className="lg:flex items-center justify-center h-full hidden bg-gray-50 dark:bg-brand-dark">
+                  <p className="text-gray-500 dark:text-gray-400">Select a chat to start chatting</p>
                 </div>
               )}
             </section>
@@ -187,6 +172,5 @@ console.log(updatedChats);
     </div>
   );
 };
-
 
 export default Messages;

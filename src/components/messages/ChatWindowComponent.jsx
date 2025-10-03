@@ -125,34 +125,30 @@ const ChatWindowComponent = ({
     let roomId = "";  
     if (user?.language === "english") {
       roomId = 'generalEnglishRoom'
-      // alert(roomId);
     } else if (user?.language === "spanish") {
       roomId = 'generalSpanishRoom';
-      // alert(roomId);
     } else if (user?.language === "polish") {
       roomId = 'generalPolishRoom';
-      // alert(roomId);
     }
     navigate("/classroom", {
       state: { roomId, userName, email, fromMessage: true, },
     });
   }
   return (
-    <div className="w-full h-[92vh] flex flex-col bg-gray-50 relative">
-      {/* Header */}
-      <div className="p-4 bg-white shadow-md z-10 flex items-center justify-between">
-        <button onClick={onBackClick} className="lg:hidden p-2 text-gray-500 hover:text-purple-600">
+    <div className="w-full h-[92vh] flex flex-col bg-gray-50 dark:bg-brand-dark relative">
+      <div className="p-4 bg-white dark:bg-brand-dark-secondary shadow-md z-10 flex items-center justify-between border-b border-gray-200 dark:border-purple-500/20">
+        <button onClick={onBackClick} className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-brand-orange">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 className="text-xl font-bold text-gray-800 text-center flex-grow">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white text-center flex-grow">
           {studentName.includes("General Chat ") ? (
             <>
               {studentName}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 inline-block ml-2 cursor-pointer text-purple-600 hover:text-purple-800 transition-colors"
+                className="h-6 w-6 inline-block ml-2 cursor-pointer text-purple-600 dark:text-brand-purple hover:text-purple-800 dark:hover:text-brand-orange transition-colors"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -170,10 +166,9 @@ const ChatWindowComponent = ({
             Active now
           </span>
         </h2>
-        <div className="lg:hidden w-8"></div> {/* This is a spacer to balance the header */}
+        <div className="lg:hidden w-8"></div>
       </div>
 
-      {/* Messages */}
       <PerfectScrollbar
         containerRef={(ref) => (scrollContainerRef.current = ref)}
         className="flex-1 p-6"
@@ -200,7 +195,7 @@ const ChatWindowComponent = ({
             return (
               <div key={index}>
                 {showTimestamp && (
-                  <div className="text-center text-gray-500 text-xs my-4">
+                  <div className="text-center text-gray-500 dark:text-gray-400 text-xs my-4">
                     {formatTimestamp(msg.timestamp)}
                   </div>
                 )}
@@ -227,11 +222,11 @@ const ChatWindowComponent = ({
                     className={`relative max-w-md p-4 rounded-2xl shadow-lg ${
                       isSender
                         ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-br-none"
-                        : "bg-white text-gray-800 rounded-bl-none"
+                        : "bg-white dark:bg-brand-dark-secondary text-gray-800 dark:text-gray-300 rounded-bl-none"
                     } ${!isFirstFromUser && !isSender ? "ml-14" : ""}`}
                   >
                     {showUsername && (
-                      <p className="text-sm font-bold mb-1">{msg.username}</p>
+                      <p className="text-sm font-bold mb-1 text-brand-teal">{msg.username}</p>
                     )}
                     <p className="text-sm" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
                       {msg.message}
@@ -240,9 +235,9 @@ const ChatWindowComponent = ({
                       <div className="absolute top-1/2 -left-10 transform -translate-y-1/2">
                         <button
                           onClick={() => toggleOptionsMenu(msg.id)}
-                          className="p-2 hover:bg-gray-200 rounded-full"
+                          className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full"
                         >
-                          <BsThreeDots className="text-gray-500" />
+                          <BsThreeDots className="text-gray-500 dark:text-gray-400" />
                         </button>
                         {openMessageId === msg.id && (
                           <div className="absolute top-0 left-8 z-10">
@@ -262,12 +257,11 @@ const ChatWindowComponent = ({
         </ul>
       </PerfectScrollbar>
 
-      {/* Input */}
-      <div className="p-4 bg-white border-t border-gray-200">
+      <div className="p-4 bg-white dark:bg-brand-dark-secondary border-t border-gray-200 dark:border-purple-500/20">
         <div className="relative flex items-center">
           <button
             onClick={() => setShowEmojiPicker((prev) => !prev)}
-            className="p-2 text-gray-500 hover:text-purple-600"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-brand-orange"
           >
             <BsEmojiSmile size={24} />
           </button>
@@ -277,7 +271,7 @@ const ChatWindowComponent = ({
             onChange={handleInput}
             onClick={() => dispatch(fetchUnreadMessages(user.id))}
             onKeyDown={handleKeyDown}
-            className="w-full p-3 pl-12 border-none rounded-full focus:outline-none bg-gray-100 text-gray-800 resize-none text-sm"
+            className="w-full p-3 pl-12 border-none rounded-full focus:outline-none bg-gray-100 dark:bg-brand-dark text-gray-800 dark:text-gray-300 resize-none text-sm"
             rows={1}
           />
           <button

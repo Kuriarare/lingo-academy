@@ -15,11 +15,11 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div className="flex w-full min-h-screen bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
 
       <div className="w-full">
-        <section className="w-full custom-bg shadow-md">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
           <div className="container mx-auto px-4">
             <Navbar header="HOME PAGE" />
           </div>
@@ -27,10 +27,10 @@ const Home = () => {
 
         <main className="max-w-7xl mx-auto px-4 py-12">
           <section className="text-center mb-16 animate-fade-in-down">
-            <h1 className="text-5xl font-extrabold text-gray-900 mb-3">
+            <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white mb-3">
               Welcome, {user.name}!
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 dark:text-gray-400">
               Your journey to fluency starts here. Let's make today productive.
             </p>
           </section>
@@ -59,7 +59,7 @@ const Home = () => {
           <div className="grid lg:grid-cols-3 gap-12">
             <section className="lg:col-span-2 animate-fade-in">
               <div className="flex items-center mb-8">
-                <h2 className="text-4xl font-bold text-gray-800">Frequently Asked Questions</h2>
+                <h2 className="text-4xl font-bold text-gray-800 dark:text-white">Frequently Asked Questions</h2>
               </div>
               <div className="grid md:grid-cols-2 gap-8">
                 <InfoCard
@@ -83,7 +83,7 @@ const Home = () => {
 
             <section className="animate-fade-in">
               <div className="flex items-center mb-8">
-                <h2 className="text-4xl font-bold text-gray-800">Next Sessions</h2>
+                <h2 className="text-4xl font-bold text-gray-800 dark:text-white">Next Sessions</h2>
               </div>
               <div className="space-y-4">
                 {nextClasses.map((classSession) => {

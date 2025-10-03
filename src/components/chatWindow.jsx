@@ -120,12 +120,10 @@ const ChatWindow = ({
     if (!scrollContainer) return;
 
     if (isArchivedFetch.current) {
-      // Restore scroll position after loading older messages
       scrollContainer.scrollTop =
         scrollContainer.scrollHeight - prevScrollHeight.current;
-      isArchivedFetch.current = false; // Reset the flag
+      isArchivedFetch.current = false;
     } else {
-      // Scroll to bottom for new messages or on initial load
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
   }, [allMessages]);
@@ -141,11 +139,10 @@ const ChatWindow = ({
   return (
     <>
       <div
-        className="w-full flex flex-col bg-white border border-gray-200 shadow-lg rounded-lg"
+        className="w-full flex flex-col bg-white dark:bg-brand-dark-secondary border border-gray-200 dark:border-purple-500/20 shadow-lg rounded-lg"
         style={{ height: height || "630px" }}
       >
-        {/* Header */}
-        <div className="p-3 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] text-white rounded-t-lg flex justify-between items-center gap-4">
+        <div className="p-3 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] dark:bg-gradient-to-r dark:from-brand-dark dark:to-brand-dark-secondary text-white rounded-t-lg flex justify-between items-center gap-4">
           {isChatOpen && (
             <button
               onClick={() => {
@@ -207,10 +204,9 @@ const ChatWindow = ({
           )}
         </div>
 
-        {/* Messages */}
         <PerfectScrollbar
           containerRef={(ref) => (scrollContainerRef.current = ref)}
-          className="flex-1 p-6 bg-slate-100"
+          className="flex-1 p-6 bg-slate-100 dark:bg-brand-dark"
         >
           {hasMore && (
             <div className="text-center">
@@ -244,7 +240,7 @@ const ChatWindow = ({
                       className={`relative max-w-xs p-4 rounded-2xl shadow-md ${
                         isSender
                           ? "bg-purple-600 text-white rounded-br-none"
-                          : "bg-white text-gray-800 rounded-bl-none"
+                          : "bg-white dark:bg-brand-dark-secondary text-gray-800 dark:text-white rounded-bl-none"
                       }`}
                     >
                       {isSender && (
@@ -299,7 +295,6 @@ const ChatWindow = ({
           </div>
         )}
 
-        {/* Input */}
         <div className="p-3 bg-transparent">
           {file && (
             <div className="p-3 mb-3 border rounded-lg bg-gray-100">
@@ -322,7 +317,7 @@ const ChatWindow = ({
                 value={message}
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}
-                className="w-full p-3 pr-24 bg-gray-100 border-none rounded-lg focus:outline-none text-gray-800 resize-none text-sm"
+                className="w-full p-3 pr-24 bg-gray-100 dark:bg-brand-dark border-none rounded-lg focus:outline-none text-gray-800 dark:text-white resize-none text-sm"
                 disabled={!!file}
                 style={{ maxHeight: "150px", overflowY: "auto" }}
                 rows={1}

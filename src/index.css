@@ -1,10 +1,15 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #E6F8F5;
 }
 
 .container {
@@ -331,3 +336,59 @@ body {
 .custom-scrollbar { scroll-behavior: smooth; }
 li { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #9E2FD0; }
+.dark .rbc-calendar {
+  background-color: #161625 !important;
+  color: #fff !important;
+  border: 1px solid #4b5563 !important;
+}
+
+.dark .rbc-toolbar {
+  background: #1a1a2e !important;
+  color: #fff !important;
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.dark .rbc-toolbar button {
+  color: #fff !important;
+  background-color: #374151 !important;
+}
+
+.dark .rbc-toolbar button:hover,
+.dark .rbc-toolbar button:focus {
+  background-color: #4b5563 !important;
+}
+
+.dark .rbc-toolbar .rbc-active {
+  background-color: #9E2FD0 !important;
+}
+
+.dark .rbc-header {
+  background-color: #1a1a2e !important;
+  color: #fff !important;
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.dark .rbc-day-bg {
+  border-left: 1px solid #4b5563 !important;
+}
+
+.dark .rbc-today {
+  background-color: #374151 !important;
+}
+
+.dark .rbc-time-view,
+.dark .rbc-month-view {
+  background-color: #161625 !important;
+}
+
+.dark .rbc-time-header-content,
+.dark .rbc-time-gutter {
+  background-color: #1a1a2e !important;
+  color: #fff !important;
+  border-bottom: 1px solid #4b5563 !important;
+  border-left: 1px solid #4b5563 !important;
+}
+
+.dark .rbc-time-slot {
+  border-top: 1px solid #4b5563 !important;
+}
