@@ -35,28 +35,33 @@ const Admin = () => {
   const allStudents = users.filter((user) => user.role === "user");
 
   return (
-    <div className="flex w-full relative h-screen">
+    <div className="flex w-full min-h-screen">
       <Dashboard />
-      <div className="w-full">
-        <section className="w-full h-[25vh] custom-bg">
+      <div className="w-full h-screen overflow-y-auto">
+        <section className="w-full custom-bg-profile relative">
           <div className="container">
-            <Navbar />
-            <div>
-              <h1 className="text-white text-2xl mb-10">
-                Hello {user.name}, this is your Admin interface
-              </h1>
+            <Navbar header="Admin Panel" />
+            <div className="flex flex-col md:flex-row justify-between md:items-center text-white py-8">
               <div>
+                <h2 className="text-3xl lg:text-4xl font-bold">
+                  Hello {user.name}, welcome to the Admin Interface
+                </h2>
+                <p className="max-w-md mt-2 text-white/80">
+                  From here you can manage users, assign students, and oversee platform activities.
+                </p>
+              </div>
+              <div className="flex gap-4 mt-4 md:mt-0">
                 <button
                   type="button"
                   onClick={toggleUserModal}
-                  className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                  className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 >
                   Create User
                 </button>
                 <button
                   type="button"
                   onClick={toggleDeleteModal}
-                  className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                  className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 >
                   Delete User
                 </button>
@@ -65,10 +70,19 @@ const Admin = () => {
           </div>
         </section>
 
-        <StudentAssignment teachers={teachers} students={students} />
-        <RemoveStudent teachers={teachers} students={students} />
-        <DisplayAllStudents students={allStudents} />
-
+        <main className="p-4 md:p-8">
+          <div className="space-y-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <StudentAssignment teachers={teachers} students={students} />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <RemoveStudent teachers={teachers} students={students} />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <DisplayAllStudents students={allStudents} />
+            </div>
+          </div>
+        </main>
       </div>
 
       <UserModal show={showUserModal} handleClose={toggleUserModal} />

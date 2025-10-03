@@ -8,70 +8,85 @@ const DisplayAllStudents = ({students}) => {
   const polishStudents = students.filter(student => student.language === 'polish');
 
   return (
-    <section className="flex flex-col md:flex-row gap-6 m-6 p-6 bg-gray-50 rounded-xl shadow-md justify-center">
-      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700 sticky top-0 bg-white z-10 p-2">English Students</h2>
-        <div className="max-h-[12rem] overflow-y-auto pr-2">
-          {englishStudents.map((student) => (
-            <div
-              key={student.id}
-              className="p-3 border-l-4 border-gray-200 rounded-md mb-3 flex items-center gap-3"
-            >
-              <img
-                src={!student.avatarUrl ? avatar : student.avatarUrl}
-                alt={`${student.name} ${student.lastName}`}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
-                <span className="text-sm text-gray-500 block">{student.email}</span>
+    <section>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">All Students by Language</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* English Students */}
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">English Students</h3>
+          <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+            {englishStudents.map((student) => (
+              <div key={student.id} className="p-3 mb-3 flex items-center gap-3">
+                {student.avatarUrl ? (
+                  <img
+                    src={student.avatarUrl}
+                    alt={`${student.name} ${student.lastName}`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                    {`${student.name.charAt(0)}${student.lastName.charAt(0)}`}
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
+                  <span className="text-sm text-gray-500 block">{student.email}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700 sticky top-0 bg-white z-10 p-2">Spanish Students</h2>
-        <div className="max-h-[12rem] overflow-y-auto pr-2">
-          {spanishStudents.map((student) => (
-            <div
-              key={student.id}
-              className="p-3 border-l-4 border-gray-200 rounded-md mb-3 flex items-center gap-3"
-            >
-              <img
-                src={!student.avatarUrl ? avatar : student.avatarUrl}
-                alt={`${student.name} ${student.lastName}`}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
-                <span className="text-sm text-gray-500 block">{student.email}</span>
+        {/* Spanish Students */}
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Spanish Students</h3>
+          <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+            {spanishStudents.map((student) => (
+              <div key={student.id} className="p-3 mb-3 flex items-center gap-3">
+                {student.avatarUrl ? (
+                  <img
+                    src={student.avatarUrl}
+                    alt={`${student.name} ${student.lastName}`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                    {`${student.name.charAt(0)}${student.lastName.charAt(0)}`}
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
+                  <span className="text-sm text-gray-500 block">{student.email}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700 sticky top-0 bg-white z-10 p-2">Polish Students</h2>
-        <div className="max-h-[12rem] overflow-y-auto pr-2">
-          {polishStudents.map((student) => (
-            <div
-              key={student.id}
-              className="p-3 border-l-4 border-gray-200 rounded-md mb-3 flex items-center gap-3"
-            >
-              <img
-                src={!student.avatarUrl ? avatar : student.avatarUrl}
-                alt={`${student.name} ${student.lastName}`}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
-                <span className="text-sm text-gray-500 block">{student.email}</span>
+        {/* Polish Students */}
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Polish Students</h3>
+          <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+            {polishStudents.map((student) => (
+              <div key={student.id} className="p-3 mb-3 flex items-center gap-3">
+                {student.avatarUrl ? (
+                  <img
+                    src={student.avatarUrl}
+                    alt={`${student.name} ${student.lastName}`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                    {`${student.name.charAt(0)}${student.lastName.charAt(0)}`}
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
+                  <span className="text-sm text-gray-500 block">{student.email}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

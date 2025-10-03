@@ -198,82 +198,115 @@ const StudentAssignment = ({ teachers, students }) => {
   };
 
   return (
-    <section className="flex flex-col md:flex-row gap-6 m-6 p-6 bg-gray-50 rounded-xl shadow-md justify-center items-start">
-      {/* Students List */}
-      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Students</h2>
-        <div className="max-h-[12rem] overflow-y-auto pr-2">
-          {studentsWithoutTeacher.length === 0 ? (
-            <p className="text-gray-500">No students available.</p>
-          ) : (
-            studentsWithoutTeacher.map((student) => (
+    <section>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Assign Student to Teacher</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Students List */}
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">1. Select a Student</h3>
+          <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+            {studentsWithoutTeacher.length === 0 ? (
+              <p className="text-gray-500">No students available.</p>
+            ) : (
+              studentsWithoutTeacher.map((student) => (
+                <div
+                  key={student.id}
+                  className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
+                    selectedStudent?.id === student.id
+                      ? "border-purple-500 bg-purple-50 shadow-md"
+                      : "border-gray-200 hover:bg-gray-100 hover:border-purple-300"
+                  }`}
+                  onClick={() => handleStudentSelect(student)}
+                >
+                  {student.avatarUrl ? (
+                    <img
+                      src={student.avatarUrl}
+                      alt={`${student.name} ${student.lastName}`}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                      {`${student.name.charAt(0)}${student.lastName.charAt(0)}`}
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
+                    <span className="text-sm text-gray-500 block">{student.email}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Teachers List */}
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">2. Select a Teacher</h3>
+          <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+            {teachers.map((teacher) => (
               <div
-                key={student.id}
+                key={teacher.id}
                 className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
-                  selectedStudent?.id === student.id
-                    ? "border-blue-500 bg-blue-50 shadow-sm"
-                    : "border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+                  selectedTeacher?.id === teacher.id
+                    ? "border-purple-500 bg-purple-50 shadow-md"
+                    : "border-gray-200 hover:bg-gray-100 hover:border-purple-300"
                 }`}
-                onClick={() => handleStudentSelect(student)}
+                onClick={() => handleTeacherSelect(teacher)}
               >
-                <img
-                  src={!student.avatarUrl ? avatar : student.avatarUrl}
-                  alt={`${student.name} ${student.lastName}`}
-                  className="w-10 h-10 rounded-full"
-                />
+                {teacher.avatarUrl ? (
+                  <img
+                    src={teacher.avatarUrl}
+                    alt={`${teacher.name} ${teacher.lastName}`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                    {`${teacher.name.charAt(0)}${teacher.lastName.charAt(0)}`}
+                  </div>
+                )}
                 <div>
-                  <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
-                  <span className="text-sm text-gray-500 block">
-                    {student.email}
-                  </span>
+                  <span className="font-medium text-gray-800">{`${teacher.name} ${teacher.lastName}`}</span>
+                  <span className="text-sm text-gray-500 block">{teacher.email}</span>
                 </div>
               </div>
-            ))
-          )}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Teachers List */}
-      <div className="w-full md:w-1/3 lg:w-1/4 p-4 bg-white rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Teachers</h2>
-        <div className="max-h-[12rem] overflow-y-auto pr-2">
-          {teachers.map((teacher) => (
-            <div
-              key={teacher.id}
-              className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
-                selectedTeacher?.id === teacher.id
-                  ? "border-blue-500 bg-blue-50 shadow-sm"
-                  : "border-gray-200 hover:bg-gray-100 hover:border-blue-300"
-              }`}
-              onClick={() => handleTeacherSelect(teacher)}
+        {/* Actions and Scheduled Events */}
+        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col justify-between min-h-[300px]">
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">3. Set Schedule</h3>
+            <button
+              onClick={handleCalendarOpen}
+              disabled={!selectedTeacher || !selectedStudent}
+              className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2.5 px-4 rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
-              <img
-                src={!teacher.avatarUrl ? avatar : teacher.avatarUrl}
-                alt={`${teacher.name} ${teacher.lastName}`}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <span className="font-medium text-gray-800">{`${teacher.name} ${teacher.lastName}`}</span>
-                <span className="text-sm text-gray-500 block">
-                  {teacher.email}
-                </span>
-              </div>
+              View Availability
+            </button>
+            <div className="mt-6 min-h-[100px]">
+              {events.length > 0 && (
+                <>
+                  <h4 className="text-md font-semibold text-gray-700 mb-2">Scheduled Classes</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-600 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                    {events.map((event, index) => (
+                      <li key={index}>
+                        {`${dayjs(event.date).format("MMM DD, YYYY")} from ${formatDateTime(event.start)} - ${formatDateTime(event.end)}`}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
-          ))}
+          </div>
+          <button
+            onClick={handleAssignClick}
+            disabled={!selectedTeacher || !selectedStudent || events.length === 0}
+            className="w-full mt-4 bg-gradient-to-r from-green-500 to-teal-500 text-white py-2.5 px-4 rounded-lg shadow-md hover:from-green-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+          >
+            Assign Student
+          </button>
         </div>
-      </div>
-      <div className="flex flex-col justify-end mt-4 md:mt-0">
-        <button
-          onClick={handleCalendarOpen}
-          disabled={!selectedTeacher || !selectedStudent}
-          className={`bg-blue-600 text-white py-2 px-4 rounded-md ${
-            !selectedTeacher || !selectedStudent
-              ? "opacity-50 cursor-not-allowed"
-              : "cursor-pointer"
-          }`}
-        >
-          Availability
-        </button>
       </div>
 
       {/* Calendar Modal */}
@@ -371,38 +404,6 @@ const StudentAssignment = ({ teachers, students }) => {
           </div>
         </div>
       )}
-
-      {events.length > 0 && (
-        <div className="flex flex-col gap-4 mt-4">
-          <h2 className="text-xl font-bold">Scheduled Events</h2>
-          <ul className="list-disc ml-6">
-            {events.map((event, index) => (
-              <li key={index}>
-                {`${dayjs(event.date).format(
-                  "MMM DD, YYYY"
-                )} from ${formatDateTime(event.start)} - ${formatDateTime(
-                  event.end
-                )}`}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Assign Button */}
-      <div className="flex flex-col justify-end mt-4 md:mt-0">
-        <button
-          onClick={handleAssignClick}
-          disabled={!selectedTeacher || !selectedStudent || events.length === 0}
-          className={`bg-blue-600 text-white py-2 px-4 rounded-md ${
-            !selectedTeacher || !selectedStudent || events.length === 0
-              ? "opacity-50 cursor-not-allowed"
-              : "cursor-pointer"
-          }`}
-        >
-          Assign
-        </button>
-      </div>
     </section>
   );
 };

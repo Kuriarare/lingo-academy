@@ -123,7 +123,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`h-screen bg-white shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 fixed top-0 left-0 z-50 lg:sticky lg:top-0 ${
+      className={`h-screen bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 fixed top-0 left-0 z-50 lg:sticky lg:top-0 ${
         isSidebarOpen
           ? "w-64 translate-x-0"
           : "w-64 -translate-x-full lg:w-20 lg:translate-x-0"
