@@ -31,7 +31,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-r from-purple-50 via-pink-50 to-red-50">
+    <div className="min-h-screen flex flex-col bg-[#1a1a2e]">
       <div className="flex flex-1 flex-col md:flex-row justify-center items-center px-4 py-8 md:px-8">
         <AnimatedLogo />
         <LoginForm

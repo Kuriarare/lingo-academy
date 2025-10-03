@@ -2,48 +2,44 @@ import { FiFacebook, FiInstagram, FiTwitter } from "react-icons/fi";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-[#9E2FD0] to-[#A567C2] py-4 ">
+    <footer className="bg-[#161625] py-6 border-t border-purple-500/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center md:flex-row md:justify-between space-y-2 md:space-y-0">
-          {/* Compact branding */}
-          <div className="flex items-center space-x-2">
-            <span className="text-xl font-black bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent tracking-wide">
+        <div className="flex flex-col items-center gap-y-4 md:flex-row md:justify-between">
+          {/* Branding */}
+          <div className="text-sm text-gray-400">
+            <span>© {new Date().getFullYear()} </span>
+            <span className="font-semibold bg-gradient-to-r from-purple-400 to-orange-400 bg-clip-text text-transparent">
               Lingolandias
             </span>
+            <span>. All Rights Reserved.</span>
           </div>
           
-          {/* Social icons row */}
-          <div className="flex space-x-3">
+          {/* Social icons */}
+          <div className="flex space-x-4">
             <a 
               href="https://www.facebook.com/lingolandias" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-white hover:text-emerald-300 transition-colors p-1"
+              className="text-gray-400 hover:text-orange-400 transition-colors"
             >
-              <FiFacebook size={18} />
+              <FiFacebook size={20} />
             </a>
             <a 
               href="https://www.instagram.com/lingolandias" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-white hover:text-emerald-300 transition-colors p-1"
+              className="text-gray-400 hover:text-orange-400 transition-colors"
             >
-              <FiInstagram size={18} />
+              <FiInstagram size={20} />
             </a>
             <a 
               href="https://twitter.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-white hover:text-emerald-300 transition-colors p-1"
+              className="text-gray-400 hover:text-orange-400 transition-colors"
             >
-              <FiTwitter size={18} />
+              <FiTwitter size={20} />
             </a>
-          </div>
-
-          {/* Inline copyright */}
-          <div className="text-sm text-white/80 font-medium">
-            <span className="text-emerald-200/90">© {new Date().getFullYear()}</span>
-            {" "}• &quot;Share the world&apos;s soul&quot;
           </div>
         </div>
       </div>
@@ -52,49 +48,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
-// import { FiFacebook, FiInstagram, FiTwitter } from "react-icons/fi";
-
-// const Footer = () => {
-//   return (
-//     <footer className="bg-gradient-to-r from-[#9E2FD0] to-[#A567C2] py-4">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//         <div className="flex flex-col items-center gap-y-3 sm:flex-row sm:justify-between">
-//           {/* Enhanced brand title */}
-//           <span className="text-xl font-black bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent tracking-tight">
-//             Lingolandias
-//           </span>
-
-//           {/* Social icons */}
-//           <div className="flex space-x-3">
-//             <a 
-//               href="https://facebook.com" 
-//               className="text-white/90 hover:text-emerald-300 transition-colors"
-//             >
-//               <FiFacebook size={18} />
-//             </a>
-//             <a 
-//               href="https://instagram.com" 
-//               className="text-white/90 hover:text-emerald-300 transition-colors"
-//             >
-//               <FiInstagram size={18} />
-//             </a>
-//             <a 
-//               href="https://twitter.com" 
-//               className="text-white/90 hover:text-emerald-300 transition-colors"
-//             >
-//               <FiTwitter size={18} />
-//             </a>
-//           </div>
-
-//           {/* Copyright */}
-//           <span className="text-sm text-white/80">
-//             ©{new Date().getFullYear()}
-//           </span>
-//         </div>
-//       </div>
-//     </footer>
-//   );
-// };
-
-// export default Footer;
