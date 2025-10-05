@@ -392,3 +392,23 @@ li { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 .dark .rbc-time-slot {
   border-top: 1px solid #4b5563 !important;
 }
+.dark-mode-loading {
+  background-color: #1a202c; /* Or any dark color you prefer */
+}
+/* Dark mode for the corner square */
+.dark .rbc-time-header-gutter {
+  background-color: #1a1a2e !important;
+}
+
+/* Dedicated dark scrollbar class */
+.dark-scrollbar .ps__rail-y {
+  background-color: #1a202c !important;
+  opacity: 1 !important;
+}
+
+.dark-scrollbar .ps__thumb-y {
+  background-color: #4a5568 !important;
+}
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

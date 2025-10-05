@@ -1,16 +1,24 @@
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useSelector, useDispatch } from 'react-redux';
 import { FiSun, FiMoon } from 'react-icons/fi';
+import { updateUserSettings } from '../../redux/userSlice';
 
 const ThemeToggleButton = () => {
-  const { theme, toggleTheme } = useTheme();
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.user);
+  const darkMode = userInfo?.user?.settings?.darkMode || false;
+
+  const handleToggle = () => {
+    const newDarkModeState = !darkMode;
+    dispatch(updateUserSettings({ darkMode: newDarkModeState }));
+  };
 
   return (
     <button
-      onClick={toggleTheme}
+      onClick={handleToggle}
       className="p-2 rounded-full bg-white/20 text-white"
     >
-      {theme === 'dark' ? <FiSun /> : <FiMoon />}
+      {darkMode ? <FiSun /> : <FiMoon />}
     </button>
   );
 };

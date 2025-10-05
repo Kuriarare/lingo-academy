@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import Swal from "sweetalert2";
 import dayjs from 'dayjs';
+import { updateEvent } from "../redux/userSlice";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
-const useEventEdit = () => {
+const useEventEdit = (studentId) => {
+  const dispatch = useDispatch();
   // State to store event details
   const [eventDetails, setEventDetails] = useState({
     start: '',
@@ -47,7 +51,12 @@ const useEventEdit = () => {
     const timePattern = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/; // HH:MM format validation
   
     if (!timePattern.test(eventDetails.start) || !timePattern.test(eventDetails.end)) {
-      alert("Please enter time in HH:MM format (24-hour)");
+      Swal.fire({
+        title: "Invalid Time Format",
+        text: "Please enter time in HH:MM format (24-hour).",
+        icon: "warning",
+        confirmButtonText: "Ok",
+      });
       return;
     }
   
@@ -88,15 +97,42 @@ const useEventEdit = () => {
       });
   
       if (response.ok) {
-        alert("Event updated successfully. Please logout and login again to see changes");
-        setIsEditing(false); 
-        setEventDetails({ start: "", end: "", eventId: "" }); 
+        Swal.fire({
+          title: "Success!",
+          text: "Event updated successfully.",
+          icon: "success",
+          confirmButtonText: "Ok",
+        }).then(async () => {
+         try {
+           const updatedEvent = await response.json();
+           const serializedEvent = {
+             ...updatedEvent,
+             start: new Date(updatedEvent.start).toISOString(),
+             end: new Date(updatedEvent.end).toISOString(),
+           };
+           dispatch(updateEvent({ studentId, eventId: eventDetails.eventId, updatedEvent: serializedEvent }));
+         } catch (error) {
+           console.error("Failed to parse JSON, state will not be updated:", error);
+         }
+        });
+        setIsEditing(false);
+        setEventDetails({ start: "", end: "", eventId: "" });
       } else {
-        alert("Error updating event");
+        Swal.fire({
+          title: "Error!",
+          text: "Error updating event.",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
       }
     } catch (error) {
       console.error("Error: ", error);
-      alert("Error updating event");
+      Swal.fire({
+        title: "Error!",
+        text: "Error updating event.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
     }
   };
   

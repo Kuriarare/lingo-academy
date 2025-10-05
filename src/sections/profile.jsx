@@ -87,7 +87,7 @@ const Profile = () => {
     <div className="flex w-full min-h-screen bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full h-screen overflow-y-auto">
-        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md relative">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md relative border-b border-transparent dark:border-purple-500/20">
           <div className="container">
             <Navbar header={header} />
             <div className="flex flex-col md:flex-row justify-between md:items-center text-white py-8">

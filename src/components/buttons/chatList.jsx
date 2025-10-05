@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import PropTypes from "prop-types";
 import avatar from "../../assets/logos/avatar.jpg";
 import ChatWindow from "../chatWindow";
@@ -54,7 +55,7 @@ const ChatList = ({
 
   return (
     <div className="h-[630px] flex flex-col bg-slate-50 dark:bg-brand-dark-secondary rounded-lg overflow-hidden font-inter">
-      <div className="px-5 py-4 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] dark:bg-gradient-to-r dark:from-brand-dark dark:to-brand-dark-secondary text-white rounded-t-lg">
+      <div className="px-5 py-4 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] dark:bg-gradient-to-r dark:from-brand-dark dark:to-brand-dark-secondary text-white rounded-t-lg border dark:border-purple-500/20">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold tracking-tight">Messages</h2>
           <Dropdown>
@@ -63,12 +64,15 @@ const ChatList = ({
                 onClick={() => {
                   setEditingEvent((prev) => !prev);
                   if (!editingEvent) {
-                    alert(
-                      "Edit mode enabled: Select a calendar to modify, then click a new time slot to move it."
-                    );
+                    Swal.fire({
+                      title: "Edit Mode Enabled",
+                      text: "Select a calendar event to modify, then click a new time slot to move it.",
+                      icon: "info",
+                      confirmButtonText: "Got it!",
+                    });
                   }
                 }}
-                className="block w-full text-left px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-gray-100 flex items-center"
+                className="block w-full text-left px-4 py-2 text-sm font-semibold text-indigo-600 dark:text-brand-purple hover:bg-gray-100 dark:hover:bg-white/5 flex items-center"
                 role="menuitem"
               >
                 {editingEvent ? (
@@ -85,7 +89,7 @@ const ChatList = ({
             {(user.role === "teacher" || user.role === "user") && (
               <button
                 onClick={() => handleJoinMeeting()}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center"
                 role="menuitem"
               >
                 <FiUsers className="mr-2" /> Group Class
@@ -103,7 +107,7 @@ const ChatList = ({
                   <button
                     key={lang}
                     onClick={() => handleJoinMeeting(roomName)}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center"
                     role="menuitem"
                   >
                     <FiVideo className="mr-2" /> {roomName}
@@ -234,7 +238,9 @@ const MainChat = ({
   const dispatch = useDispatch();
 
   const [selectedChat, setSelectedChat] = useState(null);
-  dispatch(fetchMessagesForTeacher());
+  useEffect(() => {
+    dispatch(fetchMessagesForTeacher());
+  }, [dispatch]);
   return (
     <div className="h-[630px] bg-white dark:bg-brand-dark-secondary rounded-lg overflow-hidden shadow-lg">
       {!selectedChat ? (

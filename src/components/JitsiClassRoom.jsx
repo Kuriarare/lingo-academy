@@ -22,7 +22,6 @@ const JitsiClassRoom = () => {
     (state) => state.chat.studentUnreadCount
   );
 
-  console.log(unreadCountsByRoom);
   const user = useSelector((state) => state.user.userInfo.user);
 
   const apiRef = useRef(null);
@@ -98,7 +97,7 @@ const JitsiClassRoom = () => {
       }}
     >
       {loading && (
-        <section className="dots-container">
+        <section className="dots-container dark:bg-brand-dark">
           <div className="dot"></div>
           <div className="dot"></div>
           <div className="dot"></div>

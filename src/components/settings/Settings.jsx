@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FiMoon, FiBell, FiUser, FiEye, FiDroplet, FiType, FiShield, FiLogOut, FiGlobe, FiInfo } from 'react-icons/fi';
 import Dashboard from '../../sections/dashboard';
 import Navbar from '../navbar';
+import { updateUserSettings } from '../../redux/userSlice';
 
 const Settings = () => {
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.user);
   const [activeTab, setActiveTab] = useState('appearance');
   const [showBanner, setShowBanner] = useState(true);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const darkMode = userInfo?.user?.settings?.darkMode || false;
   const [accentColor, setAccentColor] = useState('#3B82F6');
   const [fontSize, setFontSize] = useState('medium');
   const [classReminders, setClassReminders] = useState(true);
   const [messageNotifications, setMessageNotifications] = useState(true);
   const [language, setLanguage] = useState('en');
+
+  const handleDarkModeToggle = () => {
+    const newDarkModeState = !darkMode;
+    dispatch(updateUserSettings({ darkMode: newDarkModeState }));
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -25,6 +34,15 @@ const Settings = () => {
                 <FiMoon className="text-xl text-gray-500 dark:text-gray-400" />
                 <span className="font-semibold text-gray-700 dark:text-gray-300">Dark Mode</span>
               </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={darkMode}
+                  onChange={handleDarkModeToggle}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              </label>
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
@@ -98,7 +116,7 @@ const Settings = () => {
     <div className="flex w-full min-h-screen bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full">
-        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md border-b border-transparent dark:border-purple-500/20">
           <div className="container">
             <Navbar header="Settings" />
           </div>

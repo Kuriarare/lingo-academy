@@ -135,7 +135,7 @@ const ChatWindowComponent = ({
     });
   }
   return (
-    <div className="w-full h-[92vh] flex flex-col bg-gray-50 dark:bg-brand-dark relative">
+    <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-brand-dark relative">
       <div className="p-4 bg-white dark:bg-brand-dark-secondary shadow-md z-10 flex items-center justify-between border-b border-gray-200 dark:border-purple-500/20">
         <button onClick={onBackClick} className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-brand-orange">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -46,8 +46,6 @@ const CallChatWindow = ({
   useEffect(() => {
     if (socket && room) {
       socket.on('globalChatDeleted', (data) => {
-        console.log(`Message with ID ${data.messageId} was deleted`);
-  
         // Remove the deleted message from the local state
         setChatMessages((prevMessages) =>
           prevMessages.filter((msg) => msg.id !== data.messageId)

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../redux/sidebarSlice";
-import { FiHome, FiCalendar, FiBookOpen, FiMessageSquare, FiUser, FiLogIn, FiSettings, FiHelpCircle, FiUsers, FiChevronLeft } from "react-icons/fi";
+import { FiHome, FiCalendar, FiBookOpen, FiMessageSquare, FiUser, FiLogIn, FiSettings, FiHelpCircle, FiUsers, FiChevronLeft, FiVideo } from "react-icons/fi";
 import { fetchUnreadMessages } from "../redux/messageSlice";
 import { io } from "socket.io-client";
 import { Slide, ToastContainer, toast } from "react-toastify";
@@ -106,7 +106,9 @@ const Dashboard = () => {
 
   const navLinks = [
     { to: "/home", icon: <FiHome />, text: "Dashboard" },
-    { to: "/schedule", icon: <FiCalendar />, text: "My Schedule", unread: totalScheduleUnread },
+    user?.role === "admin"
+      ? { to: "/schedule", icon: <FiVideo />, text: "Meetings" }
+      : { to: "/schedule", icon: <FiCalendar />, text: "My Schedule", unread: totalScheduleUnread },
     { to: "/learning", icon: <FiBookOpen />, text: "Learning" },
     { to: "/messages", icon: <FiMessageSquare />, text: "Messages", unread: totalUnread },
   ];

@@ -8,7 +8,7 @@ const Dropdown = ({ children }) => {
       <div>
         <button
           type="button"
-          className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+          className="inline-flex justify-center w-full rounded-md border border-gray-300 dark:border-purple-500/20 shadow-sm px-4 py-2 bg-white dark:bg-brand-dark text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
           id="options-menu"
           aria-haspopup="true"
           aria-expanded="true"
@@ -32,7 +32,7 @@ const Dropdown = ({ children }) => {
       </div>
 
       {isOpen && (
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-brand-dark-secondary ring-1 ring-black ring-opacity-5">
           <div
             className="py-1"
             role="menu"

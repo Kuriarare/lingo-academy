@@ -12,7 +12,6 @@ const useChat = () => {
           });
     
           if (response.ok) {
-            console.log(`Chat read in room: ${room}`);
           } else {
             console.error('Error reading chat:', response.statusText);
           }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import AnimatedLogo from "./LoginLogo";
@@ -25,7 +26,12 @@ const Login = () => {
         navigate("/home");
         window.location.reload();
       }else {
-        alert('Wrong credentials. If you cannot remember your password, please click on the "Forgot Password" link below the login form.');
+        Swal.fire({
+          title: "Login Failed",
+          text: 'Wrong credentials. If you cannot remember your password, please click on the "Forgot Password" link below the login form.',
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
       }
     });
   };

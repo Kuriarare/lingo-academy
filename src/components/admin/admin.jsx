@@ -35,10 +35,10 @@ const Admin = () => {
   const allStudents = users.filter((user) => user.role === "user");
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div className="flex w-full min-h-screen bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full h-screen overflow-y-auto">
-        <section className="w-full custom-bg-profile relative">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md border-b border-transparent dark:border-purple-500/20">
           <div className="container">
             <Navbar header="Admin Panel" />
             <div className="flex flex-col md:flex-row justify-between md:items-center text-white py-8">
@@ -72,13 +72,13 @@ const Admin = () => {
 
         <main className="p-4 md:p-8">
           <div className="space-y-8">
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white dark:bg-brand-dark-secondary p-6 rounded-lg shadow-md border border-gray-200 dark:border-purple-500/20">
               <StudentAssignment teachers={teachers} students={students} />
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white dark:bg-brand-dark-secondary p-6 rounded-lg shadow-md border border-gray-200 dark:border-purple-500/20">
               <RemoveStudent teachers={teachers} students={students} />
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white dark:bg-brand-dark-secondary p-6 rounded-lg shadow-md border border-gray-200 dark:border-purple-500/20">
               <DisplayAllStudents students={allStudents} />
             </div>
           </div>

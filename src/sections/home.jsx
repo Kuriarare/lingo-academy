@@ -19,7 +19,7 @@ const Home = () => {
       <Dashboard />
 
       <div className="w-full">
-        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md border-b border-transparent dark:border-purple-500/20">
           <div className="container mx-auto px-4">
             <Navbar header="HOME PAGE" />
           </div>

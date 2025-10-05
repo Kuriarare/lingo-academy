@@ -43,7 +43,6 @@ const useChatWindow = () => {
       );
 
       if (response.ok) {
-        console.log(`Messages read in room: ${room}`);
       } else {
         console.error("Error reading messages:", response.statusText);
       }

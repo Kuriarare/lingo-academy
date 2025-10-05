@@ -6,14 +6,11 @@ const useDeleteMessage = (setChatMessages, socket, room) => {
   const [openMessageId, setOpenMessageId] = useState(null);
 
     const handleEditMessage = (message) => {
-        console.log("Editing message:", message);
         // Add your edit logic here
       };
       
       const handleDeleteMessage = async (messageId) => {
         try {
-          console.log("Deleting message with ID:", messageId);
-          
           // Delete message from backend
           const response = await fetch(`${BACKEND_URL}/chat/delete-global-chat/${messageId}`, {
             method: "DELETE",
@@ -23,8 +20,6 @@ const useDeleteMessage = (setChatMessages, socket, room) => {
             console.error("Failed to delete message:", response.statusText);
             return;
           }
-      
-          console.log("Message deleted successfully");
       
           // Remove the message from the local state
           setChatMessages((prevMessages) =>
@@ -40,8 +35,6 @@ const useDeleteMessage = (setChatMessages, socket, room) => {
       
       const handleDeleteNormalMessage = async (messageId) => {
         try {
-          console.log("Deleting message with ID:", messageId);
-          
           // Delete message from backend
           const response = await fetch(`${BACKEND_URL}/chat/delete-normal-chat/${messageId}`, {
             method: "DELETE",
@@ -51,8 +44,6 @@ const useDeleteMessage = (setChatMessages, socket, room) => {
             console.error("Failed to delete message:", response.statusText);
             return;
           }
-      
-          console.log("Message deleted successfully");
       
           // Remove the message from the local state
           setChatMessages((prevMessages) =>

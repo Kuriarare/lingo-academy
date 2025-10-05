@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 import { Calendar, dayjsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from "dayjs";
@@ -44,14 +45,8 @@ const StudentAssignment = ({ teachers, students }) => {
 
       const formattedEvents = selectedTeacher.teacherSchedules.flatMap(
         (event) => {
-          const startTime = dayjs(
-            `${event.date} ${event.startTime}`,
-            "YYYY-MM-DD HH:mm"
-          );
-          const endTime = dayjs(
-            `${event.date} ${event.endTime}`,
-            "YYYY-MM-DD HH:mm"
-          );
+          const startTime = dayjs(event.startTime);
+          const endTime = dayjs(event.endTime);
 
           return Array.from({ length: 4 }, (_, i) => {
             const start = startTime.add(i * 7, "day");
@@ -100,7 +95,12 @@ const StudentAssignment = ({ teachers, students }) => {
         !timePattern.test(eventDetails.start) ||
         !timePattern.test(eventDetails.end)
       ) {
-        alert("Please enter time in HH:MM format (24-hour)");
+        Swal.fire({
+          title: "Invalid Time Format",
+          text: "Please enter time in HH:MM format (24-hour).",
+          icon: "warning",
+          confirmButtonText: "Ok",
+        });
         return;
       }
 
@@ -199,22 +199,22 @@ const StudentAssignment = ({ teachers, students }) => {
 
   return (
     <section>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Assign Student to Teacher</h2>
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Assign Student to Teacher</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Students List */}
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">1. Select a Student</h3>
+        <div className="bg-white dark:bg-brand-dark-secondary p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">1. Select a Student</h3>
           <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
             {studentsWithoutTeacher.length === 0 ? (
-              <p className="text-gray-500">No students available.</p>
+              <p className="text-gray-500 dark:text-gray-400">No students available.</p>
             ) : (
               studentsWithoutTeacher.map((student) => (
                 <div
                   key={student.id}
                   className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
                     selectedStudent?.id === student.id
-                      ? "border-purple-500 bg-purple-50 shadow-md"
-                      : "border-gray-200 hover:bg-gray-100 hover:border-purple-300"
+                      ? "border-purple-500 bg-purple-50 dark:bg-purple-900/50 shadow-md"
+                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-purple-300"
                   }`}
                   onClick={() => handleStudentSelect(student)}
                 >
@@ -230,8 +230,8 @@ const StudentAssignment = ({ teachers, students }) => {
                     </div>
                   )}
                   <div>
-                    <span className="font-medium text-gray-800">{`${student.name} ${student.lastName}`}</span>
-                    <span className="text-sm text-gray-500 block">{student.email}</span>
+                    <span className="font-medium text-gray-800 dark:text-white">{`${student.name} ${student.lastName}`}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 block">{student.email}</span>
                   </div>
                 </div>
               ))
@@ -240,16 +240,16 @@ const StudentAssignment = ({ teachers, students }) => {
         </div>
 
         {/* Teachers List */}
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">2. Select a Teacher</h3>
+        <div className="bg-white dark:bg-brand-dark-secondary p-4 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">2. Select a Teacher</h3>
           <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
             {teachers.map((teacher) => (
               <div
                 key={teacher.id}
                 className={`p-3 border-l-4 rounded-md cursor-pointer mb-3 flex items-center gap-3 transition-all duration-200 ${
                   selectedTeacher?.id === teacher.id
-                    ? "border-purple-500 bg-purple-50 shadow-md"
-                    : "border-gray-200 hover:bg-gray-100 hover:border-purple-300"
+                    ? "border-purple-500 bg-purple-50 dark:bg-purple-900/50 shadow-md"
+                    : "border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-purple-300"
                 }`}
                 onClick={() => handleTeacherSelect(teacher)}
               >
@@ -265,8 +265,8 @@ const StudentAssignment = ({ teachers, students }) => {
                   </div>
                 )}
                 <div>
-                  <span className="font-medium text-gray-800">{`${teacher.name} ${teacher.lastName}`}</span>
-                  <span className="text-sm text-gray-500 block">{teacher.email}</span>
+                  <span className="font-medium text-gray-800 dark:text-white">{`${teacher.name} ${teacher.lastName}`}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 block">{teacher.email}</span>
                 </div>
               </div>
             ))}
@@ -274,9 +274,9 @@ const StudentAssignment = ({ teachers, students }) => {
         </div>
 
         {/* Actions and Scheduled Events */}
-        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col justify-between min-h-[300px]">
+        <div className="bg-white dark:bg-brand-dark-secondary p-4 rounded-lg shadow-sm flex flex-col justify-between min-h-[300px]">
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">3. Set Schedule</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">3. Set Schedule</h3>
             <button
               onClick={handleCalendarOpen}
               disabled={!selectedTeacher || !selectedStudent}
@@ -287,8 +287,8 @@ const StudentAssignment = ({ teachers, students }) => {
             <div className="mt-6 min-h-[100px]">
               {events.length > 0 && (
                 <>
-                  <h4 className="text-md font-semibold text-gray-700 mb-2">Scheduled Classes</h4>
-                  <ul className="list-disc list-inside text-sm text-gray-600 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                  <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Scheduled Classes</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
                     {events.map((event, index) => (
                       <li key={index}>
                         {`${dayjs(event.date).format("MMM DD, YYYY")} from ${formatDateTime(event.start)} - ${formatDateTime(event.end)}`}
@@ -317,10 +317,10 @@ const StudentAssignment = ({ teachers, students }) => {
 
           {/* Modal Content */}
           <div className="fixed inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white w-full md:w-3/4 lg:w-1/2 rounded-lg shadow-lg p-4 max-w-4xl relative">
+            <div className="bg-white dark:bg-brand-dark-secondary w-full md:w-3/4 lg:w-1/2 rounded-lg shadow-lg p-4 max-w-4xl relative border border-gray-200 dark:border-purple-500/20">
               {/* Close Button */}
               <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
                 onClick={() => setIsCalendarOpen(false)} // Close the modal
               >
                 ✕
@@ -352,20 +352,20 @@ const StudentAssignment = ({ teachers, students }) => {
 
           {/* Event Modal Content */}
           <div className="fixed inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md relative">
+            <div className="bg-white dark:bg-brand-dark-secondary rounded-lg shadow-lg p-4 w-full max-w-md relative border border-gray-200 dark:border-purple-500/20">
               {/* Close Button */}
               <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
                 onClick={handleEventModalClose} // Close the event modal
               >
                 ✕
               </button>
 
-              <h2 className="text-xl font-bold mb-4">Add Event</h2>
+              <h2 className="text-xl font-bold mb-4 dark:text-white">Add Event</h2>
 
               <form>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
                     Start Time (HH:MM format, 24-hour)
                   </label>
                   <input
@@ -374,12 +374,12 @@ const StudentAssignment = ({ teachers, students }) => {
                     name="start"
                     value={eventDetails.start}
                     onChange={handleEventDetailsChange}
-                    className="border rounded w-full py-2 px-3 text-gray-700"
+                    className="border rounded w-full py-2 px-3 text-gray-700 dark:text-white bg-white dark:bg-brand-dark dark:border-purple-500/20"
                     required
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
                     End Time (HH:MM format, 24-hour)
                   </label>
                   <input
@@ -388,7 +388,7 @@ const StudentAssignment = ({ teachers, students }) => {
                     name="end"
                     value={eventDetails.end}
                     onChange={handleEventDetailsChange}
-                    className="border rounded w-full py-2 px-3 text-gray-700"
+                    className="border rounded w-full py-2 px-3 text-gray-700 dark:text-white bg-white dark:bg-brand-dark dark:border-purple-500/20"
                     required
                   />
                 </div>

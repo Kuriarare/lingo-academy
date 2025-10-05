@@ -78,7 +78,7 @@ const Learning = () => {
     <div className="flex w-full relative bg-gray-100 dark:bg-brand-dark">
       <Dashboard />
       <div className="w-full">
-        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md border-b border-transparent dark:border-purple-500/20">
           <div className="container">
             <Navbar header={header} />
           </div>

@@ -14,13 +14,14 @@ import GlobalNotificationHandler from './components/GlobalNotificationHandler';
 import FilePreviewModal from './components/FilePreviewModal';
 import HelpCenter from './components/help-center/HelpCenter';
 import Settings from './components/settings/Settings';
-import { useTheme } from './context/ThemeContext';
+import { useSelector } from 'react-redux';
 
 function App() {
-  const { theme } = useTheme();
+  const { userInfo } = useSelector((state) => state.user);
+  const darkMode = userInfo?.user?.settings?.darkMode;
 
   return (
-    <div className={`${theme} bg-brand-light dark:bg-brand-dark min-h-screen`}>
+    <div className={`${darkMode ? 'dark' : ''} bg-brand-light dark:bg-brand-dark min-h-screen`}>
       <Router>
         <GlobalNotificationHandler />
         <FilePreviewModal />
@@ -46,7 +47,7 @@ function App() {
           <Route
             path="/admin"
             element={
-              <RequireAuth>
+              <RequireAuth role="admin">
                 <Admin />
               </RequireAuth>
             }

@@ -58,7 +58,7 @@ const Navbar = ({ header }) => {
   };
 
   return (
-    <header className="w-full flex justify-between items-center py-3 bg-brand-navbar-light dark:bg-brand-dark-secondary">
+    <header className="w-full grid grid-cols-3 items-center py-3 bg-brand-navbar-light dark:bg-brand-dark-secondary">
       <div className="flex items-center gap-4">
         <button
           onClick={handleSidebarToggle}
@@ -73,15 +73,15 @@ const Navbar = ({ header }) => {
         <h2 className="text-xl font-bold text-white dark:text-white">{header}</h2>
       </div>
 
-      <div className="flex-grow flex justify-center">
+      <div className="flex justify-center">
         <ThemeToggleButton />
       </div>
 
-      <nav className="flex items-center gap-5">
-        <button className="relative text-white dark:text-gray-300 hover:bg-white/20 dark:hover:bg-white/10 p-2 rounded-full transition-colors">
+      <nav className="flex items-center gap-5 justify-self-end pr-5">
+        {/* <button className="relative text-white dark:text-gray-300 hover:bg-white/20 dark:hover:bg-white/10 p-2 rounded-full transition-colors">
           <FiBell size={24} />
           <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-brand-dark-secondary"></div>
-        </button>
+        </button> */}
         
         <div className="relative">
           <button

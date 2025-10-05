@@ -79,6 +79,31 @@ export const uploadAvatar = createAsyncThunk(
   }
 );
 
+export const updateUserSettings = createAsyncThunk(
+  "user/updateUserSettings",
+  async (settingsData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/settings`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(settingsData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update user settings");
+      }
+
+      const updatedSettings = await response.json();
+      return updatedSettings;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // The main user slice
 const userSlice = createSlice({
   name: "user",
@@ -102,6 +127,29 @@ const userSlice = createSlice({
         if (studentIndex !== -1) {
           user.students[studentIndex].online = online;
         }
+      }
+    },
+    updateUserEvents: (state, action) => {
+      const { studentId, updatedEvents } = action.payload;
+      const student = state.userInfo.user.students.find(s => s.id === studentId);
+      if (student) {
+        student.events = updatedEvents;
+      }
+    },
+    updateEvent: (state, action) => {
+      const { studentId, eventId, updatedEvent } = action.payload;
+      const student = state.userInfo.user.students.find(s => s.id === studentId);
+      if (student) {
+        const eventIndex = student.events.findIndex(e => e.id === eventId);
+        if (eventIndex !== -1) {
+          student.events[eventIndex] = { ...student.events[eventIndex], ...updatedEvent };
+        }
+      }
+    },
+    removeStudent: (state, action) => {
+      const studentId = action.payload;
+      if (state.userInfo && state.userInfo.user && state.userInfo.user.students) {
+        state.userInfo.user.students = state.userInfo.user.students.filter(s => s.id !== studentId);
       }
     },
     logout: (state) => {
@@ -159,10 +207,25 @@ const userSlice = createSlice({
         );
         state.status = "failed";
         state.error = action.payload || action.error.message;
+      })
+      
+      .addCase(updateUserSettings.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateUserSettings.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        if (!state.userInfo.user.settings) {
+          state.userInfo.user.settings = {};
+        }
+        state.userInfo.user.settings = action.payload;
+      })
+      .addCase(updateUserSettings.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || action.error.message;
       });
   },
 });
 
-export const { logout, updateUserStatus } = userSlice.actions;
+export const { logout, updateUserStatus, updateUserEvents, removeStudent, updateEvent } = userSlice.actions;
 
 export default userSlice.reducer;

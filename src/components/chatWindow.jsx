@@ -142,7 +142,7 @@ const ChatWindow = ({
         className="w-full flex flex-col bg-white dark:bg-brand-dark-secondary border border-gray-200 dark:border-purple-500/20 shadow-lg rounded-lg"
         style={{ height: height || "630px" }}
       >
-        <div className="p-3 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] dark:bg-gradient-to-r dark:from-brand-dark dark:to-brand-dark-secondary text-white rounded-t-lg flex justify-between items-center gap-4">
+        <div className="p-3 bg-gradient-to-r from-[#A567C2] to-[#9E2FD0] dark:bg-gradient-to-r dark:from-brand-dark dark:to-brand-dark-secondary text-white rounded-t-lg flex justify-between items-center gap-4 border dark:border-purple-500/20">
           {isChatOpen && (
             <button
               onClick={() => {

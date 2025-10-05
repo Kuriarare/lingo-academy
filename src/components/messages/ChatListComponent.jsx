@@ -23,7 +23,7 @@ const ChatListComponent = ({ chats, onChatSelect, newMessage }) => {
   };
 
   return (
-    <div className="h-[92vh] flex flex-col bg-white dark:bg-brand-dark-secondary shadow-lg border-r border-gray-200 dark:border-purple-500/20">
+    <div className="h-full flex flex-col bg-white dark:bg-brand-dark-secondary shadow-lg border-r border-gray-200 dark:border-purple-500/20">
       <div className="p-4 bg-gradient-to-r from-[#9E2FD0] to-[#B15FE3] text-white" style={{ paddingTop: '1.1rem', paddingBottom: '1.1rem' }}>
         <h2 className="text-xl font-bold">Conversations</h2>
         <p className="text-sm text-purple-200">{chats.length} active chats</p>

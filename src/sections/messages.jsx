@@ -111,17 +111,17 @@ const Messages = () => {
   });
 
   return (
-    <div className="flex w-full relative h-[97vh]">
+    <div className="flex w-full relative h-screen">
       <Dashboard />
-      <div className="w-full h-[100vh]">
-        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md">
+      <div className="w-full flex flex-col">
+        <section className="w-full bg-brand-navbar-light dark:bg-brand-dark-secondary shadow-md border-b border-transparent dark:border-purple-500/20">
           <div className="container">
             <Navbar header="MESSAGES PAGE" />
           </div>
         </section>
 
-        <section>
-          <div className="flex w-full">
+        <section className="flex-grow min-h-0">
+          <div className={`w-full h-full ${showChatList ? 'hidden lg:flex' : 'flex'}`}>
             <section className="w-[300px] bg-gray-100 dark:bg-brand-dark-secondary hidden lg:block">
               <ChatListComponent
                 chats={updatedChats}
@@ -157,7 +157,7 @@ const Messages = () => {
           </div>
 
           {showChatList && (
-            <section className="lg:hidden">
+            <section className="lg:hidden h-full">
               <ChatListComponent
                 chats={updatedChats}
                 onChatSelect={handleChatSelect}
