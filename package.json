@@ -17,6 +17,7 @@
     "@jitsi/react-sdk": "^1.4.0",
     "@reduxjs/toolkit": "^2.2.7",
     "@stream-io/video-react-sdk": "^1.2.14",
+    "axios": "^1.13.4",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "emoji-picker-react": "^4.12.0",

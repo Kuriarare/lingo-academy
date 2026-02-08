@@ -8,6 +8,7 @@ import Shchedule from './components/schedule/schedule';
 import RequireAuth from './components/requireAuth';
 import JitsiClassRoom from './components/JitsiClassRoom';
 import Messages from './sections/messages';
+import Trello from './sections/trello';
 import ForgotPassword from './components/login/forgotPassword';
 import ResetPassword from './components/login/resetPassword';
 import GlobalNotificationHandler from './components/GlobalNotificationHandler';
@@ -81,6 +82,14 @@ function App() {
             element={
               <RequireAuth>
                  <Messages  />
+              </RequireAuth>
+            }
+          />
+           <Route
+            path="/trello"
+            element={
+              <RequireAuth>
+                 <Trello  />
               </RequireAuth>
             }
           />
